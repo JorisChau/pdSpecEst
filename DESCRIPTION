@@ -13,3 +13,6 @@ Imports:
 RoxygenNote: 5.0.1
 LinkingTo: Rcpp, RcppArmadillo, RcppEigen
 SystemRequirements: GNU make
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr

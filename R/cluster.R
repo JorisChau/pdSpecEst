@@ -1,4 +1,9 @@
-#' Fuzzy c-means clustering algorithm in wavelet domain.
+#' Wavelet-based clustering of multivariate spectra.
+#'
+#' \code{SpecClust} performs clustering of multivariate spectral matrices via a two-step fuzzy
+#' clustering algorithm in the manifold wavelet domain as detailed in (Chau and von Sachs, 2017).
+#'
+#' This is a two-step clustering algorithm.
 #'
 #' @param P list, curves of PD matrices to be clustered.
 #' @param wt list, wavelet representations of curves of PD matrices to be clustered.
@@ -11,9 +16,25 @@
 #' @param m numeric, fuzziness parameter (\code{m > 1}).
 #' @param d.uptoscale numeric, if fraction of components of wavelet coefficients at scale \code{j} is smaller than
 #' \code{d.uptoscale} the iterative clustering algorithm terminates at scale \code{j}.
+#'
+#' @examples
+#' m <- function(){
+#'  X <- matrix(complex(real=rnorm(9), imaginary=rnorm(9)), nrow=3)
+#'  t(Conj(X)) %*% X
+#' }
+#' M <- replicate(100, m())
+#' z <- rnorm(100)
+#' w <- abs(z)/sum(abs(z))
+#' KarchMean(M, w)
+#'
 #' @return Returns an integer sequence with cluster assignments.
+#'
+#' @references Chau, J. and von Sachs, R. \emph{Positive-definite multivariate spectral
+#' estimation: a geometric wavelet approach}. (Submitted)
+#'
 #' @export
-FuzzyCmeans <- function(P = NULL, wt = NULL, D = 2, K = 2, uptoscale = 5, denoise = F, m = 2, d.uptoscale=0.1){
+SpecClust <- function(P = NULL, wt = NULL, D = 2, K = 2, jmax = NULL, denoise = F,
+                      m = 2, d.jmax=0.1){
 
   if(is.null(wt)){
     d <- dim(P$p[[1]])[1]
