@@ -2,11 +2,11 @@
 
 // [[Rcpp::depends(RcppEigen)]]
 
-//' Exponential map.
+//' Exponential map
 //'
 //' \code{Expm(P, H)} computes the projection of a Hermitian matrix \code{H} from the tangent space at a Hermitian
-//' positive-definite matrix \code{P} to the Riemannian manifold of Hermitian PD matrices via the
-//' exponential map as in (Pennec, 2006).
+//' PD matrix \code{P} to the Riemannian manifold of Hermitian PD matrices via the
+//' exponential map as in (Pennec, 2006). This is the unique inverse of the logarithmic map \code{\link{Logm}}.
 //'
 //' @param P a square Hermitian positive-definite matrix.
 //' @param H a square Hermitian matrix (of equal dimension as \code{P}).

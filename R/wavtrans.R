@@ -1,36 +1,45 @@
-#' MI forward wavelet transform.
+#' Forward MI wavelet transform
 #'
-#' \code{WavTransf} computes the \emph{midpoint-interpolation} (MI) forward wavelet
-#' transform of a curve of length \eqn{m} of (\eqn{d x d})-dimensional HPD matrices
-#' (e.g. a multivariate spectrum) as described in (Chau and von Sachs, 2017).
+#' \code{WavTransf} computes the forward \emph{midpoint-interpolation} (MI) wavelet transform of a
+#' curve of length \eqn{m} of (\eqn{d \times d})-dimensional Hermitian PD matrices as described in
+#' (Chau and von Sachs, 2017).
 #'
-#' @param P a (\eqn{d,d,m})-dimensional array, with \eqn{m} a dyadic number.
-#' @param order an odd integer taking values between 1 and 9 corresponding to the
-#'  order of the MI refinement scheme.
-#' @param jmax the maximum scale at which the wavelet coefficients are computed, such
-#' that \eqn{jmax < log2(m)}.
+#' @param P a (\eqn{d,d,m})-dimensional array, with \eqn{m = 2^J} for some \eqn{J > 0}.
+#' @param order an odd integer between 1 and 9 corresponding to the order of the MI refinement scheme.
+#' @param jmax the maximum scale upto which the wavelet coefficients are computed. If \code{jmax} is not
+#' specified it is set equal to the maximum possible scale \code{jmax = J-1}.
 #'
 #' @examples
-#' m <- function(){
-#'  X <- matrix(complex(real=rnorm(9), imaginary=rnorm(9)), nrow=3)
-#'  t(Conj(X)) %*% X
-#' }
-#' M <- replicate(100, m())
-#' z <- rnorm(100)
-#' w <- abs(z)/sum(abs(z))
-#' KarchMean(M, w)
+#' ## ARMA(1,1) process: Example 11.4.1 in (Brockwell and Davis, 1991)
 #'
-#' @return Returns an integer sequence with cluster assignments.
+#' Phi <- array(c(0.7, 0, 0, 0.6, rep(0, 4)), dim = c(2, 2, 2))
+#' Theta <- array(c(0.5, -0.7, 0.6, 0.8, rep(0, 4)), dim = c(2, 2, 2))
+#' Sigma <- matrix(c(1, 0.71, 0.71, 2), nrow = 2)
+#' ts.sim <- rARMA(2^10, 2, Phi, Theta, Sigma)
+#' ts.plot(ts.sim$X) # plot generated time series traces.
 #'
-#' @seealso \code{\link{InvWavTransf}}
+#' pgram <- pdPgram(ts.sim$X)
+#' WavTransf(pgram$P)
 #'
-#' @references Chau, J. and von Sachs, R. \emph{Positive-definite multivariate spectral
-#' estimation: a geometric wavelet approach}. (Submitted)
+#' @return The function returns a list with two components:
+#' \item{D }{a list of arrays, where each (\eqn{d, d, 2^j})-dimensional array contains the (\eqn{d \times d})-
+#' dimensional wavelet coefficents at the \eqn{2^j} different locations in the given wavelet scale. The first
+#' list element is a (\eqn{d, d, 2})-dimensional array containing the (\eqn{d \times d})-dimensional midpoints
+#' at the coarsest scale (\eqn{j = 1}) in the midpoint pyramid.}
+#' \item{M }{a list of arrays, where each (\eqn{d, d, 2^j})-dimensional array contains the (\eqn{d \times d})-
+#' dimensional midpoints at the \eqn{2^j} diffferent locations in the given midpoint scale. The first list
+#' element is equivalent to the first list element in the \code{$D} component.}
+#'
+#' @seealso \code{\link{InvWavTransf}}, \code{\link{pdSpecEst}}
+#'
+#' @references Chau, J. and von Sachs, R. (2017). \emph{Positive-definite multivariate spectral
+#' estimation: a geometric wavelet approach}. (Unpublished)
+#' @references Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
 #'
 #' @export
 WavTransf <- function(P, order = 5, jmax)
 {
-  J <- log(dim(P)[3], 2)
+  J <- log2(dim(P)[3])
   if(!isTRUE(all.equal(as.integer(J), J))){
     print(paste0("Input length is non-dyadic, please change length ", dim(P)[3],
       " to dyadic number."))

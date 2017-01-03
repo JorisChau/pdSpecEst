@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{Expm}
 \alias{Expm}
-\title{Exponential map.}
+\title{Exponential map}
 \usage{
 Expm(P, H)
 }
@@ -13,8 +13,8 @@ Expm(P, H)
 }
 \description{
 \code{Expm(P, H)} computes the projection of a Hermitian matrix \code{H} from the tangent space at a Hermitian
-positive-definite matrix \code{P} to the Riemannian manifold of Hermitian PD matrices via the
-exponential map as in (Pennec, 2006).
+PD matrix \code{P} to the Riemannian manifold of Hermitian PD matrices via the
+exponential map as in (Pennec, 2006). This is the unique inverse of the logarithmic map \code{\link{Logm}}.
 }
 \examples{
  H <- matrix(complex(real = rnorm(9), imaginary = rnorm(9)), nrow = 3)

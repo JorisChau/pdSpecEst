@@ -2,12 +2,12 @@
 
 // [[Rcpp::depends(RcppEigen)]]
 
-//' Geodesic midpoint between HPD-matrices.
+//' Geodesic midpoint between HPD-matrices
 //'
-//' \code{Mid} calculates the geodesic midpoint between two Hermitian,
-//' positive-definite matrices as in (Bhatia, 2009, Chapter 6).
+//' \code{Mid} calculates the geodesic midpoint between two Hermitian PD matrices as in
+//' (Bhatia, 2009, Chapter 6).
 //'
-//' @param A,B Hermitian, positive-definite matrices (of equal dimension).
+//' @param A,B square Hermitian positive-definite matrices (of equal dimension).
 //'
 //' @examples
 //'  a <- matrix(complex(real = rnorm(9), imaginary = rnorm(9)), nrow = 3)
@@ -21,7 +21,6 @@
 //'
 //' @export
 // [[Rcpp::export()]]
-
 
 Eigen::MatrixXcd Mid(Eigen::MatrixXcd A, Eigen::MatrixXcd B) {
 

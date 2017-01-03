@@ -2,41 +2,48 @@
 % Please edit documentation in R/invwavtrans.R
 \name{InvWavTransf}
 \alias{InvWavTransf}
-\title{MI inverse wavelet transform.}
+\title{Inverse MI wavelet transform}
 \usage{
 InvWavTransf(D, order = 5)
 }
 \arguments{
-\item{D}{a list of wavelet coefficients and coarse-scale midpoints as obtained from
-the function \code{WavTransf}.}
+\item{D}{a list of arrays containing coarse-scale midpoints and Hermitian matrix-valued wavelet
+coefficients in the same format as the \code{$D} component given as output by the function
+\code{\link{WavTransf}}.}
 
-\item{order}{an odd integer taking values between 1 and 9 corresponding to the
-order of the MI refinement scheme.}
+\item{order}{an odd integer between 1 and 9 corresponding to the order of the MI refinement scheme.}
 }
 \value{
-Returns an integer sequence with cluster assignments.
+Returns a (\eqn{d, d, m})-dimensional array corresponding to a curve of length \eqn{m} of
+(\eqn{d \times d})-dimensional Hermitian PD matrices.
 }
 \description{
-\code{InvWavTransf} computes the \emph{midpoint-interpolation} (MI) inverse wavelet
-transform of a pyramid of Hermitian matrix-valued wavelet coefficients combined with an
-array of coarse-scale Hermitian positive-definite midpoints as described in (Chau and von Sachs, 2017).
+\code{InvWavTransf} computes the inverse \emph{midpoint-interpolation} (MI) wavelet
+transform of an array of coarse-scale Hermitian PD midpoints combined with a pyramid of Hermitian
+matrix-valued wavelet coefficients as described in (Chau and von Sachs, 2017).
 }
 \examples{
-m <- function(){
- X <- matrix(complex(real=rnorm(9), imaginary=rnorm(9)), nrow=3)
- t(Conj(X)) \%*\% X
-}
-M <- replicate(100, m())
-z <- rnorm(100)
-w <- abs(z)/sum(abs(z))
-KarchMean(M, w)
+## ARMA(1,1) process: Example 11.4.1 in (Brockwell and Davis, 1991)
+
+Phi <- array(c(0.7, 0, 0, 0.6, rep(0, 4)), dim = c(2, 2, 2))
+Theta <- array(c(0.5, -0.7, 0.6, 0.8, rep(0, 4)), dim = c(2, 2, 2))
+Sigma <- matrix(c(1, 0.71, 0.71, 2), nrow = 2)
+ts.sim <- rARMA(2^10, 2, Phi, Theta, Sigma)
+ts.plot(ts.sim$X) # plot generated time series traces.
+
+pgram <- pdPgram(ts.sim$X)
+D <- WavTransf(pgram$P)$D
+P <- InvWavTransf(D)
+all.equal(pgram$P, P)
 
 }
 \references{
-Chau, J. and von Sachs, R. \emph{Positive-definite multivariate spectral
-estimation: a geometric wavelet approach}. (Submitted)
+Chau, J. and von Sachs, R. (2017) \emph{Positive-definite multivariate spectral
+estimation: a geometric wavelet approach}. (Unpublished)
+
+Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
 }
 \seealso{
-\code{\link{WavTransf}}
+\code{\link{WavTransf}}, \code{\link{pdSpecEst}}
 }
 

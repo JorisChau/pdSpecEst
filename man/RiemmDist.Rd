@@ -2,15 +2,15 @@
 % Please edit documentation in R/RcppExports.R
 \name{RiemmDist}
 \alias{RiemmDist}
-\title{Riemannian distance HPD-matrices.}
+\title{Riemannian distance HPD-matrices}
 \usage{
 RiemmDist(A, B)
 }
 \arguments{
-\item{A, B}{Hermitian, positive-definite matrices (of equal dimension).}
+\item{A, B}{square Hermitian positive-definite matrices (of equal dimension).}
 }
 \description{
-\code{RiemmDist} calculates the natural Riemannian distance between two Hermitian, positive-definite matrices as
+\code{RiemmDist} calculates the natural Riemannian distance between two Hermitian PD matrices as
 in (Bhatia, 2009, Chapter 6).
 }
 \examples{
@@ -19,6 +19,7 @@ in (Bhatia, 2009, Chapter 6).
  b <- matrix(complex(real = rnorm(9), imaginary = rnorm(9)), nrow = 3)
  B <- t(Conj(b)) \%*\% b
  RiemmDist(A, B)
+
 }
 \references{
 Bhatia, R. (2009). \emph{Positive Definite Matrices}. New Jersey: Princeton University Press.

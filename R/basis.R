@@ -1,4 +1,5 @@
 #' @useDynLib pdSpecEst
+#' @importFrom Rcpp evalCpp
 E_basis <- function(d) {
   E <- function(i, j) {
     E_ij <- matrix(0, nrow = d, ncol = d)

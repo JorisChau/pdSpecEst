@@ -2,18 +2,19 @@
 % Please edit documentation in R/RcppExports.R
 \name{Logm}
 \alias{Logm}
-\title{Logarithmic map.}
+\title{Logarithmic map}
 \usage{
 Logm(P, Q)
 }
 \arguments{
-\item{P}{a square HPD-matrix.}
+\item{P}{a square Hermitian positive-definite matrix.}
 
-\item{Q}{a square HPD-matrix (of equal dimension as \code{P}).}
+\item{Q}{a square Hermitian positive-definite matrix (of equal dimension as \code{P}).}
 }
 \description{
-\code{Logm(P, Q)} computes the projection of the HPD-matrix \code{Q} on the Riemannian manifold to
-the tangent space attached at the HPD-matrix \code{P} via the logarithmic map as in (Pennec, 2006).
+\code{Logm(P, Q)} computes the projection of a Hermitian PD matrix \code{Q} on the Riemannian manifold
+to the tangent space attached at the Hermitian PD matrix \code{P} via the logarithmic map as in (Pennec, 2006).
+This is the unique inverse of the exponential map \code{\link{Expm}}.
 }
 \examples{
  q <- matrix(complex(real = rnorm(9), imaginary = rnorm(9)), nrow = 3)

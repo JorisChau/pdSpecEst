@@ -1,12 +1,11 @@
-#' Approximate weighted Karcher mean.
+#' Approximate weighted Karcher mean
 #'
-#' \code{KarchMean} calculates the approximate weighted Karcher mean of an array
-#' of \eqn{(d x d)}-dimensional HPD-matrices by the recursive algorithm
-#' described in (Chau and von Sachs, 2017). By default, the unweighted Karcher mean is
-#' computed.
+#' \code{KarchMean} calculates the approximate weighted Karcher mean of \eqn{S} different
+#' \eqn{(d \times d)}-dimensional Hermitian PD matrices by the recursive algorithm described
+#' in (Chau and von Sachs, 2017). By default, the unweighted Karcher mean is computed.
 #'
-#' @param M, a \eqn{(d,d,S)}-dimensional array.
-#' @param w, an \eqn{S}-dimensional nonnegative weight vector, such that \code{sum(w) = 1}.
+#' @param M a \eqn{(d,d,S)}-dimensional array.
+#' @param w an \eqn{S}-dimensional nonnegative weight vector, such that \code{sum(w) = 1}.
 #'
 #' @examples
 #' m <- function(){
@@ -17,8 +16,9 @@
 #' z <- rnorm(100)
 #' w <- abs(z)/sum(abs(z))
 #' KarchMean(M, w)
-#' @references Chau, J. and von Sachs, R. \emph{Positive-definite multivariate spectral
-#' estimation: a geometric wavelet approach}. (Submitted)
+#'
+#' @references Chau, J. and von Sachs, R. (2017). \emph{Positive-definite multivariate spectral
+#' estimation: a geometric wavelet approach}. (Unpublished)
 #'
 #' @seealso \code{\link{Mid}}
 #'

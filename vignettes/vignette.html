@@ -10,11 +10,11 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<meta name="author" content="Vignette Author" />
+<meta name="author" content="Joris Chau" />
 
-<meta name="date" content="2016-12-26" />
+<meta name="date" content="2017-01-03" />
 
-<title>Vignette Title</title>
+<title>The pdSpecEst package</title>
 
 
 
@@ -68,214 +68,125 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 
-<h1 class="title toc-ignore">Vignette Title</h1>
-<h4 class="author"><em>Vignette Author</em></h4>
-<h4 class="date"><em>2016-12-26</em></h4>
+<h1 class="title toc-ignore">The <code>pdSpecEst</code> package</h1>
+<h4 class="author"><em>Joris Chau</em></h4>
+<h4 class="date"><em>2017-01-03</em></h4>
 
 
 
-<p>Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The <code>html_vignette</code> output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The <code>html_vignette</code> format:</p>
-<ul>
-<li>Never uses retina figures</li>
-<li>Has a smaller default figure size</li>
-<li>Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style</li>
-</ul>
-<div id="vignette-info" class="section level2">
-<h2>Vignette Info</h2>
-<p>Note the various macros within the <code>vignette</code> section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the <code>title</code> field and the <code>\VignetteIndexEntry</code> to match the title of your vignette.</p>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>In nonparametric estimation of the autocovariance matrices or the spectral density matrix of a second-order stationary multivariate time series, it is important to preserve positive-definiteness of the estimator. This in order to ensure interpretability of the estimator as an estimated covariance or spectral matrix, but also to avoid computational issues in e.g. simulation or bootstrapping procedures.</p>
+<p>For this purpose, in <span class="citation">(Chau, J. and von Sachs, R. 2017)</span> we considered multivariate spectral estimation in the Riemannian manifold of Hermitian and positive-definite matrices based on a geometric wavelet approach. Nonlinear wavelet curve denoising in the Riemannian manifold allows one to capture local smoothness behavior of the spectral matrix across frequency, but also varying degrees of smoothness across components of the spectral matrix. Moreover, and in contrast to existing approaches, due to its geometric nature the wavelet-based spectral estimator enjoys the important property that it is invariant to permutations of the components of the time series.</p>
+<p>In addition to spectral estimation, we proposed computationally fast clustering of spectral matrices based on their representations in the wavelet domain, exploiting the fact that smooth curves in the Riemannian manifold are summarized by few high-energy wavelet coefficients.</p>
+<p>In this vignette we demonstrate the wavelet-based multivariate spectral estimation and clustering procedures of <span class="citation">(Chau, J. and von Sachs, R. 2017)</span> by means of simulated time series data using the functions in the <code>pdSpecEst</code> package.</p>
 </div>
-<div id="styles" class="section level2">
-<h2>Styles</h2>
-<p>The <code>html_vignette</code> template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:</p>
-<pre><code>output: 
-  rmarkdown::html_vignette:
-    css: mystyles.css</code></pre>
+<div id="simulate-time-series-data-with-rarma" class="section level2">
+<h2>Simulate time series data with <code>rARMA()</code></h2>
+<p>With <code>rARMA()</code> we simulate multivariate time series observations from a vector ARMA(2,2) process based on Gaussian white noise (i.e. a simulated autoregressive moving average process). By including a vector of frequencies <code>freq</code>, the function <code>rARMA()</code> also returns the generating spectrum of the time series.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(pdSpecEst)
+## Fix parameters
+freq &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dt">from =</span> pi /<span class="st"> </span><span class="dv">2</span>^<span class="dv">9</span>, <span class="dt">to =</span> pi, <span class="dt">length =</span> <span class="dv">2</span>^<span class="dv">9</span>)
+d &lt;-<span class="st"> </span><span class="dv">2</span>
+Phi &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(<span class="fl">0.5</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, -<span class="fl">0.9</span>), <span class="dt">dim =</span> <span class="kw">c</span>(d, d, <span class="dv">2</span>))
+Theta &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="fl">0.5</span>), <span class="dt">dim =</span> <span class="kw">c</span>(d, d, <span class="dv">2</span>))
+Sigma &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="fl">0.25</span>), <span class="dt">nrow =</span> d)
+
+## Generate time series
+<span class="kw">set.seed</span>(<span class="dv">10</span>)
+ts.sim &lt;-<span class="st"> </span><span class="kw">rARMA</span>(<span class="dv">2</span>^<span class="dv">11</span>, d, Phi, Theta, Sigma, <span class="dt">freq =</span> freq)
+<span class="kw">str</span>(ts.sim)
+<span class="co">#&gt; List of 2</span>
+<span class="co">#&gt;  $ X: num [1:2048, 1:2] -0.475 1.14 0.397 0.874 -0.093 ...</span>
+<span class="co">#&gt;  $ f: cplx [1:2, 1:2, 1:512] 1.2747+0i 0.0421+0.0003i 0.0421-0.0003i ...</span></code></pre></div>
+<p>The autoregressive (AR) and moving average (MA) parameters are chosen in such a way that the spectral matrix displays different degrees of (local) smoothness across different components of the spectral matrix. The code below can be used to plot the simulated time series data and the underlying spectral matrix in the frequency domain.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Plot time series observations
+<span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">1</span>), <span class="dt">mar =</span> <span class="kw">c</span>(<span class="fl">4.5</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">2</span>))
+<span class="kw">invisible</span>(<span class="kw">sapply</span>(<span class="dv">1</span>:d, function(i) <span class="kw">plot</span>(ts.sim$X[, i], <span class="dt">main =</span> <span class="kw">paste0</span>(<span class="st">&quot;Component &quot;</span>, i), <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>, <span class="dt">xlab =</span> <span class="st">&quot;Time&quot;</span>, <span class="dt">ylab =</span> <span class="st">&quot;&quot;</span>)))
+
+## Plot spectral matrix
+<span class="kw">layout</span>(<span class="dt">mat =</span> <span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">6</span>), <span class="dt">nrow =</span> <span class="dv">4</span>))
+plotspec &lt;-<span class="st"> </span>function(i){
+  if(i[<span class="dv">1</span>] ==<span class="st"> </span>i[<span class="dv">2</span>]){
+    <span class="kw">plot</span>(freq, <span class="kw">Re</span>(ts.sim$f[i[<span class="dv">1</span>], i[<span class="dv">1</span>], ]), <span class="dt">main =</span> <span class="kw">paste0</span>(<span class="st">&quot;Auto-spectrum (&quot;</span>, i[<span class="dv">1</span>], <span class="st">&quot;, &quot;</span>, i[<span class="dv">1</span>], <span class="st">&quot;)&quot;</span>), <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>, <span class="dt">xlab =</span> <span class="st">&quot;Frequency&quot;</span>, <span class="dt">ylab =</span> <span class="st">&quot;&quot;</span>)
+  } else{
+    <span class="kw">plot</span>(freq, <span class="kw">Re</span>(ts.sim$f[i[<span class="dv">1</span>], i[<span class="dv">2</span>], ]), <span class="dt">main =</span> <span class="kw">paste0</span>(<span class="st">&quot;Real cross-spectrum (&quot;</span>, i[<span class="dv">1</span>], <span class="st">&quot;, &quot;</span>, i[<span class="dv">2</span>], <span class="st">&quot;)&quot;</span>), <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>, <span class="dt">xlab =</span> <span class="st">&quot;Frequency&quot;</span>, <span class="dt">ylab =</span> <span class="st">&quot;&quot;</span>)
+    <span class="kw">plot</span>(freq, <span class="kw">Im</span>(ts.sim$f[i[<span class="dv">1</span>], i[<span class="dv">2</span>], ]), <span class="dt">main =</span> <span class="kw">paste0</span>(<span class="st">&quot;Imag. cross-spectrum (&quot;</span>, i[<span class="dv">1</span>], <span class="st">&quot;, &quot;</span>, i[<span class="dv">2</span>], <span class="st">&quot;)&quot;</span>), <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>, <span class="dt">xlab =</span> <span class="st">&quot;Frequency&quot;</span>, <span class="dt">ylab =</span> <span class="st">&quot;&quot;</span>)
+  }
+}
+<span class="kw">invisible</span>(<span class="kw">apply</span>(<span class="kw">expand.grid</span>(<span class="dv">1</span>:d, <span class="dv">1</span>:d), <span class="dv">1</span>, plotspec))</code></pre></div>
 </div>
-<div id="figures" class="section level2">
-<h2>Figures</h2>
-<p>The figure sizes have been customised so that you can easily put two images side-by-side.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="dv">1</span>:<span class="dv">10</span>)
-<span class="kw">plot</span>(<span class="dv">10</span>:<span class="dv">1</span>)</code></pre></div>
-<p><img src="data:image/png;base64,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" alt /><img src="data:image/png;base64,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" alt /></p>
-<p>You can enable figure captions by <code>fig_caption: yes</code> in YAML:</p>
-<pre><code>output:
-  rmarkdown::html_vignette:
-    fig_caption: yes</code></pre>
-<p>Then you can use the chunk option <code>fig.cap = &quot;Your figure caption.&quot;</code> in <strong>knitr</strong>.</p>
+<div id="bias-corrected-periodogram-with-pdpgram" class="section level2">
+<h2>Bias-corrected periodogram with <code>pdPgram()</code></h2>
+<p><code>pdPgram()</code> computes an initial noisy spectral estimator based on an averaged periodogram matrix, rescaled by the manifold bias-correction described in <span class="citation">(Chau, J. and von Sachs, R. 2017)</span>. If <code>B &gt;= d</code>, i.e. the number of segments over which the averaged periodogram is computed is larger than or equal to the dimension of the time series, then the initial spectral estimator is guaranteed to be Hermitian positive-definite (HPD).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pgram &lt;-<span class="st"> </span><span class="kw">pdPgram</span>(ts.sim$X)
+<span class="kw">str</span>(pgram)
+<span class="co">#&gt; List of 2</span>
+<span class="co">#&gt;  $ freq: num [1:512] 0.00614 0.01227 0.01841 0.02454 0.03068 ...</span>
+<span class="co">#&gt;  $ P   : cplx [1:2, 1:2, 1:512] 1.254+0i 0.151-0.068i 0.151+0.068i ...</span></code></pre></div>
 </div>
-<div id="more-examples" class="section level2">
-<h2>More Examples</h2>
-<p>You can write math expressions, e.g. <span class="math inline">\(Y = X\beta + \epsilon\)</span>, footnotes<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>, and tables, e.g. using <code>knitr::kable()</code>.</p>
-<table>
-<thead>
-<tr class="header">
-<th align="left"></th>
-<th align="right">mpg</th>
-<th align="right">cyl</th>
-<th align="right">disp</th>
-<th align="right">hp</th>
-<th align="right">drat</th>
-<th align="right">wt</th>
-<th align="right">qsec</th>
-<th align="right">vs</th>
-<th align="right">am</th>
-<th align="right">gear</th>
-<th align="right">carb</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">Mazda RX4</td>
-<td align="right">21.0</td>
-<td align="right">6</td>
-<td align="right">160.0</td>
-<td align="right">110</td>
-<td align="right">3.90</td>
-<td align="right">2.620</td>
-<td align="right">16.46</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">4</td>
-<td align="right">4</td>
-</tr>
-<tr class="even">
-<td align="left">Mazda RX4 Wag</td>
-<td align="right">21.0</td>
-<td align="right">6</td>
-<td align="right">160.0</td>
-<td align="right">110</td>
-<td align="right">3.90</td>
-<td align="right">2.875</td>
-<td align="right">17.02</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">4</td>
-<td align="right">4</td>
-</tr>
-<tr class="odd">
-<td align="left">Datsun 710</td>
-<td align="right">22.8</td>
-<td align="right">4</td>
-<td align="right">108.0</td>
-<td align="right">93</td>
-<td align="right">3.85</td>
-<td align="right">2.320</td>
-<td align="right">18.61</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">4</td>
-<td align="right">1</td>
-</tr>
-<tr class="even">
-<td align="left">Hornet 4 Drive</td>
-<td align="right">21.4</td>
-<td align="right">6</td>
-<td align="right">258.0</td>
-<td align="right">110</td>
-<td align="right">3.08</td>
-<td align="right">3.215</td>
-<td align="right">19.44</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">3</td>
-<td align="right">1</td>
-</tr>
-<tr class="odd">
-<td align="left">Hornet Sportabout</td>
-<td align="right">18.7</td>
-<td align="right">8</td>
-<td align="right">360.0</td>
-<td align="right">175</td>
-<td align="right">3.15</td>
-<td align="right">3.440</td>
-<td align="right">17.02</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">3</td>
-<td align="right">2</td>
-</tr>
-<tr class="even">
-<td align="left">Valiant</td>
-<td align="right">18.1</td>
-<td align="right">6</td>
-<td align="right">225.0</td>
-<td align="right">105</td>
-<td align="right">2.76</td>
-<td align="right">3.460</td>
-<td align="right">20.22</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">3</td>
-<td align="right">1</td>
-</tr>
-<tr class="odd">
-<td align="left">Duster 360</td>
-<td align="right">14.3</td>
-<td align="right">8</td>
-<td align="right">360.0</td>
-<td align="right">245</td>
-<td align="right">3.21</td>
-<td align="right">3.570</td>
-<td align="right">15.84</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">3</td>
-<td align="right">4</td>
-</tr>
-<tr class="even">
-<td align="left">Merc 240D</td>
-<td align="right">24.4</td>
-<td align="right">4</td>
-<td align="right">146.7</td>
-<td align="right">62</td>
-<td align="right">3.69</td>
-<td align="right">3.190</td>
-<td align="right">20.00</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">4</td>
-<td align="right">2</td>
-</tr>
-<tr class="odd">
-<td align="left">Merc 230</td>
-<td align="right">22.8</td>
-<td align="right">4</td>
-<td align="right">140.8</td>
-<td align="right">95</td>
-<td align="right">3.92</td>
-<td align="right">3.150</td>
-<td align="right">22.90</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">4</td>
-<td align="right">2</td>
-</tr>
-<tr class="even">
-<td align="left">Merc 280</td>
-<td align="right">19.2</td>
-<td align="right">6</td>
-<td align="right">167.6</td>
-<td align="right">123</td>
-<td align="right">3.92</td>
-<td align="right">3.440</td>
-<td align="right">18.30</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">4</td>
-<td align="right">4</td>
-</tr>
-</tbody>
-</table>
-<p>Also a quote using <code>&gt;</code>:</p>
-<blockquote>
-<p>“He who gives up [code] safety for [code] speed deserves neither.” (<a href="https://twitter.com/hadleywickham/status/504368538874703872">via</a>)</p>
-</blockquote>
+<div id="wavelet-denoised-spectral-estimator-with-pdspecest" class="section level2">
+<h2>Wavelet-denoised spectral estimator with <code>pdSpecEst()</code></h2>
+<p><code>pdSpecEst()</code> computes the HPD wavelet-denoised spectral estimator by thresholding the wavelet coefficients of an initial noisy HPD spectral estimator in the manifold wavelet domain. The components of the wavelet coefficients are thresholded based on the hard (keep-or-kill) threshold <code>lam</code>. If <code>lam</code> is unspecified, the threshold is determined data-adaptively by a twofold cross-validation procedure.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">f.hat &lt;-<span class="st"> </span><span class="kw">pdSpecEst</span>(pgram$P)
+<span class="kw">str</span>(f.hat)
+<span class="co">#&gt; List of 4</span>
+<span class="co">#&gt;  $ f         : cplx [1:2, 1:2, 1:512] 1.3675-0i 0.0413+0.005i 0.0413-0.005i ...</span>
+<span class="co">#&gt;  $ D         :List of 9</span>
+<span class="co">#&gt;   ..$ M.scale1: cplx [1:2, 1:2, 1:2] 0.5796-0i 0.0237+0.0058i 0.0237-0.0058i ...</span>
+<span class="co">#&gt;   ..$ D.scale1: cplx [1:2, 1:2, 1:2] -0.1826+0i 0.0805+0.0177i 0.0805-0.0177i ...</span>
+<span class="co">#&gt;   ..$ D.scale2: cplx [1:2, 1:2, 1:4] 0.0569+0i 0.0175+0.0218i 0.0175-0.0218i ...</span>
+<span class="co">#&gt;   ..$ D.scale3: cplx [1:2, 1:2, 1:8] 0+0i 0+0i 0+0i ...</span>
+<span class="co">#&gt;   ..$ D.scale4: cplx [1:2, 1:2, 1:16] 0+0i 0+0i 0+0i ...</span>
+<span class="co">#&gt;   ..$ D.scale5: cplx [1:2, 1:2, 1:32] 0+0i 0+0i 0+0i ...</span>
+<span class="co">#&gt;   ..$ D.scale6: cplx [1:2, 1:2, 1:64] 0+0i 0+0i 0+0i ...</span>
+<span class="co">#&gt;   ..$ D.scale7: cplx [1:2, 1:2, 1:128] 0+0i 0+0i 0+0i ...</span>
+<span class="co">#&gt;   ..$ D.scale8: cplx [1:2, 1:2, 1:256] 0+0i 0+0i 0+0i ...</span>
+<span class="co">#&gt;  $ lam       : num 3.25</span>
+<span class="co">#&gt;  $ components:List of 8</span>
+<span class="co">#&gt;   ..$ : num [1:4, 1:2] -0.1826 -0.025 0.1139 1.5063 0.0952 ...</span>
+<span class="co">#&gt;   ..$ : num [1:4, 1:4] 0.0569 -0.0309 0.0248 -0.6219 0.0146 ...</span>
+<span class="co">#&gt;   ..$ : num [1:4, 1:8] 0 0 0 0 0 0 0 0 0 0 ...</span>
+<span class="co">#&gt;   ..$ : num [1:4, 1:16] 0 0 0 0 0 0 0 0 0 0 ...</span>
+<span class="co">#&gt;   ..$ : num [1:4, 1:32] 0 0 0 0 0 0 0 0 0 0 ...</span>
+<span class="co">#&gt;   ..$ : num [1:4, 1:64] 0 0 0 0 0 0 0 0 0 0 ...</span>
+<span class="co">#&gt;   ..$ : num [1:4, 1:128] 0 0 0 0 0 0 0 0 0 0 ...</span>
+<span class="co">#&gt;   ..$ : num [1:4, 1:256] 0 0 0 0 0 0 0 0 0 0 ...</span></code></pre></div>
+<p>The figure below shows the true underlying spectral matrix given by <code>ts.sim$f</code> and the estimated spectral matrix obtained from <code>f.hat$f</code> at the frequencies <code>freq</code>. The spectral estimator is able to capture both the very smooth curve behavior in the first auto-spectral component of the matrix and the localized peak in the second auto-spectral component of the matrix, while guaranteeing positive-definiteness of the estimator. <br> <br></p>
+<div class="figure">
+<img src="data:image/png;base64,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" alt="Figure: True (left) and estimated (right) spectral matrices in the frequency domain." width="35%" /><img src="data:image/png;base64,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" alt="Figure: True (left) and estimated (right) spectral matrices in the frequency domain." width="35%" />
+<p class="caption">
+Figure: True (left) and estimated (right) spectral matrices in the frequency domain.
+</p>
 </div>
-<div class="footnotes">
-<hr />
-<ol>
-<li id="fn1"><p>A footnote here.<a href="#fnref1">↩</a></p></li>
-</ol>
+</div>
+<div id="wavelet-based-spectral-clustering-with-pdspecclust" class="section level2">
+<h2>Wavelet-based spectral clustering with <code>pdSpecClust()</code></h2>
+<p><code>pdSpecClust()</code> performs clustering of multivariate spectral matrices via a two-step fuzzy clustering algorithm in the manifold wavelet domain. Below we simulate time series data for ten different subjects from two slightly different vARMA(2,2) processes. Here, the first group of five subjects shares the same spectrum and the second group of five subjects share a slightly different spectrum. We use <code>pdSpecClust()</code> to assign the different subjects to <code>K=2</code> clusters in a probabilistic fashion. Note that the true clusters are formed by the first group of five subjects and the last group of five subjects.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Phi1 &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(<span class="fl">0.5</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, -<span class="fl">0.9</span>), <span class="dt">dim =</span> <span class="kw">c</span>(d, d, <span class="dv">2</span>))
+Phi2 &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(<span class="fl">0.5</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="fl">0.3</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, -<span class="fl">0.9</span>), <span class="dt">dim =</span> <span class="kw">c</span>(d, d, <span class="dv">2</span>))
+pgram &lt;-<span class="st"> </span>function(Phi) <span class="kw">pdPgram</span>(<span class="kw">rARMA</span>(<span class="dv">2</span>^<span class="dv">12</span>, d, Phi, Theta, Sigma)$X)$P
+P &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(<span class="kw">replicate</span>(<span class="dv">5</span>, <span class="kw">pgram</span>(Phi1)), <span class="kw">replicate</span>(<span class="dv">5</span>, <span class="kw">pgram</span>(Phi2))), <span class="dt">dim=</span><span class="kw">c</span>(d, d, <span class="dv">2</span>^<span class="dv">10</span>, <span class="dv">10</span>))
+<span class="kw">pdSpecClust</span>(P, <span class="dt">K =</span> <span class="dv">2</span>, <span class="dt">lam =</span> <span class="dv">3</span>)
+<span class="co">#&gt;              Cluster1   Cluster2</span>
+<span class="co">#&gt; Subject1  0.029605479 0.97039452</span>
+<span class="co">#&gt; Subject2  0.008206674 0.99179333</span>
+<span class="co">#&gt; Subject3  0.038516956 0.96148304</span>
+<span class="co">#&gt; Subject4  0.020563027 0.97943697</span>
+<span class="co">#&gt; Subject5  0.008389883 0.99161012</span>
+<span class="co">#&gt; Subject6  0.926256142 0.07374386</span>
+<span class="co">#&gt; Subject7  0.981985410 0.01801459</span>
+<span class="co">#&gt; Subject8  0.995410790 0.00458921</span>
+<span class="co">#&gt; Subject9  0.988680309 0.01131969</span>
+<span class="co">#&gt; Subject10 0.981736482 0.01826352</span></code></pre></div>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2>References</h2>
+<div id="refs" class="references">
+<div id="ref-CvS17">
+<p>Chau, J., and von Sachs, R. 2017. “Positive-Definite Multivariate Spectral Estimation: A Geometric Wavelet Approach.” <em>(Unpublished)</em>.</p>
+</div>
+</div>
 </div>
 
 

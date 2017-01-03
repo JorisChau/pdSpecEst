@@ -2,16 +2,16 @@
 % Please edit documentation in R/RcppExports.R
 \name{Mid}
 \alias{Mid}
-\title{Geodesic midpoint between HPD-matrices.}
+\title{Geodesic midpoint between HPD-matrices}
 \usage{
 Mid(A, B)
 }
 \arguments{
-\item{A, B}{Hermitian, positive-definite matrices (of equal dimension).}
+\item{A, B}{square Hermitian positive-definite matrices (of equal dimension).}
 }
 \description{
-\code{Mid} calculates the geodesic midpoint between two Hermitian,
-positive-definite matrices as in (Bhatia, 2009, Chapter 6).
+\code{Mid} calculates the geodesic midpoint between two Hermitian PD matrices as in
+(Bhatia, 2009, Chapter 6).
 }
 \examples{
  a <- matrix(complex(real = rnorm(9), imaginary = rnorm(9)), nrow = 3)

@@ -2,13 +2,14 @@
 
 // [[Rcpp::depends(RcppEigen)]]
 
-//' Logarithmic map.
+//' Logarithmic map
 //'
-//' \code{Logm(P, Q)} computes the projection of the HPD-matrix \code{Q} on the Riemannian manifold to
-//' the tangent space attached at the HPD-matrix \code{P} via the logarithmic map as in (Pennec, 2006).
+//' \code{Logm(P, Q)} computes the projection of a Hermitian PD matrix \code{Q} on the Riemannian manifold
+//' to the tangent space attached at the Hermitian PD matrix \code{P} via the logarithmic map as in (Pennec, 2006).
+//' This is the unique inverse of the exponential map \code{\link{Expm}}.
 //'
-//' @param P a square HPD-matrix.
-//' @param Q a square HPD-matrix (of equal dimension as \code{P}).
+//' @param P a square Hermitian positive-definite matrix.
+//' @param Q a square Hermitian positive-definite matrix (of equal dimension as \code{P}).
 //'
 //' @examples
 //'  q <- matrix(complex(real = rnorm(9), imaginary = rnorm(9)), nrow = 3)
@@ -25,7 +26,6 @@
 //'
 //' @export
 // [[Rcpp::export()]]
-
 
 Eigen::MatrixXcd Logm(Eigen::MatrixXcd P, Eigen::MatrixXcd Q) {
 
