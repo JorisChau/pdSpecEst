@@ -34,6 +34,7 @@
 #' ts.sim <- rARMA(200, 2, Phi, Theta, Sigma, freq=freq)
 #' ts.plot(ts.sim$X) # plot generated time series traces.
 #'
+#' @importFrom stats rnorm
 #' @export
 rARMA <- function(n, d, Phi, Theta, Sigma, burn=100, freq=NULL)
 {
@@ -50,7 +51,7 @@ rARMA <- function(n, d, Phi, Theta, Sigma, burn=100, freq=NULL)
     Sigma <- diag(d)
   }
   Se <- Sqrt(Sigma)
-  Z <- replicate(n + burn, Se %*% rnorm(d), simplify=T)
+  Z <- replicate(n + burn, Se %*% stats::rnorm(d), simplify=T)
   X <- t(ARMA(Phi, Theta, Z, n+burn)[, (burn+1):(n+burn)])
   f <- NULL
   if(!is.null(freq)){
