@@ -4,15 +4,15 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ## ------------------------------------------------------------------------
 library(pdSpecEst)
 ## Fix parameters
-freq <- seq(from = pi / 2^9, to = pi, length = 2^9)
+freq <- seq(from = pi / 2^8, to = pi, length = 2^8)
 d <- 2
 Phi <- array(c(0.5, 0, 0, 0.2, 0, 0, 0, -0.9), dim = c(d, d, 2))
 Theta <- array(c(0, 0.1, 0.1, 0, 0, 0, 0, 0, 0.5), dim = c(d, d, 2))
 Sigma <- matrix(c(2, 0, 0, 0.25), nrow = d)
 
 ## Generate time series
-set.seed(10)
-ts.sim <- rARMA(2^11, d, Phi, Theta, Sigma, freq = freq)
+set.seed(0)
+ts.sim <- rARMA(2^10, d, Phi, Theta, Sigma, freq = freq)
 str(ts.sim)
 
 ## ---- eval=FALSE---------------------------------------------------------
@@ -45,11 +45,15 @@ str(f.hat)
 par(mar = c(0.1,0.1,2,0.1))
 layout(mat = matrix(c(1,1,2,3,4,5,6,6), nrow = 4))
 plotspec <- function(i, data, col){
+  ylim <- range(Re(data$f), Im(data$f))
   if(i[1] == i[2]){
-    plot(freq, Re(data$f[i[1], i[1], ]), main = paste0("Re(f(", i[1], ",", i[1], "))"), type = "l", xaxt = "n", yaxt = "n", col = col)
+    plot(freq, Re(data$f[i[1], i[1], ]), main = paste0("Re(f(", i[1], ",", i[1], "))"), type = "l", xaxt = "n", yaxt = "n", col = col, ylim = ylim)
+    abline(h = 0, lty = 3)
   } else{
-    plot(freq, Re(data$f[i[1], i[2], ]), main = paste0("Re(f(", i[1], ",", i[2], "))"), type = "l", xaxt = "n", yaxt = "n", col = col)
-    plot(freq, Im(data$f[i[1], i[2], ]), main = paste0("Im(f(", i[1], ",", i[1], "))"), type = "l", xaxt = "n", yaxt = "n", col = col)
+    plot(freq, Re(data$f[i[1], i[2], ]), main = paste0("Re(f(", i[1], ",", i[2], "))"), type = "l", xaxt = "n", yaxt = "n", col = col, ylim = ylim)
+    abline(h = 0, lty = 3)
+    plot(freq, Im(data$f[i[1], i[2], ]), main = paste0("Im(f(", i[1], ",", i[1], "))"), type = "l", xaxt = "n", yaxt = "n", col = col, ylim = ylim)
+    abline(h = 0, lty = 3)
   }
 }
 grid <- expand.grid(1:d, 1:d)
@@ -57,9 +61,9 @@ invisible(apply(grid, 1, function(i) plotspec(i, ts.sim, 1)))
 invisible(apply(grid, 1, function(i) plotspec(i, f.hat, 2)))
 
 ## ------------------------------------------------------------------------
-Phi1 <- array(c(0.5, 0, 0, 0.2, 0, 0, 0, -0.9), dim = c(d, d, 2))
+Phi1 <- array(c(0.5, 0, 0, 0.1, 0, 0, 0, -0.9), dim = c(d, d, 2))
 Phi2 <- array(c(0.5, 0, 0, 0.3, 0, 0, 0, -0.9), dim = c(d, d, 2))
-pgram <- function(Phi) pdPgram(rARMA(2^12, d, Phi, Theta, Sigma)$X)$P
-P <- array(c(replicate(5, pgram(Phi1)), replicate(5, pgram(Phi2))), dim=c(d, d, 2^10, 10))
+pgram <- function(Phi) pdPgram(rARMA(2^10, d, Phi, Theta, Sigma)$X)$P
+P <- array(c(replicate(5, pgram(Phi1)), replicate(5, pgram(Phi2))), dim=c(d, d, 2^8, 10))
 pdSpecClust(P, K = 2, lam = 3)
 

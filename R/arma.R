@@ -49,7 +49,9 @@ rARMA <- function(n, d, Phi, Theta, Sigma, burn=100, freq=NULL)
     print("Sigma is unspecified. By default Sigma is equal to the diagonal matrix")
     Sigma <- diag(d)
   }
-  X <- t(ARMA(Phi, Theta, Re(Sqrt(Sigma)), n+burn)[, (burn+1):(n+burn)])
+  Se <- Sqrt(Sigma)
+  Z <- replicate(n + burn, Se %*% rnorm(d), simplify=T)
+  X <- t(ARMA(Phi, Theta, Z, n+burn)[, (burn+1):(n+burn)])
   f <- NULL
   if(!is.null(freq)){
     f.nu <- function(nu){

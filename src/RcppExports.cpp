@@ -114,16 +114,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // ARMA
-arma::mat ARMA(arma::cube Phi, arma::cube Theta, arma::mat Se, int len);
-RcppExport SEXP pdSpecEst_ARMA(SEXP PhiSEXP, SEXP ThetaSEXP, SEXP SeSEXP, SEXP lenSEXP) {
+arma::mat ARMA(arma::cube Phi, arma::cube Theta, arma::mat Z, int len);
+RcppExport SEXP pdSpecEst_ARMA(SEXP PhiSEXP, SEXP ThetaSEXP, SEXP ZSEXP, SEXP lenSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::cube >::type Phi(PhiSEXP);
     Rcpp::traits::input_parameter< arma::cube >::type Theta(ThetaSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Se(SeSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Z(ZSEXP);
     Rcpp::traits::input_parameter< int >::type len(lenSEXP);
-    rcpp_result_gen = Rcpp::wrap(ARMA(Phi, Theta, Se, len));
+    rcpp_result_gen = Rcpp::wrap(ARMA(Phi, Theta, Z, len));
     return rcpp_result_gen;
 END_RCPP
 }

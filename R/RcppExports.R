@@ -119,8 +119,8 @@ Sqrt <- function(M) {
     .Call('pdSpecEst_Sqrt', PACKAGE = 'pdSpecEst', M)
 }
 
-ARMA <- function(Phi, Theta, Se, len) {
-    .Call('pdSpecEst_ARMA', PACKAGE = 'pdSpecEst', Phi, Theta, Se, len)
+ARMA <- function(Phi, Theta, Z, len) {
+    .Call('pdSpecEst_ARMA', PACKAGE = 'pdSpecEst', Phi, Theta, Z, len)
 }
 
 iSqrt <- function(M) {
