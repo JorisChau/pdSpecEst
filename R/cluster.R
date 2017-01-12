@@ -73,140 +73,150 @@
 #' @references Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
 #'
 #' @export
-pdSpecClust <- function(P, D.hat = NULL, K, m = 2, jmax, d.jmax, eps, tau, ...){
+pdSpecClust <- function(P, D.hat = NULL, K, m = 2, jmax, d.jmax, eps, tau, ...) {
 
   ## missing arguments
-  if(missing(P)) P <- NULL
-  if(missing(d.jmax)) d.jmax <- 0.1
-  if(missing(eps)) eps <- c(1E-4, 1E-4)
-  if(missing(tau)) tau <- 0.5
+  if (missing(P)) {
+    P <- NULL
+  }
+  if (missing(d.jmax)) {
+    d.jmax <- 0.1
+  }
+  if (missing(eps)) {
+    eps <- c(1e-04, 1e-04)
+  }
+  if (missing(tau)) {
+    tau <- 0.5
+  }
   dots <- list(...)
   order <- dots$order
-  if(is.null(order)) order <- 5
+  if (is.null(order)) {
+    order <- 5
+  }
   alpha <- dots$alpha
-  if(is.null(alpha)) alpha <- 0.75
+  if (is.null(alpha)) {
+    alpha <- 0.75
+  }
   lam <- dots$lam
 
-  if(is.null(D.hat)){
+  if (is.null(D.hat)) {
 
     ## Define variables
     J <- log2(dim(P)[3])
     if (!isTRUE(all.equal(as.integer(J), J))) {
-      print(paste0("Input length is non-dyadic, please change length ",
-                   dim(P)[3], " to dyadic number."))
+      print(paste0("Input length is non-dyadic, please change length ", dim(P)[3],
+                   " to dyadic number."))
     }
     stopifnot(isTRUE(all.equal(as.integer(J), J)))
     if (!(order %in% c(1, 3, 5, 7, 9))) {
       print("Refinement order should be an odd integer between 1 and 9, by default set to 5")
       order <- 5
     }
-    if(missing(jmax)) jmax <- J-1
+    if (missing(jmax)) {
+      jmax <- J - 1
+    }
     dim <- dim(P)[1]
     S <- dim(P)[4]
     d.nzero <- matrix(1, ncol = jmax, nrow = S)
     D <- list()
-    for(s in 1:S) {
+    for (s in 1:S) {
       D.hat <- pdSpecEst(P[, , , s], lam, order, return = "D", alpha)
       D[[s]] <- D.hat$D
-      d.nzero[s, ] <- sapply(1:jmax, function(j) sum(as.logical(D.hat$components[[j]])) /
-                               (dim^2 * 2^j))
+      d.nzero[s, ] <- sapply(1:jmax, function(j) sum(as.logical(D.hat$components[[j]]))/(dim^2 *  2^j))
     }
     jmax <- min(jmax, sum(colMeans(d.nzero) > d.jmax))
-  } else{
+  } else {
 
-    ##Define variables
+    ## Define variables
     J <- length(D.hat[[1]]$D)
     dim <- dim(D.hat[[1]]$D[[1]])[1]
     S <- length(D.hat)
-    if(missing(jmax)) jmax <- J-1
+    if (missing(jmax))
+      jmax <- J - 1
     D <- list()
     d.nzero <- matrix(1, ncol = jmax, nrow = S)
-    for(s in 1:S){
+    for (s in 1:S) {
       D[[s]] <- D.hat[[s]]$D
-      d.nzero[s, ] <- sapply(1:jmax, function(j) sum(as.logical(D.hat[[s]]$components[[j]])) /
-                               (dim^2 * 2^j))
+      d.nzero[s, ] <- sapply(1:jmax, function(j) sum(as.logical(D.hat[[s]]$components[[j]]))/(dim^2 * 2^j))
     }
     jmax <- min(jmax, sum(colMeans(d.nzero) > d.jmax))
   }
 
   ## c-medoids algorithm
-  M <- sapply(1:S, function(s) D[[s]][[1]], simplify="array")
-  cent <- M[,,,sample(1:S, K)]
+  M <- sapply(1:S, function(s) D[[s]][[1]], simplify = "array")
+  cent <- M[, , , sample(1:S, K)]
   stopit <- F
   i <- 0
-  distM <- function(M1, M2){
-    RiemmDist(M1[,,1], M2[,,1])^2 + RiemmDist(M1[,,2], M2[,,2])^2
+  distM <- function(M1, M2) {
+    RiemmDist(M1[, , 1], M2[, , 1])^2 + RiemmDist(M1[, , 2], M2[, , 2])^2
   }
-  while((!stopit) & (i < 50)){
-    dist <- t(sapply(1:S, function(s) t(sapply(1:K, function(k) distM(M[,,,s], cent[,,,k])))))
-    mu <- function(s){
-      if(!any(dist[s,] < .Machine$double.eps)){
-        sapply(1:K, function(k) 1 / sum((dist[s,k] / dist[s,])^(1 / (m - 1))))
-      } else{
-        as.numeric(dist[s,] < .Machine$double.eps) / sum(dist[s,] < .Machine$double.eps)
+  while ((!stopit) & (i < 50)) {
+    dist <- t(sapply(1:S, function(s) t(sapply(1:K, function(k) distM(M[, , , s], cent[, , , k])))))
+    mu <- function(s) {
+      if (!any(dist[s, ] < .Machine$double.eps)) {
+        sapply(1:K, function(k) 1/sum((dist[s, k]/dist[s, ])^(1/(m - 1))))
+      } else {
+        as.numeric(dist[s, ] < .Machine$double.eps)/sum(dist[s, ] < .Machine$double.eps)
       }
     }
     clust <- t(sapply(1:S, mu))
-    cent1 <- array(dim=c(dim, dim, 2, K))
-    for(k in 1:K){
-      w <- clust[, k]^m / sum(clust[, k]^m)
-      cent1[,,,k] <- sapply(1:2, function(i) KarchMean(M[,,i,], w), simplify = "array")
+    cent1 <- array(dim = c(dim, dim, 2, K))
+    for (k in 1:K) {
+      w <- clust[, k]^m/sum(clust[, k]^m)
+      cent1[, , , k] <- sapply(1:2, function(i) KarchMean(M[, , i, ], w), simplify = "array")
     }
-    stopit <- ifelse(isTRUE(sum(sapply(1:K, function(k) distM(cent[,,,k],
-                        cent1[,,,k]))) > eps[1]), F, T)
+    stopit <- ifelse(isTRUE(sum(sapply(1:K, function(k) distM(cent[, , , k],
+                                        cent1[, , , k]))) > eps[1]), F, T)
     cent <- cent1
-    i <- i+1
+    i <- i + 1
   }
 
   ## Weighted c-means algorithm
-  D <- lapply(1:jmax, function(j) sapply(1:S, function(s) D[[s]][[j+1]], simplify="array"))
-  cent <- lapply(1:jmax, function(j) array(dim=c(dim, dim, 2^j, K)))
-  for(k in 1:K){
-    w <- clust[, k]^m / sum(clust[, k]^m)
-    for(j in 1:jmax){
-      cent[[j]][,,,k] <- sapply(1:2^j, function(i) apply(array(rep(w, each=dim^2), dim=c(dim, dim, S)) *
-                                                              D[[j]][,,i,], c(1,2), sum), simplify="array")
+  D <- lapply(1:jmax, function(j) sapply(1:S, function(s) D[[s]][[j + 1]], simplify = "array"))
+  cent <- lapply(1:jmax, function(j) array(dim = c(dim, dim, 2^j, K)))
+  for (k in 1:K) {
+    w <- clust[, k]^m/sum(clust[, k]^m)
+    for (j in 1:jmax) {
+      cent[[j]][, , , k] <- sapply(1:2^j, function(i) apply(array(rep(w, each = dim^2),
+                                    dim = c(dim, dim, S)) * D[[j]][, , i, ], c(1, 2), sum), simplify = "array")
     }
   }
   stopit <- F
   i <- 0
   dist0 <- dist
   clust0 <- clust
-  distj <- function(D1, D2, j){
-    sum(sapply(1:2^j, function(i) 2^(jmax - j) * NormF(D1[,,i] - D2[,,i])^2))
+  distj <- function(D1, D2, j) {
+    sum(sapply(1:2^j, function(i) 2^(jmax - j) * NormF(D1[, , i] - D2[, , i])^2))
   }
-  while((!stopit) & (i < 50)){
-    dist <- t(sapply(1:S, function(s) t(sapply(1:K, function(k) sum(sapply(1:jmax, function(j)
-                 (1 - exp(-tau * dist0[s, k]))/(1 + exp(-tau * dist0[s, k])) *
-                      distj(D[[j]][,,,s], cent[[j]][,,,k], j)))))))
-    mu <- function(s){
-      if(!any(dist[s,] < .Machine$double.eps)){
-        sapply(1:K, function(k) 1 / sum((dist[s,k] / dist[s,])^(1 / (m - 1))))
-      } else if (all(dist[s,] < .Machine$double.eps)){
-        clust0[s,]
-      } else{
-        as.numeric(dist[s,] < .Machine$double.eps) / sum(dist[s,] < .Machine$double.eps)
+  while ((!stopit) & (i < 50)) {
+    dist <- t(sapply(1:S, function(s) t(sapply(1:K, function(k) sum(sapply(1:jmax,
+                                                function(j) (1 - exp(-tau * dist0[s, k]))/(1 + exp(-tau * dist0[s, k])) *
+                                                  distj(D[[j]][, , , s], cent[[j]][, , , k], j)))))))
+    mu <- function(s) {
+      if (!any(dist[s, ] < .Machine$double.eps)) {
+        sapply(1:K, function(k) 1/sum((dist[s, k]/dist[s, ])^(1/(m - 1))))
+      } else if (all(dist[s, ] < .Machine$double.eps)) {
+        clust0[s, ]
+      } else {
+        as.numeric(dist[s, ] < .Machine$double.eps)/sum(dist[s, ] < .Machine$double.eps)
       }
     }
     clust <- t(sapply(1:S, mu))
-    cent1 <- lapply(1:jmax, function(j) array(dim=c(dim, dim, 2^j, K)))
-    for(k in 1:K){
-      w <- clust[, k]^m / sum(clust[, k]^m)
-      for(j in 1:jmax){
-        cent1[[j]][,,,k] <- sapply(1:2^j, function(i) apply(array(rep(w, each=dim^2), dim=c(dim, dim, S)) *
-                                                                    D[[j]][,,i,], c(1,2), sum), simplify="array")
+    cent1 <- lapply(1:jmax, function(j) array(dim = c(dim, dim, 2^j, K)))
+    for (k in 1:K) {
+      w <- clust[, k]^m/sum(clust[, k]^m)
+      for (j in 1:jmax) {
+        cent1[[j]][, , , k] <- sapply(1:2^j, function(i) apply(array(rep(w,  each = dim^2),
+                                       dim = c(dim, dim, S)) * D[[j]][, , i, ], c(1, 2), sum),
+                                         simplify = "array")
       }
     }
     stopit <- ifelse(isTRUE(sum(sapply(1:K, function(k) sum(sapply(1:jmax, function(j)
-      distj(cent[[j]][,,,k], cent1[[j]][,,,k], j))))) > eps[2]), F, T)
+                                        distj(cent[[j]][, , , k], cent1[[j]][, , , k], j))))) > eps[2]), F, T)
     cent <- cent1
-    i <- i+1
+    i <- i + 1
   }
   rownames(clust) <- paste0("Subject", 1:S)
   colnames(clust) <- paste0("Cluster", 1:K)
   return(clust)
 }
-
-
-
-

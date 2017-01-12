@@ -23,11 +23,13 @@
 #' @seealso \code{\link{Mid}}
 #'
 #' @export
-KarchMean <- function(M, w)
-{
-  if(missing(w)) w <- rep(1/dim(M)[3], dim(M)[3])
-  return(kMean(do.call(rbind, lapply(1:dim(M)[3], function(s) M[,,s])), w))
+KarchMean <- function(M, w) {
+  if (missing(w))
+    w <- rep(1/dim(M)[3], dim(M)[3])
+  return(kMean(do.call(rbind, lapply(1:dim(M)[3], function(s) M[, , s])), w))
 }
+
+
 
 
 

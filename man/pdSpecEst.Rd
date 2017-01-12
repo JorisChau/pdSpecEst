@@ -23,7 +23,7 @@ of the wavelet coefficients across scales. By default, \code{alpha} is set to \c
 \value{
 The function returns a list with four components:
 \item{f }{a (\eqn{d,d,m})-dimensional array corresponding to the wavelet-denoised Hermitian PD (\eqn{d \times d})-dimensional
-spectral estimate at the \code{m} different frequencies. If \code{!(return == "f")}, the inverse wavelet transform
+spectral estimate at the \code{m} different frequencies. If \code{!(return == 'f')}, the inverse wavelet transform
 of the thresholded wavelet coefficients is not computed and \code{f} is set equal to \code{NULL}.}
 \item{D }{a list of arrays, each (\eqn{d, d, 2^j})-dimensional array contains the thresholded
 (\eqn{d \times d})-dimensional wavelet coefficents at the \eqn{2^j} different locations in the given wavelet scale
@@ -53,7 +53,7 @@ in \eqn{[0.5, 1)} is reasonable in most settings. If \code{alpha} is not specifi
 The components of the wavelet coefficients are thresholded based on the hard (keep-or-kill)
 threshold \code{lam}. If \code{lam} is unspecified, the threshold is determined in a data-adaptive manner
 by a twofold cross-validation procedure, which is described in detail in (Chau and von Sachs, 2017). \cr
-If \code{return == "f"} the thresholded wavelet coefficients are transformed back to the frequency domain by
+If \code{return == 'f'} the thresholded wavelet coefficients are transformed back to the frequency domain by
 the function \code{\link{InvWavTransf}} giving the wavelet-denoised Hermitian PD spectral estimate.
 }
 \examples{

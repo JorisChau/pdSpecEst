@@ -36,36 +36,33 @@
 #'
 #' @importFrom stats rnorm
 #' @export
-rARMA <- function(n, d, Phi, Theta, Sigma, burn=100, freq=NULL)
-{
-  if(missing(Phi)){
+rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
+  if (missing(Phi)) {
     print("Phi is unspecified. By default the AR-component are equal to the zero matrices")
     Phi <- array(0, c(d, d, 2))
   }
-  if(missing(Theta)){
+  if (missing(Theta)) {
     print("Theta is unspecified. By default the MA-components are equal to the zero matrices")
     Theta <- array(0, c(d, d, 2))
   }
-  if(missing(Sigma)){
+  if (missing(Sigma)) {
     print("Sigma is unspecified. By default Sigma is equal to the diagonal matrix")
     Sigma <- diag(d)
   }
   Se <- Sqrt(Sigma)
-  Z <- replicate(n + burn, Se %*% stats::rnorm(d), simplify=T)
-  X <- t(ARMA(Phi, Theta, Z, n+burn)[, (burn+1):(n+burn)])
+  Z <- replicate(n + burn, Se %*% stats::rnorm(d), simplify = T)
+  X <- t(ARMA(Phi, Theta, Z, n + burn)[, (burn + 1):(n + burn)])
   f <- NULL
-  if(!is.null(freq)){
-    f.nu <- function(nu){
-      PhiB <- diag(d) - Phi[, , 1] * exp(complex(imaginary = -nu)) -
-        Phi[, , 2] * exp(complex(imaginary = -2 * nu))
-      ThetaB <- diag(d) + Theta[, , 1] * exp(complex(imaginary = -nu)) +
-        Theta[, , 2] * exp(complex(imaginary = -2 * nu))
-      return((((solve(PhiB) %*% ThetaB) %*% Sigma) %*% t(Conj(ThetaB))) %*%
-               t(solve(Conj(PhiB))))
+  if (!is.null(freq)) {
+    f.nu <- function(nu) {
+      PhiB <- diag(d) - Phi[, , 1] * exp(complex(imaginary = -nu)) - Phi[, , 2] *
+                                                                      exp(complex(imaginary = -2 * nu))
+      ThetaB <- diag(d) + Theta[, , 1] * exp(complex(imaginary = -nu)) + Theta[, , 2] *
+                                                                      exp(complex(imaginary = -2 * nu))
+      return((((solve(PhiB) %*% ThetaB) %*% Sigma) %*% t(Conj(ThetaB))) %*% t(solve(Conj(PhiB))))
     }
-    f <- sapply(freq, function(freq) 1 / (2 * pi) * f.nu(freq), simplify = "array")
+    f <- sapply(freq, function(freq) 1/(2 * pi) * f.nu(freq), simplify = "array")
   }
   return(list(X = X, f = f))
 }
-
 

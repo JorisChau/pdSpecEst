@@ -13,18 +13,15 @@ Impute_man <- function(M_j0, D, Nw) {
   } else {
     for (i in 1:2^j0) {
       if (i == 1) {
-        tM_j1[, , i] <- Expm(M_j0[, , i], (1/4) * Logm(M_j0[, , i], M_j0[,
-                                                                         , i + 1]))
+        tM_j1[, , i] <- Expm(M_j0[, , i], (1/4) * Logm(M_j0[, , i], M_j0[, , i + 1]))
       } else if (i == 2^j0) {
-        tM_j1[, , i] <- Expm(M_j0[, , i], (-1/4) * Logm(M_j0[, , i], M_j0[,
-                                                                          , i - 1]))
+        tM_j1[, , i] <- Expm(M_j0[, , i], (-1/4) * Logm(M_j0[, , i], M_j0[, , i - 1]))
       } else {
         nbrs0 <- abs((0:2^j0) - (0:2^j0)[i]) <= D
         Di <- min(sum(nbrs0[1:(i - 1)]), sum(nbrs0[(i + 1):2^j0]))
         nbrs <- abs((0:2^j0) - (0:2^j0)[i]) <= Di
         tM_j1[, , i] <- Expm(P0, apply(array(rep(Nw[[Di + 1]], each = d^2),
-                                             dim = c(d, d, 2 * Di + 1)) * M_j0.log[, , (i - Di):(i + Di)], c(1,
-                                                                                                             2), sum))
+                              dim = c(d, d, 2 * Di + 1)) * M_j0.log[, , (i - Di):(i + Di)], c(1, 2), sum))
       }
     }
   }

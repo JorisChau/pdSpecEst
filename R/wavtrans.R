@@ -37,25 +37,27 @@
 #' @references Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
 #'
 #' @export
-WavTransf <- function(P, order = 5, jmax)
-{
+WavTransf <- function(P, order = 5, jmax) {
+
+  ## Set variables
   J <- log2(dim(P)[3])
-  if(!isTRUE(all.equal(as.integer(J), J))){
+  if (!isTRUE(all.equal(as.integer(J), J))) {
     print(paste0("Input length is non-dyadic, please change length ", dim(P)[3],
-      " to dyadic number."))
+                 " to dyadic number."))
     result <- NA
   } else {
-    if(!(order %in% c(1,3,5,7,9))){
+    if (!(order %in% c(1, 3, 5, 7, 9))) {
       print("Refinement order should be an odd integer between 1 and 9, by default set to 5")
       order <- 5
     }
     d <- dim(P)[1]
     M <- list()
-    for (j in J:1){
-      if (j == J){
+    for (j in J:1) {
+      if (j == J) {
         Mper <- unname(P)
-      } else{
-        Mper <- sapply(1:(dim(Mper)[3]/2), function(i) Mid(Mper[, , 2 * i - 1], Mper[, , 2 * i]), simplify = "array")
+      } else {
+        Mper <- sapply(1:(dim(Mper)[3]/2), function(i) Mid(Mper[, , 2 * i - 1], Mper[, , 2 * i]),
+                        simplify = "array")
       }
       M[[j]] <- array(Mper[, , 1:2^j], dim = c(d, d, 2^j))
     }
@@ -64,19 +66,22 @@ WavTransf <- function(P, order = 5, jmax)
     Nw <- list(N1 = 1, N3 = c(-1, 8, 1)/8, N5 = c(3, -22, 128, 22, -3)/128,
                N7 = c(-5, 44, -201, 1024, 201, -44, 5)/1024,
                N9 = c(35, -370, 1898, -6922, 32768, 6922, -1898, 370, -35)/32768)
-    if(missing(jmax)) jmax <- J-1
-    if(jmax > J-1){
-      print(paste0("jmax cannot exceed maximum scale j=", J-1))
-      jmax <- J-1
+    if (missing(jmax))
+      jmax <- J - 1
+    if (jmax > J - 1) {
+      print(paste0("jmax cannot exceed maximum scale j=", J - 1))
+      jmax <- J - 1
     }
-    for (j in 1:jmax){
-      tm1 <- Impute_man(M[[j]], (order-1)/2, Nw)
+
+    ## Compute wavelet transform
+    for (j in 1:jmax) {
+      tm1 <- Impute_man(M[[j]], (order - 1)/2, Nw)
       iSqrt_tm1 <- sapply(1:2^j, function(l) iSqrt(tm1[, , l]), simplify = "array")
-      D[[j + 1]] <- sapply(1:2^j, function(l) Logm(diag(d), (iSqrt_tm1[ , , l] %*%
-                                M[[j + 1]][ , , 2 * l]) %*% iSqrt_tm1[ , , l]), simplify = "array")
+      D[[j + 1]] <- sapply(1:2^j, function(l) Logm(diag(d), (iSqrt_tm1[, , l] %*%
+                            M[[j + 1]][, , 2 * l]) %*% iSqrt_tm1[, , l]), simplify = "array")
       names(D)[j + 1] <- paste0("D.scale", j)
     }
-    result <- list(D=D, M=M)
+    result <- list(D = D, M = M)
   }
   return(result)
 }

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Joris Chau" />
 
-<meta name="date" content="2017-01-04" />
+<meta name="date" content="2017-01-12" />
 
 <title>The pdSpecEst package</title>
 
@@ -70,23 +70,23 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">The <code>pdSpecEst</code> package</h1>
 <h4 class="author"><em>Joris Chau</em></h4>
-<h4 class="date"><em>2017-01-04</em></h4>
+<h4 class="date"><em>2017-01-12</em></h4>
 
 
 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
 <p>In nonparametric estimation of the autocovariance matrices or the spectral density matrix of a second-order stationary multivariate time series, it is important to preserve positive-definiteness of the estimator. This in order to ensure interpretability of the estimator as an estimated covariance or spectral matrix, but also to avoid computational issues in e.g. simulation or bootstrapping procedures.</p>
-<p>For this purpose, in <span class="citation">(Chau, J. and von Sachs, R. 2017)</span> we considered multivariate spectral estimation in the Riemannian manifold of Hermitian and positive-definite matrices based on a geometric wavelet approach. Nonlinear wavelet curve denoising in the Riemannian manifold allows one to capture local smoothness behavior of the spectral matrix across frequency, but also varying degrees of smoothness across components of the spectral matrix. Moreover, and in contrast to existing approaches, due to its geometric nature the wavelet-based spectral estimator enjoys the important property that it is invariant to permutations of the components of the time series.</p>
+<p>For this purpose, in <span class="citation">(Chau and von Sachs 2017)</span> we considered multivariate spectral estimation in the Riemannian manifold of Hermitian and positive-definite matrices based on a geometric wavelet approach. Nonlinear wavelet curve denoising in the Riemannian manifold allows one to capture local smoothness behavior of the spectral matrix across frequency, but also varying degrees of smoothness across components of the spectral matrix. Moreover, and in contrast to existing approaches, due to its geometric nature the wavelet-based spectral estimator enjoys the important property that it is invariant to permutations of the components of the time series.</p>
 <p>In addition to spectral estimation, we proposed computationally fast clustering of spectral matrices based on their representations in the wavelet domain, exploiting the fact that smooth curves in the Riemannian manifold are summarized by few high-energy wavelet coefficients.</p>
-<p>In this vignette we demonstrate the wavelet-based multivariate spectral estimation and clustering procedures of <span class="citation">(Chau, J. and von Sachs, R. 2017)</span> by means of simulated time series data using the functions in the <code>pdSpecEst</code> package.</p>
+<p>In this vignette we demonstrate the wavelet-based multivariate spectral estimation and clustering procedures of <span class="citation">(Chau and von Sachs 2017)</span> by means of simulated time series data using the functions in the <code>pdSpecEst</code> package.</p>
 </div>
 <div id="simulate-time-series-data-with-rarma" class="section level2">
 <h2>Simulate time series data with <code>rARMA()</code></h2>
 <p>With <code>rARMA()</code> we simulate multivariate time series observations from a vector ARMA(2,2) process based on Gaussian white noise (i.e. a simulated autoregressive moving average process). By including a vector of frequencies <code>freq</code>, the function <code>rARMA()</code> also returns the generating spectrum of the time series.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(pdSpecEst)
 ## Fix parameters
-freq &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dt">from =</span> pi /<span class="st"> </span><span class="dv">2</span>^<span class="dv">8</span>, <span class="dt">to =</span> pi, <span class="dt">length =</span> <span class="dv">2</span>^<span class="dv">8</span>)
+freq &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dt">from =</span> pi /<span class="st"> </span><span class="dv">2</span>^<span class="dv">9</span>, <span class="dt">to =</span> pi, <span class="dt">length =</span> <span class="dv">2</span>^<span class="dv">9</span>)
 d &lt;-<span class="st"> </span><span class="dv">2</span>
 Phi &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(<span class="fl">0.5</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, -<span class="fl">0.9</span>), <span class="dt">dim =</span> <span class="kw">c</span>(d, d, <span class="dv">2</span>))
 Theta &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="fl">0.5</span>), <span class="dt">dim =</span> <span class="kw">c</span>(d, d, <span class="dv">2</span>))
@@ -94,11 +94,11 @@ Sigma &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="
 
 ## Generate time series
 <span class="kw">set.seed</span>(<span class="dv">0</span>)
-ts.sim &lt;-<span class="st"> </span><span class="kw">rARMA</span>(<span class="dv">2</span>^<span class="dv">10</span>, d, Phi, Theta, Sigma, <span class="dt">freq =</span> freq)
+ts.sim &lt;-<span class="st"> </span><span class="kw">rARMA</span>(<span class="dv">2</span>^<span class="dv">11</span>, d, Phi, Theta, Sigma, <span class="dt">freq =</span> freq)
 <span class="kw">str</span>(ts.sim)
 <span class="co">#&gt; List of 2</span>
-<span class="co">#&gt;  $ X: num [1:1024, 1:2] -1.79 0.856 1.554 0.338 0.124 ...</span>
-<span class="co">#&gt;  $ f: cplx [1:2, 1:2, 1:256] 1.2744+0i 0.0421+0.0006i 0.0421-0.0006i ...</span></code></pre></div>
+<span class="co">#&gt;  $ X: num [1:2048, 1:2] -1.79 0.856 1.554 0.338 0.124 ...</span>
+<span class="co">#&gt;  $ f: cplx [1:2, 1:2, 1:512] 1.2747+0i 0.0421+0.0003i 0.0421-0.0003i ...</span></code></pre></div>
 <p>The autoregressive (AR) and moving average (MA) parameters are chosen in such a way that the spectral matrix displays different degrees of (local) smoothness across different components of the spectral matrix. The code below can be used to plot the simulated time series data and the underlying spectral matrix in the frequency domain.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Plot time series observations
 <span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">1</span>), <span class="dt">mar =</span> <span class="kw">c</span>(<span class="fl">4.5</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">2</span>))
@@ -118,12 +118,12 @@ plotspec &lt;-<span class="st"> </span>function(i){
 </div>
 <div id="bias-corrected-periodogram-with-pdpgram" class="section level2">
 <h2>Bias-corrected periodogram with <code>pdPgram()</code></h2>
-<p><code>pdPgram()</code> computes an initial noisy spectral estimator based on an averaged periodogram matrix, rescaled by the manifold bias-correction described in <span class="citation">(Chau, J. and von Sachs, R. 2017)</span>. If <code>B &gt;= d</code>, i.e. the number of segments over which the averaged periodogram is computed is larger than or equal to the dimension of the time series, then the initial spectral estimator is guaranteed to be Hermitian positive-definite (HPD).</p>
+<p><code>pdPgram()</code> computes an initial noisy spectral estimator based on an averaged periodogram matrix, rescaled by the manifold bias-correction described in <span class="citation">(Chau and von Sachs 2017)</span>. If <code>B &gt;= d</code>, i.e. the number of segments over which the averaged periodogram is computed is larger than or equal to the dimension of the time series, then the initial spectral estimator is guaranteed to be Hermitian positive-definite (HPD).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pgram &lt;-<span class="st"> </span><span class="kw">pdPgram</span>(ts.sim$X)
 <span class="kw">str</span>(pgram)
 <span class="co">#&gt; List of 2</span>
-<span class="co">#&gt;  $ freq: num [1:256] 0.0123 0.0245 0.0368 0.0491 0.0614 ...</span>
-<span class="co">#&gt;  $ P   : cplx [1:2, 1:2, 1:256] 0.182+0i 0.048-0.0198i 0.048+0.0198i ...</span></code></pre></div>
+<span class="co">#&gt;  $ freq: num [1:512] 0.00614 0.01227 0.01841 0.02454 0.03068 ...</span>
+<span class="co">#&gt;  $ P   : cplx [1:2, 1:2, 1:512] 0.6829+0i 0.0197+0.0164i 0.0197-0.0164i ...</span></code></pre></div>
 </div>
 <div id="wavelet-denoised-spectral-estimator-with-pdspecest" class="section level2">
 <h2>Wavelet-denoised spectral estimator with <code>pdSpecEst()</code></h2>
@@ -131,28 +131,30 @@ plotspec &lt;-<span class="st"> </span>function(i){
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">f.hat &lt;-<span class="st"> </span><span class="kw">pdSpecEst</span>(pgram$P)
 <span class="kw">str</span>(f.hat)
 <span class="co">#&gt; List of 4</span>
-<span class="co">#&gt;  $ f         : cplx [1:2, 1:2, 1:256] 1.2923+0i 0.0115-0.017i 0.0115+0.017i ...</span>
-<span class="co">#&gt;  $ D         :List of 8</span>
-<span class="co">#&gt;   ..$ M.scale1: cplx [1:2, 1:2, 1:2] 0.5576+0i 0.0245-0.0056i 0.0245+0.0056i ...</span>
-<span class="co">#&gt;   ..$ D.scale1: cplx [1:2, 1:2, 1:2] -0.2699+0i 0.0244-0.0643i 0.0244+0.0643i ...</span>
-<span class="co">#&gt;   ..$ D.scale2: cplx [1:2, 1:2, 1:4] 0.171+0i 0.19+0.114i 0.19-0.114i ...</span>
+<span class="co">#&gt;  $ f         : cplx [1:2, 1:2, 1:512] 1.121-0i 0.041-0.0111i 0.041+0.0111i ...</span>
+<span class="co">#&gt;  $ D         :List of 9</span>
+<span class="co">#&gt;   ..$ M.scale1: cplx [1:2, 1:2, 1:2] 0.5312-0i 0.0332+0.004i 0.0332-0.004i ...</span>
+<span class="co">#&gt;   ..$ D.scale1: cplx [1:2, 1:2, 1:2] -0.1187+0i 0.0458+0.0148i 0.0458-0.0148i ...</span>
+<span class="co">#&gt;   ..$ D.scale2: cplx [1:2, 1:2, 1:4] 0.0601+0i 0.1045+0.096i 0.1045-0.096i ...</span>
 <span class="co">#&gt;   ..$ D.scale3: cplx [1:2, 1:2, 1:8] 0+0i 0+0i 0+0i ...</span>
 <span class="co">#&gt;   ..$ D.scale4: cplx [1:2, 1:2, 1:16] 0+0i 0+0i 0+0i ...</span>
 <span class="co">#&gt;   ..$ D.scale5: cplx [1:2, 1:2, 1:32] 0+0i 0+0i 0+0i ...</span>
 <span class="co">#&gt;   ..$ D.scale6: cplx [1:2, 1:2, 1:64] 0+0i 0+0i 0+0i ...</span>
 <span class="co">#&gt;   ..$ D.scale7: cplx [1:2, 1:2, 1:128] 0+0i 0+0i 0+0i ...</span>
-<span class="co">#&gt;  $ lam       : num 3.31</span>
-<span class="co">#&gt;  $ components:List of 7</span>
-<span class="co">#&gt;   ..$ : num [1:4, 1:2] -0.2699 0.0909 0.0345 1.5231 0.2108 ...</span>
-<span class="co">#&gt;   ..$ : num [1:4, 1:4] 0.1712 -0.1607 0.2693 -0.4009 -0.0549 ...</span>
+<span class="co">#&gt;   ..$ D.scale8: cplx [1:2, 1:2, 1:256] 0+0i 0+0i 0+0i ...</span>
+<span class="co">#&gt;  $ lam       : num 3.02</span>
+<span class="co">#&gt;  $ components:List of 8</span>
+<span class="co">#&gt;   ..$ : num [1:4, 1:2] -0.1187 -0.021 0.0647 1.5242 0.1656 ...</span>
+<span class="co">#&gt;   ..$ : num [1:4, 1:4] 0.0601 -0.1364 0.1477 -0.4068 -0.1262 ...</span>
 <span class="co">#&gt;   ..$ : num [1:4, 1:8] 0 0 0 0 0 0 0 0 0 0 ...</span>
 <span class="co">#&gt;   ..$ : num [1:4, 1:16] 0 0 0 0 0 0 0 0 0 0 ...</span>
 <span class="co">#&gt;   ..$ : num [1:4, 1:32] 0 0 0 0 0 0 0 0 0 0 ...</span>
 <span class="co">#&gt;   ..$ : num [1:4, 1:64] 0 0 0 0 0 0 0 0 0 0 ...</span>
-<span class="co">#&gt;   ..$ : num [1:4, 1:128] 0 0 0 0 0 0 0 0 0 0 ...</span></code></pre></div>
+<span class="co">#&gt;   ..$ : num [1:4, 1:128] 0 0 0 0 0 0 0 0 0 0 ...</span>
+<span class="co">#&gt;   ..$ : num [1:4, 1:256] 0 0 0 0 0 0 0 0 0 0 ...</span></code></pre></div>
 <p>The figure below shows the true underlying spectral matrix given by <code>ts.sim$f</code> and the estimated spectral matrix obtained from <code>f.hat$f</code> at the frequencies <code>freq</code>. The spectral estimator is able to capture both the very smooth curve behavior in the first auto-spectral component of the matrix and the localized peak in the second auto-spectral component of the matrix, while guaranteeing positive-definiteness of the estimator. <br> <br></p>
 <div class="figure">
-<img src="data:image/png;base64,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" alt="Figure: True (left) and estimated (right) spectral matrices in the frequency domain." width="35%" /><img src="data:image/png;base64,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" alt="Figure: True (left) and estimated (right) spectral matrices in the frequency domain." width="35%" />
+<img src="data:image/png;base64,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" alt="Figure: True (left) and estimated (right) spectral matrices in the frequency domain." width="35%" /><img src="data:image/png;base64,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" alt="Figure: True (left) and estimated (right) spectral matrices in the frequency domain." width="35%" />
 <p class="caption">
 Figure: True (left) and estimated (right) spectral matrices in the frequency domain.
 </p>
@@ -166,23 +168,23 @@ Phi2 &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw
 pgram &lt;-<span class="st"> </span>function(Phi) <span class="kw">pdPgram</span>(<span class="kw">rARMA</span>(<span class="dv">2</span>^<span class="dv">10</span>, d, Phi, Theta, Sigma)$X)$P
 P &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(<span class="kw">replicate</span>(<span class="dv">5</span>, <span class="kw">pgram</span>(Phi1)), <span class="kw">replicate</span>(<span class="dv">5</span>, <span class="kw">pgram</span>(Phi2))), <span class="dt">dim=</span><span class="kw">c</span>(d, d, <span class="dv">2</span>^<span class="dv">8</span>, <span class="dv">10</span>))
 <span class="kw">pdSpecClust</span>(P, <span class="dt">K =</span> <span class="dv">2</span>, <span class="dt">lam =</span> <span class="dv">3</span>)
-<span class="co">#&gt;              Cluster1    Cluster2</span>
-<span class="co">#&gt; Subject1  0.950052263 0.049947737</span>
-<span class="co">#&gt; Subject2  0.969758291 0.030241709</span>
-<span class="co">#&gt; Subject3  0.996467749 0.003532251</span>
-<span class="co">#&gt; Subject4  0.983792207 0.016207793</span>
-<span class="co">#&gt; Subject5  0.975491373 0.024508627</span>
-<span class="co">#&gt; Subject6  0.021879930 0.978120070</span>
-<span class="co">#&gt; Subject7  0.014423062 0.985576938</span>
-<span class="co">#&gt; Subject8  0.070693723 0.929306277</span>
-<span class="co">#&gt; Subject9  0.009428415 0.990571585</span>
-<span class="co">#&gt; Subject10 0.015432100 0.984567900</span></code></pre></div>
+<span class="co">#&gt;             Cluster1   Cluster2</span>
+<span class="co">#&gt; Subject1  0.10322249 0.89677751</span>
+<span class="co">#&gt; Subject2  0.01652825 0.98347175</span>
+<span class="co">#&gt; Subject3  0.01238007 0.98761993</span>
+<span class="co">#&gt; Subject4  0.02648990 0.97351010</span>
+<span class="co">#&gt; Subject5  0.02075077 0.97924923</span>
+<span class="co">#&gt; Subject6  0.98172448 0.01827552</span>
+<span class="co">#&gt; Subject7  0.98967170 0.01032830</span>
+<span class="co">#&gt; Subject8  0.97642216 0.02357784</span>
+<span class="co">#&gt; Subject9  0.93595864 0.06404136</span>
+<span class="co">#&gt; Subject10 0.94940943 0.05059057</span></code></pre></div>
 </div>
 <div id="references" class="section level2 unnumbered">
 <h2>References</h2>
 <div id="refs" class="references">
 <div id="ref-CvS17">
-<p>Chau, J., and von Sachs, R. 2017. “Positive-Definite Multivariate Spectral Estimation: A Geometric Wavelet Approach.” <em>(Unpublished)</em>.</p>
+<p>Chau, J., and R. von Sachs. 2017. “Positive-Definite Multivariate Spectral Estimation: A Geometric Wavelet Approach.” <em>(Unpublished)</em>.</p>
 </div>
 </div>
 </div>

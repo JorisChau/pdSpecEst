@@ -16,7 +16,7 @@
 #' The components of the wavelet coefficients are thresholded based on the hard (keep-or-kill)
 #' threshold \code{lam}. If \code{lam} is unspecified, the threshold is determined in a data-adaptive manner
 #' by a twofold cross-validation procedure, which is described in detail in (Chau and von Sachs, 2017). \cr
-#' If \code{return == "f"} the thresholded wavelet coefficients are transformed back to the frequency domain by
+#' If \code{return == 'f'} the thresholded wavelet coefficients are transformed back to the frequency domain by
 #' the function \code{\link{InvWavTransf}} giving the wavelet-denoised Hermitian PD spectral estimate.
 #'
 #' @param P a (\eqn{d,d,m})-dimensional array, with \eqn{m} a dyadic number.
@@ -30,7 +30,7 @@
 #'
 #' @return The function returns a list with four components:
 #' \item{f }{a (\eqn{d,d,m})-dimensional array corresponding to the wavelet-denoised Hermitian PD (\eqn{d \times d})-dimensional
-#' spectral estimate at the \code{m} different frequencies. If \code{!(return == "f")}, the inverse wavelet transform
+#' spectral estimate at the \code{m} different frequencies. If \code{!(return == 'f')}, the inverse wavelet transform
 #' of the thresholded wavelet coefficients is not computed and \code{f} is set equal to \code{NULL}.}
 #' \item{D }{a list of arrays, each (\eqn{d, d, 2^j})-dimensional array contains the thresholded
 #' (\eqn{d \times d})-dimensional wavelet coefficents at the \eqn{2^j} different locations in the given wavelet scale
@@ -60,21 +60,23 @@
 #' estimation: a geometric wavelet approach}. (Unpublished)
 #' @references Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
 #'
+#' @importFrom stats mad
 #' @export
-pdSpecEst <- function(P, lam = NULL, order = 5, return = "f", alpha)
-{
+pdSpecEst <- function(P, lam = NULL, order = 5, return = "f", alpha) {
   ## Define variables
   J <- log2(dim(P)[3])
   if (!isTRUE(all.equal(as.integer(J), J))) {
-    print(paste0("Input length is non-dyadic, please change length ",
-                 dim(P)[3], " to dyadic number."))
+    print(paste0("Input length is non-dyadic, please change length ", dim(P)[3],
+                 " to dyadic number."))
   }
   stopifnot(isTRUE(all.equal(as.integer(J), J)))
   if (!(order %in% c(1, 3, 5, 7, 9))) {
     print("Refinement order should be an odd integer between 1 and 9, by default set to 5")
     order <- 5
   }
-  if (missing(alpha)) alpha <- 0.75
+  if (missing(alpha)) {
+    alpha <- 0.75
+  }
   dim <- dim(P)[1]
   E <- E_basis(dim)
 
@@ -112,32 +114,31 @@ pdSpecEst <- function(P, lam = NULL, order = 5, return = "f", alpha)
       D.lam <- D.half
       d.lam <- d
       for (j in 3:(J - 2)) {
-        zero.odd <- sapply(1:2^j, function(k) (abs(d.new$odd[[j]][, k]) < lam) |
-                             (d.lam$odd[[j - 1]][, ceiling(k/2)] == 0))
-        zero.even <- sapply(1:2^j, function(k) (abs(d.new$even[[j]][, k]) < lam) |
-                              (d.lam$even[[j - 1]][, ceiling(k/2)] == 0))
+        zero.odd <- sapply(1:2^j, function(k) (abs(d.new$odd[[j]][, k]) <
+                                                 lam) | (d.lam$odd[[j - 1]][, ceiling(k/2)] == 0))
+        zero.even <- sapply(1:2^j, function(k) (abs(d.new$even[[j]][, k]) <
+                                                  lam) | (d.lam$even[[j - 1]][, ceiling(k/2)] == 0))
         d.lam$odd[[j]][zero.odd] <- 0
         d.lam$even[[j]][zero.even] <- 0
       }
       for (j in 1:(J - 2)) {
-        D.lam$odd[[j + 1]] <- sapply(1:2^j, function(k) E_coeff_inv(d.lam$odd[[j]][, k],
-                                                                    E), simplify = "array")
-        D.lam$even[[j + 1]] <- sapply(1:2^j, function(k) E_coeff_inv(d.lam$even[[j]][, k],
-                                                                     E), simplify = "array")
+        D.lam$odd[[j + 1]] <- sapply(1:2^j, function(k) E_coeff_inv(d.lam$odd[[j]][, k], E),
+                                      simplify = "array")
+        D.lam$even[[j + 1]] <- sapply(1:2^j, function(k) E_coeff_inv(d.lam$even[[j]][, k], E),
+                                       simplify = "array")
       }
       f.hat <- list(odd = InvWavTransf(D.lam$odd, order), even = InvWavTransf(D.lam$even, order))
 
       ## Predicted points
-      f.t.even <- sapply(1:(2^(J - 1) - 1), function(k) Mid(f.hat$odd[, , k],
-                                                            f.hat$odd[, , k + 1]), simplify = "array")
-      f.t.even <- array(c(f.t.even, f.hat$odd[, , 2^(J - 1)]),
-                        dim = c(dim, dim, 2^(J - 1)))
-      f.t.odd <- sapply(1:(2^(J - 1) - 1), function(k) Mid(f.hat$even[, , k],
-                                                           f.hat$even[, , k + 1]), simplify = "array")
+      f.t.even <- sapply(1:(2^(J - 1) - 1), function(k) Mid(f.hat$odd[, , k], f.hat$odd[, , k + 1]),
+                          simplify = "array")
+      f.t.even <- array(c(f.t.even, f.hat$odd[, , 2^(J - 1)]), dim = c(dim, dim, 2^(J - 1)))
+      f.t.odd <- sapply(1:(2^(J - 1) - 1), function(k) Mid(f.hat$even[, , k], f.hat$even[, , k + 1]),
+                         simplify = "array")
       f.t.odd <- array(c(f.hat$even[, , 1], f.t.odd), dim = c(dim, dim, 2^(J - 1)))
 
-      return(sum(sapply(1:2^(J - 1), function(k) RiemmDist(f.t.even[, , k],
-                                                           P.half$even[, , k])^2 + RiemmDist(f.t.odd[, , k], P.half$odd[, , k])^2)))
+      return(sum(sapply(1:2^(J - 1), function(k) RiemmDist(f.t.even[, , k], P.half$even[, , k])^2 +
+                                                  RiemmDist(f.t.odd[, , k], P.half$odd[, , k])^2)))
     }
 
     ## Golden section search
@@ -172,14 +173,13 @@ pdSpecEst <- function(P, lam = NULL, order = 5, return = "f", alpha)
   ## Threshold coefficients
   for (j in 3:(J - 1)) {
     zero <- sapply(1:2^j, function(k) (abs(d.new[[j]][, k]) < lam.cv) |
-                     (d[[j - 1]][, ceiling(k/2)] == 0))
+                                       (d[[j - 1]][, ceiling(k/2)] == 0))
     d[[j]][zero] <- 0
   }
 
   ## Inverse transform denoised data
   for (j in 1:(J - 1)) {
-    D[[j + 1]] <- sapply(1:2^j, function(k) E_coeff_inv(d[[j]][, k], E),
-                         simplify = "array")
+    D[[j + 1]] <- sapply(1:2^j, function(k) E_coeff_inv(d[[j]][, k], E), simplify = "array")
   }
 
   if (return == "f") {

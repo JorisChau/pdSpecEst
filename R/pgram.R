@@ -39,17 +39,17 @@
 #'
 #' @importFrom astsa mvspec
 #' @export
-pdPgram <- function(X, B)
-{
+pdPgram <- function(X, B) {
+
   d <- ncol(X)
   n <- nrow(X)
-  if(missing(B)) B <- d
+  if (missing(B))
+    B <- d
   freq <- pi * (1:floor(n/B))/floor(n/B)
-  Per <- sapply(1:B, function(b) 1/(2*pi) * astsa::mvspec(X[floor(n/B)*(b-1) +
-                                  1:floor(n/B),], plot=F)$fxx, simplify = "array")
-  P <- B*exp(-1/d * sum(digamma(B-(d-1:d)))) * apply(Per, c(1,2,3), mean)
+  Per <- sapply(1:B, function(b) 1/(2 * pi) * astsa::mvspec(X[floor(n/B) * (b - 1) + 1:floor(n/B), ],
+                                                             plot = F)$fxx, simplify = "array")
+  P <- B * exp(-1/d * sum(digamma(B - (d - 1:d)))) * apply(Per, c(1, 2, 3), mean)
   freq <- pi * (1:dim(P)[3])/dim(P)[3]
   return(list(freq = freq, P = P))
 }
-
 

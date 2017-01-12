@@ -13,8 +13,10 @@ references:
 - id: CvS17
   title: 'Positive-definite multivariate spectral estimation: a geometric wavelet approach'
   author:
-  - family: Chau, J.
-  - family: von Sachs, R.
+  - family: Chau  
+    given: J.
+  - family: von Sachs
+    given: R.
   container-title: (Unpublished)
   type: article-journal
   issued:
@@ -37,7 +39,7 @@ For this purpose, in [@CvS17] we considered multivariate spectral estimation in 
 
 In addition to spectral estimation, we proposed computationally fast clustering of spectral matrices based on their representations in the wavelet domain, exploiting the fact that smooth curves in the Riemannian manifold are summarized by few high-energy wavelet coefficients.
 
-In this vignette we demonstrate the wavelet-based multivariate spectral estimation and clustering procedures of [@CvS17] by means of simulated time series data using the functions in the `pdSpecEst` package.
+In this vignette we demonstrate the wavelet-based multivariate spectral estimation and clustering procedures of [@CvS17] by means of simulated time series data using the functions in the `pdSpecEst` package. 
 
 ## Simulate time series data with `rARMA()`
 
@@ -46,7 +48,7 @@ With `rARMA()` we simulate multivariate time series observations from a vector A
 ```{r}
 library(pdSpecEst)
 ## Fix parameters
-freq <- seq(from = pi / 2^8, to = pi, length = 2^8)
+freq <- seq(from = pi / 2^9, to = pi, length = 2^9)
 d <- 2
 Phi <- array(c(0.5, 0, 0, 0.2, 0, 0, 0, -0.9), dim = c(d, d, 2))
 Theta <- array(c(0, 0.1, 0.1, 0, 0, 0, 0, 0, 0.5), dim = c(d, d, 2))
@@ -54,7 +56,7 @@ Sigma <- matrix(c(2, 0, 0, 0.25), nrow = d)
 
 ## Generate time series
 set.seed(0)
-ts.sim <- rARMA(2^10, d, Phi, Theta, Sigma, freq = freq)
+ts.sim <- rARMA(2^11, d, Phi, Theta, Sigma, freq = freq)
 str(ts.sim)
 ```
 

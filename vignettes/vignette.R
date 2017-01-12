@@ -4,7 +4,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ## ------------------------------------------------------------------------
 library(pdSpecEst)
 ## Fix parameters
-freq <- seq(from = pi / 2^8, to = pi, length = 2^8)
+freq <- seq(from = pi / 2^9, to = pi, length = 2^9)
 d <- 2
 Phi <- array(c(0.5, 0, 0, 0.2, 0, 0, 0, -0.9), dim = c(d, d, 2))
 Theta <- array(c(0, 0.1, 0.1, 0, 0, 0, 0, 0, 0.5), dim = c(d, d, 2))
@@ -12,7 +12,7 @@ Sigma <- matrix(c(2, 0, 0, 0.25), nrow = d)
 
 ## Generate time series
 set.seed(0)
-ts.sim <- rARMA(2^10, d, Phi, Theta, Sigma, freq = freq)
+ts.sim <- rARMA(2^11, d, Phi, Theta, Sigma, freq = freq)
 str(ts.sim)
 
 ## ---- eval=FALSE---------------------------------------------------------
