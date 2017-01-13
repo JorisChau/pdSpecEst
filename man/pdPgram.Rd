@@ -46,7 +46,7 @@ Bartlett, M.S. (1950). \emph{Periodogram analysis and continuous spectra}.
 Biometrika 37 (1-2): 1-16.
 
 Chau, J. and von Sachs, R. (2017). \emph{Positive-definite multivariate spectral
-estimation: a geometric wavelet approach}. (Unpublished)
+estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
 
 Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
 }

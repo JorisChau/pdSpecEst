@@ -17,7 +17,7 @@ references:
     given: J.
   - family: von Sachs
     given: R.
-  container-title: (Unpublished)
+  URL: 'http://arxiv.org/abs/1701.03314'
   type: article-journal
   issued:
     year: 2017

@@ -7,20 +7,6 @@
 
 using namespace Rcpp;
 
-// ARMA
-arma::mat ARMA(arma::cube Phi, arma::cube Theta, arma::mat Z, int len);
-RcppExport SEXP pdSpecEst_ARMA(SEXP PhiSEXP, SEXP ThetaSEXP, SEXP ZSEXP, SEXP lenSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cube >::type Phi(PhiSEXP);
-    Rcpp::traits::input_parameter< arma::cube >::type Theta(ThetaSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Z(ZSEXP);
-    Rcpp::traits::input_parameter< int >::type len(lenSEXP);
-    rcpp_result_gen = Rcpp::wrap(ARMA(Phi, Theta, Z, len));
-    return rcpp_result_gen;
-END_RCPP
-}
 // E_coeff
 arma::vec E_coeff(arma::cx_mat H, arma::cx_cube E);
 RcppExport SEXP pdSpecEst_E_coeff(SEXP HSEXP, SEXP ESEXP) {
@@ -54,29 +40,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Eigen::MatrixXcd >::type P(PSEXP);
     Rcpp::traits::input_parameter< Eigen::MatrixXcd >::type H(HSEXP);
     rcpp_result_gen = Rcpp::wrap(Expm(P, H));
-    return rcpp_result_gen;
-END_RCPP
-}
-// iSqrt
-Eigen::MatrixXcd iSqrt(Eigen::MatrixXcd M);
-RcppExport SEXP pdSpecEst_iSqrt(SEXP MSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::MatrixXcd >::type M(MSEXP);
-    rcpp_result_gen = Rcpp::wrap(iSqrt(M));
-    return rcpp_result_gen;
-END_RCPP
-}
-// kMean
-Eigen::MatrixXcd kMean(Eigen::MatrixXcd M, Eigen::VectorXd mu);
-RcppExport SEXP pdSpecEst_kMean(SEXP MSEXP, SEXP muSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::MatrixXcd >::type M(MSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type mu(muSEXP);
-    rcpp_result_gen = Rcpp::wrap(kMean(M, mu));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -147,6 +110,43 @@ BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Eigen::MatrixXcd >::type M(MSEXP);
     rcpp_result_gen = Rcpp::wrap(Sqrt(M));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ARMA
+arma::mat ARMA(arma::cube Phi, arma::cube Theta, arma::mat Z, int len);
+RcppExport SEXP pdSpecEst_ARMA(SEXP PhiSEXP, SEXP ThetaSEXP, SEXP ZSEXP, SEXP lenSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cube >::type Phi(PhiSEXP);
+    Rcpp::traits::input_parameter< arma::cube >::type Theta(ThetaSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< int >::type len(lenSEXP);
+    rcpp_result_gen = Rcpp::wrap(ARMA(Phi, Theta, Z, len));
+    return rcpp_result_gen;
+END_RCPP
+}
+// iSqrt
+Eigen::MatrixXcd iSqrt(Eigen::MatrixXcd M);
+RcppExport SEXP pdSpecEst_iSqrt(SEXP MSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::MatrixXcd >::type M(MSEXP);
+    rcpp_result_gen = Rcpp::wrap(iSqrt(M));
+    return rcpp_result_gen;
+END_RCPP
+}
+// kMean
+Eigen::MatrixXcd kMean(Eigen::MatrixXcd M, Eigen::VectorXd mu);
+RcppExport SEXP pdSpecEst_kMean(SEXP MSEXP, SEXP muSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::MatrixXcd >::type M(MSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type mu(muSEXP);
+    rcpp_result_gen = Rcpp::wrap(kMean(M, mu));
     return rcpp_result_gen;
 END_RCPP
 }
