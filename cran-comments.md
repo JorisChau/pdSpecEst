@@ -1,6 +1,7 @@
 ## Test environments
-* local windows install, R 3.3.1
+* local windows 7 install, R 3.3.1
 * ubuntu 12.04 (on travis-ci), R 3.3.1
+* os x (on travis-ci), 
 * win-builder (devel and release)
 
 ## R CMD check results
@@ -13,6 +14,3 @@
 
 This is a new release, so there are no reverse dependencies.
 
-## Downstream dependencies
-
-There are currently no downstream dependencies for this packages.
