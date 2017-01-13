@@ -11,3 +11,7 @@ Installation
 ------------
 
 The newest 'developmental' version is installed with `devtools::install_github("JorisChau/pdSpecEst")`.
+
+**Build status (Travis CI)**
+
+[![Travis-CI Build Status](https://travis-ci.org/JorisChau/pdSpecEst.svg?branch=master)](https://travis-ci.org/JorisChau/pdSpecEst)
