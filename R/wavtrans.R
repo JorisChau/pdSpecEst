@@ -19,7 +19,7 @@
 #' ts.plot(ts.sim$X) # plot generated time series traces.
 #'
 #' pgram <- pdPgram(ts.sim$X)
-#' WavTransf(pgram$P)
+#' D <- WavTransf(pgram$P)
 #'
 #' @return The function returns a list with two components:
 #' \item{D }{a list of arrays, where each (\eqn{d, d, 2^j})-dimensional array contains the (\eqn{d \times d})-

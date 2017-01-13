@@ -35,7 +35,7 @@
 #' Sigma <- matrix(c(1, 0.71, 0.71, 2), nrow = 2)
 #' ts.sim <- rARMA(200, 2, Phi, Theta, Sigma)
 #' ts.plot(ts.sim$X) # plot generated time series traces
-#' pdPgram(ts.sim$X)
+#' pgram <- pdPgram(ts.sim$X)
 #'
 #' @importFrom astsa mvspec
 #' @export

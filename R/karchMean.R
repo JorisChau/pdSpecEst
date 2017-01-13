@@ -15,7 +15,7 @@
 #' M <- replicate(100, m())
 #' z <- rnorm(100)
 #' w <- abs(z)/sum(abs(z))
-#' KarchMean(M, w)
+#' Ave <- KarchMean(M, w)
 #'
 #' @references Chau, J. and von Sachs, R. (2017). \emph{Positive-definite multivariate spectral
 #' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.

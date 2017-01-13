@@ -66,7 +66,7 @@ ts.sim <- rARMA(2^10, 2, Phi, Theta, Sigma)
 ts.plot(ts.sim$X) # plot generated time series traces.
 
 pgram <- pdPgram(ts.sim$X)
-pdSpecEst(pgram$P)
+f <- pdSpecEst(pgram$P)
 
 }
 \references{

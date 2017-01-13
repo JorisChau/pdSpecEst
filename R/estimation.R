@@ -52,7 +52,7 @@
 #' ts.plot(ts.sim$X) # plot generated time series traces.
 #'
 #' pgram <- pdPgram(ts.sim$X)
-#' pdSpecEst(pgram$P)
+#' f <- pdSpecEst(pgram$P)
 #'
 #' @seealso \code{\link{pdPgram}}, \code{\link{WavTransf}}, \code{\link{InvWavTransf}}
 #'

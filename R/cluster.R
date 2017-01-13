@@ -64,7 +64,7 @@
 #' pgram <- function(Phi) pdPgram(rARMA(2^9, 2, Phi, Theta, Sigma)$X)$P
 #' P <- array(c(replicate(5, pgram(Phi1)), replicate(5, pgram(Phi2))), dim=c(2,2,2^7,10))
 #'
-#' pdSpecClust(P, K=2)
+#' cl <- pdSpecClust(P, K=2)
 #'
 #' @seealso \code{\link{pdPgram}}, \code{\link{pdSpecEst}}, \code{\link{RiemmDist}}
 #'
