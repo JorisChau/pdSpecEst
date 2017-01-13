@@ -3,6 +3,5 @@
 language: R
 sudo: false
 cache: packages
-os:
-  - linux
-  - osx
+os: osx
+
