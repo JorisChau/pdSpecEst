@@ -11,6 +11,11 @@
 * checking CRAN incoming feasibility ... NOTE
 Maintainer: 'Joris Chau <j.chau@uclouvain.be>'
 
+* checking installed package size ... NOTE
+    installed size is  8.1Mb
+    sub-directories of 1Mb or more:
+      libs   7.9Mb
+
 ## Reverse dependencies
 
 This is a new release, so there are no reverse dependencies.

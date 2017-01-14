@@ -4,6 +4,6 @@ language: R
 warnings_are_errors: false
 sudo: false
 cache: packages
-os: linux
+os: osx
 notifications:
   email: false
