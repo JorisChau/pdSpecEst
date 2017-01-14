@@ -12,7 +12,7 @@
 
 <meta name="author" content="Joris Chau" />
 
-<meta name="date" content="2017-01-13" />
+<meta name="date" content="2017-01-14" />
 
 <title>The pdSpecEst package</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">The <code>pdSpecEst</code> package</h1>
 <h4 class="author"><em>Joris Chau</em></h4>
-<h4 class="date"><em>2017-01-13</em></h4>
+<h4 class="date"><em>2017-01-14</em></h4>
 
 
 
@@ -131,9 +131,9 @@ plotspec &lt;-<span class="st"> </span>function(i){
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">f.hat &lt;-<span class="st"> </span><span class="kw">pdSpecEst</span>(pgram$P)
 <span class="kw">str</span>(f.hat)
 <span class="co">#&gt; List of 4</span>
-<span class="co">#&gt;  $ f         : cplx [1:2, 1:2, 1:512] 1.121-0i 0.041-0.0111i 0.041+0.0111i ...</span>
+<span class="co">#&gt;  $ f         : cplx [1:2, 1:2, 1:512] 1.121+0i 0.041-0.0111i 0.041+0.0111i ...</span>
 <span class="co">#&gt;  $ D         :List of 9</span>
-<span class="co">#&gt;   ..$ M.scale1: cplx [1:2, 1:2, 1:2] 0.5312-0i 0.0332+0.004i 0.0332-0.004i ...</span>
+<span class="co">#&gt;   ..$ M.scale1: cplx [1:2, 1:2, 1:2] 0.5312+0i 0.0332+0.004i 0.0332-0.004i ...</span>
 <span class="co">#&gt;   ..$ D.scale1: cplx [1:2, 1:2, 1:2] -0.1187+0i 0.0458+0.0148i 0.0458-0.0148i ...</span>
 <span class="co">#&gt;   ..$ D.scale2: cplx [1:2, 1:2, 1:4] 0.0601+0i 0.1045+0.096i 0.1045-0.096i ...</span>
 <span class="co">#&gt;   ..$ D.scale3: cplx [1:2, 1:2, 1:8] 0+0i 0+0i 0+0i ...</span>
@@ -168,17 +168,17 @@ Phi2 &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw
 pgram &lt;-<span class="st"> </span>function(Phi) <span class="kw">pdPgram</span>(<span class="kw">rARMA</span>(<span class="dv">2</span>^<span class="dv">10</span>, d, Phi, Theta, Sigma)$X)$P
 P &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(<span class="kw">replicate</span>(<span class="dv">5</span>, <span class="kw">pgram</span>(Phi1)), <span class="kw">replicate</span>(<span class="dv">5</span>, <span class="kw">pgram</span>(Phi2))), <span class="dt">dim=</span><span class="kw">c</span>(d, d, <span class="dv">2</span>^<span class="dv">8</span>, <span class="dv">10</span>))
 <span class="kw">pdSpecClust</span>(P, <span class="dt">K =</span> <span class="dv">2</span>, <span class="dt">lam =</span> <span class="dv">3</span>)
-<span class="co">#&gt;             Cluster1   Cluster2</span>
-<span class="co">#&gt; Subject1  0.10322249 0.89677751</span>
-<span class="co">#&gt; Subject2  0.01652825 0.98347175</span>
-<span class="co">#&gt; Subject3  0.01238007 0.98761993</span>
-<span class="co">#&gt; Subject4  0.02648990 0.97351010</span>
-<span class="co">#&gt; Subject5  0.02075077 0.97924923</span>
-<span class="co">#&gt; Subject6  0.98172448 0.01827552</span>
-<span class="co">#&gt; Subject7  0.98967170 0.01032830</span>
-<span class="co">#&gt; Subject8  0.97642216 0.02357784</span>
-<span class="co">#&gt; Subject9  0.93595864 0.06404136</span>
-<span class="co">#&gt; Subject10 0.94940943 0.05059057</span></code></pre></div>
+<span class="co">#&gt;           Cluster1 Cluster2</span>
+<span class="co">#&gt; Subject1       0.5      0.5</span>
+<span class="co">#&gt; Subject2       0.5      0.5</span>
+<span class="co">#&gt; Subject3       0.5      0.5</span>
+<span class="co">#&gt; Subject4       0.5      0.5</span>
+<span class="co">#&gt; Subject5       0.5      0.5</span>
+<span class="co">#&gt; Subject6       0.5      0.5</span>
+<span class="co">#&gt; Subject7       0.5      0.5</span>
+<span class="co">#&gt; Subject8       0.5      0.5</span>
+<span class="co">#&gt; Subject9       0.5      0.5</span>
+<span class="co">#&gt; Subject10      0.5      0.5</span></code></pre></div>
 </div>
 <div id="references" class="section level2 unnumbered">
 <h2>References</h2>

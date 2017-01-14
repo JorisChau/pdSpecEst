@@ -1,10 +1,10 @@
-#include <RcppEigen.h>
+# include <RcppArmadillo.h>
 
-// [[Rcpp::depends(RcppEigen)]]
+// [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export()]]
 
-Eigen::MatrixXcd Sqrt(Eigen::MatrixXcd M) {
+arma::cx_mat Sqrt(arma::cx_mat M) {
 
-  return M.sqrt();
+  return arma::sqrtmat_sympd(M);
 
 }

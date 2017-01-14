@@ -1,10 +1,10 @@
-#include <RcppEigen.h>
+# include <RcppArmadillo.h>
 
-// [[Rcpp::depends(RcppEigen)]]
+// [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export()]]
 
-Eigen::MatrixXcd solveMid(Eigen::MatrixXcd B, Eigen::MatrixXcd C) {
+arma::cx_mat solveMid(arma::cx_mat B, arma::cx_mat C) {
 
-  return C * B.inverse() * C;
+  return C * arma::inv_sympd(B) * C;
 
 }

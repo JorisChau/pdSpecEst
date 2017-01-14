@@ -1,6 +1,6 @@
-#include <RcppEigen.h>
+# include <RcppArmadillo.h>
 
-// [[Rcpp::depends(RcppEigen)]]
+// [[Rcpp::depends(RcppArmadillo)]]
 
 //' Geodesic midpoint between HPD-matrices
 //'
@@ -22,14 +22,14 @@
 //' @export
 // [[Rcpp::export()]]
 
-Eigen::MatrixXcd Mid(Eigen::MatrixXcd A, Eigen::MatrixXcd B) {
+arma::cx_mat Mid(arma::cx_mat A, arma::cx_mat B) {
 
-  Eigen::MatrixXcd A1 = A.sqrt();
+  arma::cx_mat A1 = arma::sqrtmat_sympd(A);
 
-  Eigen::MatrixXcd A2 = A1.inverse();
+  arma::cx_mat A2 = arma::inv_sympd(A1);
 
-  Eigen::MatrixXcd C = A2 * B * A2;
+  arma::cx_mat C = A2 * B * A2;
 
-  return A1 * C.sqrt() * A1;
+  return A1 * arma::sqrtmat_sympd(C) * A1;
 
 }

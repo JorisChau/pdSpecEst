@@ -1,12 +1,12 @@
-#include <RcppEigen.h>
+# include <RcppArmadillo.h>
 
-// [[Rcpp::depends(RcppEigen)]]
+// [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export()]]
 
-Eigen::MatrixXcd iSqrt(Eigen::MatrixXcd M) {
+arma::cx_mat iSqrt(arma::cx_mat M) {
 
-  Eigen::MatrixXcd M1 = M.sqrt();
+  arma::cx_mat M1 = arma::sqrtmat_sympd(M);
 
-  return M1.inverse();
+  return arma::inv_sympd(M1);
 
 }

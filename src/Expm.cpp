@@ -1,6 +1,6 @@
-#include <RcppEigen.h>
+# include <RcppArmadillo.h>
 
-// [[Rcpp::depends(RcppEigen)]]
+// [[Rcpp::depends(RcppArmadillo)]]
 
 //' Exponential map
 //'
@@ -28,13 +28,13 @@
 //' @export
 // [[Rcpp::export()]]
 
-Eigen::MatrixXcd Expm(Eigen::MatrixXcd P, Eigen::MatrixXcd H) {
+arma::cx_mat Expm(arma::cx_mat P, arma::cx_mat H) {
 
-  Eigen::MatrixXcd P1 = P.sqrt();
+  arma::cx_mat P1 = arma::sqrtmat_sympd(P);
 
-  Eigen::MatrixXcd P2 = P1.inverse();
+  arma::cx_mat P2 = arma::inv_sympd(P1);
 
-  Eigen::MatrixXcd P3 = (P2 * H * P2).exp();
+  arma::cx_mat P3 = arma::expmat_sym(P2 * H * P2);
 
   return P1 * P3 * P1;
 

@@ -1,6 +1,6 @@
-#include <RcppEigen.h>
+# include <RcppArmadillo.h>
 
-// [[Rcpp::depends(RcppEigen)]]
+// [[Rcpp::depends(RcppArmadillo)]]
 
 //' Logarithmic map
 //'
@@ -27,13 +27,13 @@
 //' @export
 // [[Rcpp::export()]]
 
-Eigen::MatrixXcd Logm(Eigen::MatrixXcd P, Eigen::MatrixXcd Q) {
+arma::cx_mat Logm(arma::cx_mat P, arma::cx_mat Q) {
 
-  Eigen::MatrixXcd P1 = P.sqrt();
+  arma::cx_mat P1 = arma::sqrtmat_sympd(P);
 
-  Eigen::MatrixXcd P2 = P1.inverse();
+  arma::cx_mat P2 = arma::inv_sympd(P1);
 
-  Eigen::MatrixXcd P3 = (P2 * Q * P2).log();
+  arma::cx_mat P3 = arma::logmat_sympd(P2 * Q * P2);
 
   return P1 * P3 * P1;
 

@@ -1,6 +1,6 @@
-#include <RcppEigen.h>
+# include <RcppArmadillo.h>
 
-// [[Rcpp::depends(RcppEigen)]]
+// [[Rcpp::depends(RcppArmadillo)]]
 
 //' Riemannian distance HPD-matrices
 //'
@@ -21,14 +21,14 @@
 //' @export
 // [[Rcpp::export()]]
 
-double RiemmDist(Eigen::MatrixXcd A, Eigen::MatrixXcd B) {
+double RiemmDist(arma::cx_mat A, arma::cx_mat B) {
 
-  Eigen::MatrixXcd A1 = A.sqrt();
+  arma::cx_mat A1 = arma::sqrtmat_sympd(A);
 
-  Eigen::MatrixXcd A2 = A1.inverse();
+  arma::cx_mat A2 = arma::inv_sympd(A1);
 
-  Eigen::MatrixXcd A3 = (A2 * B * A2).log();
+  arma::cx_mat A3 = arma::logmat_sympd(A2 * B * A2);
 
-  return A3.norm();
+  return norm(A3, "fro");
 
 }
