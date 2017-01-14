@@ -1,6 +1,6 @@
 ## Test environments
 * local windows 7 install, R 3.3.1
-* linux-gnu (on travis-ci), R 3.3.2
+* Ubuntu 12.04 (on travis-ci), R 3.3.2
 * OS X 10.9 (on travis-ci), R 3.3.2
 * win-builder (devel and release)
 
