@@ -7,7 +7,7 @@
 RiemmDist(A, B)
 }
 \arguments{
-\item{A, B}{square Hermitian positive-definite matrices (of equal dimension).}
+\item{A, B}{Hermitian positive-definite matrices (of equal dimension).}
 }
 \description{
 \code{RiemmDist} calculates the natural Riemannian distance between two Hermitian PD matrices as

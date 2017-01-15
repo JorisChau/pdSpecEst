@@ -7,7 +7,7 @@ arma::cx_mat kMean(arma::cx_mat M, arma::vec mu) {
 
   int d = M.n_cols;
 
-  int n = M.n_cols / d;
+  int n = M.n_rows / d;
 
   arma::cx_mat M1 = M.head_rows(d);
 
@@ -16,6 +16,10 @@ arma::cx_mat kMean(arma::cx_mat M, arma::vec mu) {
   arma::cx_mat M1sq(d, d);
 
   arma::cx_mat M1isq(d, d);
+
+  arma::vec eigval;
+
+  arma::cx_mat eigvec;
 
   double mu1;
 
@@ -29,27 +33,15 @@ arma::cx_mat kMean(arma::cx_mat M, arma::vec mu) {
 
     mu1 = arma::sum(mu.head(i + 1));
 
+    arma::eig_sym(eigval, eigvec, M1isq * Mi * M1isq);
+
+    arma::cx_mat M11 = M1sq * eigvec;
+
     if(mu1 == 0){
-
-      arma::vec eigval;
-
-      arma::cx_mat eigvec;
-
-      arma::eig_sym(eigval, eigvec, M1isq * Mi * M1isq);
-
-      arma::cx_mat M11 = M1 * eigvec;
 
       M1 = M11 * arma::diagmat(arma::pow(eigval, mu[i])) * M11.t();
 
     } else {
-
-      arma::vec eigval;
-
-      arma::cx_mat eigvec;
-
-      arma::eig_sym(eigval, eigvec, M1isq * Mi * M1isq);
-
-      arma::cx_mat M11 = M1 * eigvec;
 
       M1 = M11 * arma::diagmat(arma::pow(eigval, mu[i] / mu1)) * M11.t();
 

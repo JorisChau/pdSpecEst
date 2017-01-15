@@ -7,9 +7,9 @@
 Expm(P, H)
 }
 \arguments{
-\item{P}{a square Hermitian positive-definite matrix.}
+\item{P}{a Hermitian positive-definite matrix.}
 
-\item{H}{a square Hermitian matrix (of equal dimension as \code{P}).}
+\item{H}{a Hermitian matrix (of equal dimension as \code{P}).}
 }
 \description{
 \code{Expm(P, H)} computes the projection of a Hermitian matrix \code{H} from the tangent space at a Hermitian

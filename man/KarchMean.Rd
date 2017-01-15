@@ -7,7 +7,7 @@
 KarchMean(M, w)
 }
 \arguments{
-\item{M}{a \eqn{(d,d,S)}-dimensional array.}
+\item{M}{a \eqn{(d,d,S)}-dimensional array of Hermitian PD matrices.}
 
 \item{w}{an \eqn{S}-dimensional nonnegative weight vector, such that \code{sum(w) = 1}.}
 }

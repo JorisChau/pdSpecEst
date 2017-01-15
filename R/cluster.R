@@ -73,20 +73,11 @@
 #' @references Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
 #'
 #' @export
-pdSpecClust <- function(P, D.hat = NULL, K, m = 2, jmax, d.jmax, eps, tau, ...) {
+pdSpecClust <- function(P, D.hat = NULL, K, m = 2, jmax, d.jmax = 0.1, eps = c(1e-04, 1e-04), tau = 0.5, ...) {
 
   ## missing arguments
   if (missing(P)) {
     P <- NULL
-  }
-  if (missing(d.jmax)) {
-    d.jmax <- 0.1
-  }
-  if (missing(eps)) {
-    eps <- c(1e-04, 1e-04)
-  }
-  if (missing(tau)) {
-    tau <- 0.5
   }
   dots <- list(...)
   order <- dots$order
@@ -104,12 +95,11 @@ pdSpecClust <- function(P, D.hat = NULL, K, m = 2, jmax, d.jmax, eps, tau, ...) 
     ## Define variables
     J <- log2(dim(P)[3])
     if (!isTRUE(all.equal(as.integer(J), J))) {
-      print(paste0("Input length is non-dyadic, please change length ", dim(P)[3],
+      stop(paste0("Input length is non-dyadic, please change length ", dim(P)[3],
                    " to dyadic number."))
     }
-    stopifnot(isTRUE(all.equal(as.integer(J), J)))
     if (!(order %in% c(1, 3, 5, 7, 9))) {
-      print("Refinement order should be an odd integer between 1 and 9, by default set to 5")
+      warning("Refinement order should be an odd integer between 1 and 9, by default set to 5")
       order <- 5
     }
     if (missing(jmax)) {

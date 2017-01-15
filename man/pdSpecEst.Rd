@@ -4,10 +4,10 @@
 \alias{pdSpecEst}
 \title{Wavelet-thresholded multivariate spectral estimator.}
 \usage{
-pdSpecEst(P, lam = NULL, order = 5, return = "f", alpha)
+pdSpecEst(P, lam = NULL, order = 5, return = "f", alpha = 0.75)
 }
 \arguments{
-\item{P}{a (\eqn{d,d,m})-dimensional array, with \eqn{m} a dyadic number.}
+\item{P}{a (\eqn{d,d,m})-dimensional array of Hermitian PD matrices, with \eqn{m} a dyadic number.}
 
 \item{lam}{an optional argument specifying the wavelet threshold, if \code{lam}
 is not specified the threshold is calculated by a twofold cross-validation procedure.}

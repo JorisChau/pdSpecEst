@@ -36,7 +36,7 @@
 InvWavTransf <- function(D, order = 5) {
 
   if (!(order %in% c(1, 3, 5, 7, 9))) {
-    print("Refinement order should be an odd integer between 1 and 9, by default set to 5")
+    warning("Refinement order should be an odd integer between 1 and 9, by default set to 5")
     order <- 5
   }
   d <- nrow(D[[1]][, , 1])

@@ -19,8 +19,8 @@ E_coeff_inv <- function(coeff, E) {
 #' PD matrix \code{P} to the Riemannian manifold of Hermitian PD matrices via the
 #' exponential map as in (Pennec, 2006). This is the unique inverse of the logarithmic map \code{\link{Logm}}.
 #'
-#' @param P a square Hermitian positive-definite matrix.
-#' @param H a square Hermitian matrix (of equal dimension as \code{P}).
+#' @param P a Hermitian positive-definite matrix.
+#' @param H a Hermitian matrix (of equal dimension as \code{P}).
 #'
 #' @examples
 #'  H <- matrix(complex(real = rnorm(9), imaginary = rnorm(9)), nrow = 3)
@@ -55,8 +55,8 @@ kMean <- function(M, mu) {
 #' to the tangent space attached at the Hermitian PD matrix \code{P} via the logarithmic map as in (Pennec, 2006).
 #' This is the unique inverse of the exponential map \code{\link{Expm}}.
 #'
-#' @param P a square Hermitian positive-definite matrix.
-#' @param Q a square Hermitian positive-definite matrix (of equal dimension as \code{P}).
+#' @param P a Hermitian positive-definite matrix.
+#' @param Q a Hermitian positive-definite matrix (of equal dimension as \code{P}).
 #'
 #' @examples
 #'  q <- matrix(complex(real = rnorm(9), imaginary = rnorm(9)), nrow = 3)
@@ -81,7 +81,7 @@ Logm <- function(P, Q) {
 #' \code{Mid} calculates the geodesic midpoint between two Hermitian PD matrices as in
 #' (Bhatia, 2009, Chapter 6).
 #'
-#' @param A,B square Hermitian positive-definite matrices (of equal dimension).
+#' @param A,B Hermitian positive-definite matrices (of equal dimension).
 #'
 #' @examples
 #'  a <- matrix(complex(real = rnorm(9), imaginary = rnorm(9)), nrow = 3)
@@ -107,7 +107,7 @@ NormF <- function(M) {
 #' \code{RiemmDist} calculates the natural Riemannian distance between two Hermitian PD matrices as
 #' in (Bhatia, 2009, Chapter 6).
 #'
-#' @param A,B square Hermitian positive-definite matrices (of equal dimension).
+#' @param A,B Hermitian positive-definite matrices (of equal dimension).
 #'
 #' @examples
 #'  a <- matrix(complex(real = rnorm(9), imaginary = rnorm(9)), nrow = 3)

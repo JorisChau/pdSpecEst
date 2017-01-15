@@ -20,7 +20,7 @@ For more details and examples on how to use the package we refer to the vignette
 
 ## Installation
 
-The newest 'developmental' version is installed with `devtools::install_github("JorisChau/pdSpecEst")`.
+The newest developmental version is installed with `devtools::install_github("JorisChau/pdSpecEst")`.
 
 **Build status (Travis CI)**
 

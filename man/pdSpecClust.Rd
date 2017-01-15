@@ -4,7 +4,8 @@
 \alias{pdSpecClust}
 \title{Wavelet-based clustering of multivariate spectra.}
 \usage{
-pdSpecClust(P, D.hat = NULL, K, m = 2, jmax, d.jmax, eps, tau, ...)
+pdSpecClust(P, D.hat = NULL, K, m = 2, jmax, d.jmax = 0.1,
+  eps = c(1e-04, 1e-04), tau = 0.5, ...)
 }
 \arguments{
 \item{P}{a (\eqn{d,d,m,S})-dimensional array, with \eqn{m} a dyadic number.}

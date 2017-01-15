@@ -37,21 +37,30 @@
 #' @importFrom stats rnorm
 #' @export
 rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
-  if (missing(Phi)) {
-    print("Phi is unspecified. By default the AR-component are equal to the zero matrices")
+
+  ## Check arguments
+  if (missing(Phi) | !isTRUE(all.equal(dim(Phi), c(d, d, 2)))) {
+    warning("Phi is incorrectly specified. By default the AR-component are equal to the zero matrices")
     Phi <- array(0, c(d, d, 2))
   }
-  if (missing(Theta)) {
-    print("Theta is unspecified. By default the MA-components are equal to the zero matrices")
+  if (missing(Theta) | !isTRUE(all.equal(dim(Phi), c(d, d, 2)))) {
+    warning("Theta is incorrectly specified. By default the MA-components are equal to the zero matrices")
     Theta <- array(0, c(d, d, 2))
   }
-  if (missing(Sigma)) {
-    print("Sigma is unspecified. By default Sigma is equal to the diagonal matrix")
+  if (missing(Sigma) | !isTRUE(all.equal(dim(Sigma), c(d, d)))) {
+    warning("Sigma is incorrectly specified. By default Sigma is equal to the diagonal matrix")
     Sigma <- diag(d)
   }
+  if (!isTRUE(all(eigen(Sigma, symmetric = T, only.values = T)$values >= 0))) {
+    stop("Sigma is not a PSD matrix")
+  }
+
+  ## Generate time series
   Se <- Sqrt(Sigma)
   Z <- replicate(n + burn, Se %*% stats::rnorm(d), simplify = T)
   X <- t(ARMA(Phi, Theta, Z, n + burn)[, (burn + 1):(n + burn)])
+
+  ## Compute spectrum
   f <- NULL
   if (!is.null(freq)) {
     f.nu <- function(nu) {

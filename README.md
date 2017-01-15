@@ -5,12 +5,12 @@ The `pdSpecEst` package
 
 The goal of `pdSpecEst` is to perform wavelet-based multivariate spectral density estimation and clustering in the Riemannian manifold of Hermitian and positive-definite matrices. This is based on the paper available at <http://arxiv.org/abs/1701.03314>.
 
-For more details and examples on how to use the package we refer to the vignette.
+For more details and examples on how to use the package we refer to the vignette in the vignettes folder.
 
 Installation
 ------------
 
-The newest 'developmental' version is installed with `devtools::install_github("JorisChau/pdSpecEst")`.
+The newest development version is installed with `devtools::install_github("JorisChau/pdSpecEst")`.
 
 **Build status (Travis CI)**
 

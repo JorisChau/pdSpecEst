@@ -19,7 +19,7 @@
 #' If \code{return == 'f'} the thresholded wavelet coefficients are transformed back to the frequency domain by
 #' the function \code{\link{InvWavTransf}} giving the wavelet-denoised Hermitian PD spectral estimate.
 #'
-#' @param P a (\eqn{d,d,m})-dimensional array, with \eqn{m} a dyadic number.
+#' @param P a (\eqn{d,d,m})-dimensional array of Hermitian PD matrices, with \eqn{m} a dyadic number.
 #' @param lam an optional argument specifying the wavelet threshold, if \code{lam}
 #'  is not specified the threshold is calculated by a twofold cross-validation procedure.
 #' @param order an odd integer between 1 and 9 corresponding to the refinement order of the MI wavelet transform.
@@ -62,20 +62,18 @@
 #'
 #' @importFrom stats mad
 #' @export
-pdSpecEst <- function(P, lam = NULL, order = 5, return = "f", alpha) {
+pdSpecEst <- function(P, lam = NULL, order = 5, return = "f", alpha = 0.75) {
+
   ## Define variables
   J <- log2(dim(P)[3])
   if (!isTRUE(all.equal(as.integer(J), J))) {
-    print(paste0("Input length is non-dyadic, please change length ", dim(P)[3],
+    warning(paste0("Input length is non-dyadic, please change length ", dim(P)[3],
                  " to dyadic number."))
   }
   stopifnot(isTRUE(all.equal(as.integer(J), J)))
   if (!(order %in% c(1, 3, 5, 7, 9))) {
-    print("Refinement order should be an odd integer between 1 and 9, by default set to 5")
+    warning("Refinement order should be an odd integer between 1 and 9, by default set to 5")
     order <- 5
-  }
-  if (missing(alpha)) {
-    alpha <- 0.75
   }
   dim <- dim(P)[1]
   E <- E_basis(dim)

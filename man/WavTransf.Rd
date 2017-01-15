@@ -7,7 +7,7 @@
 WavTransf(P, order = 5, jmax)
 }
 \arguments{
-\item{P}{a (\eqn{d,d,m})-dimensional array, with \eqn{m = 2^J} for some \eqn{J > 0}.}
+\item{P}{a (\eqn{d,d,m})-dimensional array of Hermitian PD matrices, with \eqn{m = 2^J} for some \eqn{J > 0}.}
 
 \item{order}{an odd integer between 1 and 9 corresponding to the order of the MI refinement scheme.}
 

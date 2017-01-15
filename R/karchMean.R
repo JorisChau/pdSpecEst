@@ -4,7 +4,7 @@
 #' \eqn{(d \times d)}-dimensional Hermitian PD matrices by the recursive algorithm described
 #' in (Chau and von Sachs, 2017). By default, the unweighted Karcher mean is computed.
 #'
-#' @param M a \eqn{(d,d,S)}-dimensional array.
+#' @param M a \eqn{(d,d,S)}-dimensional array of Hermitian PD matrices.
 #' @param w an \eqn{S}-dimensional nonnegative weight vector, such that \code{sum(w) = 1}.
 #'
 #' @examples
@@ -24,8 +24,9 @@
 #'
 #' @export
 KarchMean <- function(M, w) {
-  if (missing(w))
+  if (missing(w)) {
     w <- rep(1/dim(M)[3], dim(M)[3])
+  }
   return(kMean(do.call(rbind, lapply(1:dim(M)[3], function(s) M[, , s])), w))
 }
 
