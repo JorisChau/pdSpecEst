@@ -1,5 +1,17 @@
 ---
 output: github_document
+references:
+- id: CvS17
+  title: 'Positive-definite multivariate spectral estimation: a geometric wavelet approach'
+  author:
+  - family: Chau  
+    given: J.
+  - family: von Sachs
+    given: R.
+  URL: 'http://arxiv.org/abs/1701.03314'
+  type: article-journal
+  issued:
+    year: 2017
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -14,14 +26,19 @@ knitr::opts_chunk$set(
 
 # The `pdSpecEst` package
 
-The goal of `pdSpecEst` is to perform wavelet-based multivariate spectral density estimation and clustering in the Riemannian manifold of Hermitian and positive-definite matrices. This is based on the paper available at <http://arxiv.org/abs/1701.03314>. 
+[![Travis-CI Build Status](https://travis-ci.org/JorisChau/pdSpecEst.svg?branch=master)](https://travis-ci.org/JorisChau/pdSpecEst)
 
-For more details and examples on how to use the package we refer to the vignette. 
+This package provides the tools to perform wavelet-based multivariate spectral density estimation and clustering in the Riemannian manifold of Hermitian and positive-definite matrices. The methodology is based on the paper [@CvS17] available at <http://arxiv.org/abs/1701.03314>. 
+
+For more details and examples on how to use the package see the accompanying vignette in the vignettes folder. 
+
+*Author and maintainer:* Joris Chau (<j.chau@uclouvain.be>).
 
 ## Installation
 
-The newest developmental version is installed with `devtools::install_github("JorisChau/pdSpecEst")`.
+**Current development version:** install via `devtools::install_github("JorisChau/pdSpecEst")`, (requires R package `devtools`).
 
-**Build status (Travis CI)**
+## References
 
-[![Travis-CI Build Status](https://travis-ci.org/JorisChau/pdSpecEst.svg?branch=master)](https://travis-ci.org/JorisChau/pdSpecEst)
+
+

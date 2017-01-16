@@ -34,20 +34,31 @@
 #' ts.sim <- rARMA(200, 2, Phi, Theta, Sigma, freq=freq)
 #' ts.plot(ts.sim$X) # plot generated time series traces.
 #'
+#' @useDynLib pdSpecEst, .registration = TRUE
+#' @importFrom Rcpp evalCpp
 #' @importFrom stats rnorm
 #' @export
 rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
 
   ## Check arguments
-  if (missing(Phi) | !isTRUE(all.equal(dim(Phi), c(d, d, 2)))) {
-    warning("Phi is incorrectly specified. By default the AR-component are equal to the zero matrices")
+  if (missing(Phi)) {
+    warning("Phi is not specified. By default the AR-components are equal to the zero matrices")
+    Phi <- array(0, c(d, d, 2))
+  } else if (!isTRUE(all.equal(dim(Phi), c(d, d, 2)))) {
+    warning("Phi is incorrectly specified. By default the AR-components are equal to the zero matrices")
     Phi <- array(0, c(d, d, 2))
   }
-  if (missing(Theta) | !isTRUE(all.equal(dim(Phi), c(d, d, 2)))) {
+  if (missing(Theta)) {
+    warning("Theta is not specified. By default the MA-components are equal to the zero matrices")
+    Theta <- array(0, c(d, d, 2))
+  } else if (!isTRUE(all.equal(dim(Theta), c(d, d, 2)))) {
     warning("Theta is incorrectly specified. By default the MA-components are equal to the zero matrices")
     Theta <- array(0, c(d, d, 2))
   }
-  if (missing(Sigma) | !isTRUE(all.equal(dim(Sigma), c(d, d)))) {
+  if (missing(Sigma)) {
+    warning("Sigma is not specified. By default Sigma is equal to the diagonal matrix")
+    Sigma <- diag(d)
+  } else if(!isTRUE(all.equal(dim(Sigma), c(d, d)))) {
     warning("Sigma is incorrectly specified. By default Sigma is equal to the diagonal matrix")
     Sigma <- diag(d)
   }

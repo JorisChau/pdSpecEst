@@ -25,6 +25,12 @@ arma::cx_mat kMean(arma::cx_mat M, arma::vec mu) {
 
   for(int i = 1; i < n; ++i) {
 
+    if (i % 1000 == 0) {
+
+      Rcpp::checkUserInterrupt();
+
+    }
+
     Mi = M.rows(i * d, (i + 1) * d - 1);
 
     M1sq = arma::sqrtmat_sympd(M1);
