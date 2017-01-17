@@ -3,7 +3,7 @@
 The `pdSpecEst` package
 =======================
 
-[![Travis-CI Build Status](https://travis-ci.org/JorisChau/pdSpecEst.svg?branch=master)](https://travis-ci.org/JorisChau/pdSpecEst)
+[![CRAN version](http://www.r-pkg.org/badges/version/pdSpecEst)](http://cran.r-project.org/web/packages/pdSpecEst/index.html) [![CRAN RStudio mirror downloads](http://cranlogs.r-pkg.org/badges/pdSpecEst)](http://cran.r-project.org/web/packages/pdSpecEst/index.html) [![Travis-CI Build Status](https://travis-ci.org/JorisChau/pdSpecEst.svg?branch=master)](https://travis-ci.org/JorisChau/pdSpecEst)
 
 This package provides the tools to perform wavelet-based multivariate spectral density estimation and clustering in the Riemannian manifold of Hermitian and positive-definite matrices. The methodology is based on the paper (Chau and von Sachs 2017) available at <http://arxiv.org/abs/1701.03314>.
 
@@ -14,7 +14,9 @@ For more details and examples on how to use the package see the accompanying vig
 Installation
 ------------
 
-**Current development version:** install via `devtools::install_github("JorisChau/pdSpecEst")`, (requires R package `devtools`).
+-   **Stable CRAN version:** install from within R.
+
+-   **Current development version:** install via `devtools::install_github("JorisChau/pdSpecEst")`, (requires R package `devtools`).
 
 References
 ----------

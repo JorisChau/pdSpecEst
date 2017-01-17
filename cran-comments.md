@@ -21,7 +21,7 @@ Travis-ci note (linux):
     sub-directories of 1Mb or more:
       libs   7.9Mb
       
-My understanding is that the inflation of the libs subdirectory is due to the use of Rcpp and RcppArmadillo. 
+My understanding is that the inflation of the libs subdirectory is due to the use of `Rcpp` and `RcppArmadillo`. 
 
 ## Resubmission
 

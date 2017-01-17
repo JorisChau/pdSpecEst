@@ -21,7 +21,7 @@
 #' In the first step, a fuzzy c-medoids algorithm based on the Riemannian distance function as in
 #' \code{\link{RiemmDist}}, with fuzziness parameter \eqn{m}, is applied to the \eqn{S} coarsest-scale midpoint
 #' vectors, i.e. scale \code{j = 1}. \cr
-#' In the second step, a weighted fuzzy c-means algorithm based on the Euclidian
+#' In the second step, a weighted fuzzy c-means algorithm based on the Euclidean
 #' distance function, also with fuzziness parameter \eqn{m}, is applied to the nonzero thresholded wavelet
 #' coefficients for the \eqn{S} different subjects. The tuning parameter \code{tau} controls the weight given
 #' to the cluster assignments obtained in the first step of the clustering algorithm. For more details on the
