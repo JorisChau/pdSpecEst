@@ -51,7 +51,7 @@ library(pdSpecEst)
 freq <- seq(from = pi / 2^9, to = pi, length = 2^9)
 d <- 2
 Phi <- array(c(0.5, 0, 0, 0.2, 0, 0, 0, -0.9), dim = c(d, d, 2))
-Theta <- array(c(0, 0.1, 0.1, 0, 0, 0, 0, 0, 0.5), dim = c(d, d, 2))
+Theta <- array(c(0, 0.1, 0.1, 0, 0, 0, 0, 0.5), dim = c(d, d, 2))
 Sigma <- matrix(c(2, 0, 0, 0.25), nrow = d)
 
 ## Generate time series

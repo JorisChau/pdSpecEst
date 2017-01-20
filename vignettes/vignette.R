@@ -7,7 +7,7 @@ library(pdSpecEst)
 freq <- seq(from = pi / 2^9, to = pi, length = 2^9)
 d <- 2
 Phi <- array(c(0.5, 0, 0, 0.2, 0, 0, 0, -0.9), dim = c(d, d, 2))
-Theta <- array(c(0, 0.1, 0.1, 0, 0, 0, 0, 0, 0.5), dim = c(d, d, 2))
+Theta <- array(c(0, 0.1, 0.1, 0, 0, 0, 0, 0.5), dim = c(d, d, 2))
 Sigma <- matrix(c(2, 0, 0, 0.25), nrow = d)
 
 ## Generate time series
@@ -19,7 +19,7 @@ str(ts.sim)
 #  ## Plot time series observations
 #  par(mfrow = c(2,1), mar = c(4.5, 3, 2, 2))
 #  invisible(sapply(1:d, function(i) plot(ts.sim$X[, i], main = paste0("Component ", i), type = "l", xlab = "Time", ylab = "")))
-#  
+#
 #  ## Plot spectral matrix
 #  layout(mat = matrix(c(1,1,2,3,4,5,6,6), nrow = 4))
 #  plotspec <- function(i){
