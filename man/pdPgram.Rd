@@ -4,7 +4,7 @@
 \alias{pdPgram}
 \title{Bias-corrected averaged periodogram}
 \usage{
-pdPgram(X, B)
+pdPgram(X, B, method = c("bartlett", "multitaper"))
 }
 \arguments{
 \item{X}{a multivariate time series, with the \code{d} columns corresponding to the components

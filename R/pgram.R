@@ -38,17 +38,23 @@
 #' pgram <- pdPgram(ts.sim$X)
 #'
 #' @importFrom astsa mvspec
+#' @importFrom multitaper dpss
 #' @export
-pdPgram <- function(X, B) {
+pdPgram <- function(X, B, method = c("bartlett", "multitaper")) {
 
+  method <- match.arg(method, c("bartlett", "multitaper"))
   d <- ncol(X)
   n <- nrow(X)
   if (missing(B)) {
     B <- d
   }
-  freq <- pi * (1:floor(n/B))/floor(n/B)
-  Per <- sapply(1:B, function(b) 1/(2 * pi) * astsa::mvspec(X[floor(n/B) * (b - 1) + 1:floor(n/B), ],
+  if (method == "bartlett") {
+    Per <- sapply(1:B, function(b) 1/(2 * pi) * astsa::mvspec(X[floor(n/B) * (b - 1) + 1:floor(n/B), ],
                                                              plot = F)$fxx, simplify = "array")
+  } else if (method == "multitaper") {
+    h <- multitaper::dpss(n, B, 2, returnEigenvalues = F)$v * sqrt(n)
+    Per <- sapply(1:B, function(k) 1/(2 * pi) * astsa::mvspec(h[, k] * X, plot = F)$fxx, simplify = "array")
+  }
   P <- B * exp(-1/d * sum(digamma(B - (d - 1:d)))) * apply(Per, c(1, 2, 3), mean)
   freq <- pi * (1:dim(P)[3])/dim(P)[3]
 

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Joris Chau" />
 
-<meta name="date" content="2017-01-14" />
+<meta name="date" content="2017-01-22" />
 
 <title>The pdSpecEst package</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">The <code>pdSpecEst</code> package</h1>
 <h4 class="author"><em>Joris Chau</em></h4>
-<h4 class="date"><em>2017-01-14</em></h4>
+<h4 class="date"><em>2017-01-22</em></h4>
 
 
 
@@ -89,7 +89,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 freq &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dt">from =</span> pi /<span class="st"> </span><span class="dv">2</span>^<span class="dv">9</span>, <span class="dt">to =</span> pi, <span class="dt">length =</span> <span class="dv">2</span>^<span class="dv">9</span>)
 d &lt;-<span class="st"> </span><span class="dv">2</span>
 Phi &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(<span class="fl">0.5</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, -<span class="fl">0.9</span>), <span class="dt">dim =</span> <span class="kw">c</span>(d, d, <span class="dv">2</span>))
-Theta &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="fl">0.5</span>), <span class="dt">dim =</span> <span class="kw">c</span>(d, d, <span class="dv">2</span>))
+Theta &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="fl">0.5</span>), <span class="dt">dim =</span> <span class="kw">c</span>(d, d, <span class="dv">2</span>))
 Sigma &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="fl">0.25</span>), <span class="dt">nrow =</span> d)
 
 ## Generate time series
@@ -98,7 +98,7 @@ ts.sim &lt;-<span class="st"> </span><span class="kw">rARMA</span>(<span class="
 <span class="kw">str</span>(ts.sim)
 <span class="co">#&gt; List of 2</span>
 <span class="co">#&gt;  $ X: num [1:2048, 1:2] -1.79 0.856 1.554 0.338 0.124 ...</span>
-<span class="co">#&gt;  $ f: cplx [1:2, 1:2, 1:512] 1.2747+0i 0.0421+0.0003i 0.0421-0.0003i ...</span></code></pre></div>
+<span class="co">#&gt;  $ f: cplx [1:2, 1:2, 1:512] 1.2747+0i 0.0445+0.0003i 0.0445-0.0003i ...</span></code></pre></div>
 <p>The autoregressive (AR) and moving average (MA) parameters are chosen in such a way that the spectral matrix displays different degrees of (local) smoothness across different components of the spectral matrix. The code below can be used to plot the simulated time series data and the underlying spectral matrix in the frequency domain.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Plot time series observations
 <span class="kw">par</span>(<span class="dt">mfrow =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">1</span>), <span class="dt">mar =</span> <span class="kw">c</span>(<span class="fl">4.5</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">2</span>))
@@ -123,7 +123,7 @@ plotspec &lt;-<span class="st"> </span>function(i){
 <span class="kw">str</span>(pgram)
 <span class="co">#&gt; List of 2</span>
 <span class="co">#&gt;  $ freq: num [1:512] 0.00614 0.01227 0.01841 0.02454 0.03068 ...</span>
-<span class="co">#&gt;  $ P   : cplx [1:2, 1:2, 1:512] 0.6829+0i 0.0197+0.0164i 0.0197-0.0164i ...</span></code></pre></div>
+<span class="co">#&gt;  $ P   : cplx [1:2, 1:2, 1:512] 0.683+0i 0.023+0.0259i 0.023-0.0259i ...</span></code></pre></div>
 </div>
 <div id="wavelet-denoised-spectral-estimator-with-pdspecest" class="section level2">
 <h2>Wavelet-denoised spectral estimator with <code>pdSpecEst()</code></h2>
@@ -131,21 +131,21 @@ plotspec &lt;-<span class="st"> </span>function(i){
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">f.hat &lt;-<span class="st"> </span><span class="kw">pdSpecEst</span>(pgram$P)
 <span class="kw">str</span>(f.hat)
 <span class="co">#&gt; List of 4</span>
-<span class="co">#&gt;  $ f         : cplx [1:2, 1:2, 1:512] 1.121+0i 0.041-0.0111i 0.041+0.0111i ...</span>
+<span class="co">#&gt;  $ f         : cplx [1:2, 1:2, 1:512] 1.1341-0i 0.0392-0.019i 0.0392+0.019i ...</span>
 <span class="co">#&gt;  $ D         :List of 9</span>
-<span class="co">#&gt;   ..$ M.scale1: cplx [1:2, 1:2, 1:2] 0.5312+0i 0.0332+0.004i 0.0332-0.004i ...</span>
-<span class="co">#&gt;   ..$ D.scale1: cplx [1:2, 1:2, 1:2] -0.1187+0i 0.0458+0.0148i 0.0458-0.0148i ...</span>
-<span class="co">#&gt;   ..$ D.scale2: cplx [1:2, 1:2, 1:4] 0.0601+0i 0.1045+0.096i 0.1045-0.096i ...</span>
+<span class="co">#&gt;   ..$ M.scale1: cplx [1:2, 1:2, 1:2] 0.524-0i 0.039-0.0001i 0.039+0.0001i ...</span>
+<span class="co">#&gt;   ..$ D.scale1: cplx [1:2, 1:2, 1:2] -0.1409+0i 0.0925+0.0294i 0.0925-0.0294i ...</span>
+<span class="co">#&gt;   ..$ D.scale2: cplx [1:2, 1:2, 1:4] 0.0624+0i 0.0845+0.0586i 0.0845-0.0586i ...</span>
 <span class="co">#&gt;   ..$ D.scale3: cplx [1:2, 1:2, 1:8] 0+0i 0+0i 0+0i ...</span>
 <span class="co">#&gt;   ..$ D.scale4: cplx [1:2, 1:2, 1:16] 0+0i 0+0i 0+0i ...</span>
 <span class="co">#&gt;   ..$ D.scale5: cplx [1:2, 1:2, 1:32] 0+0i 0+0i 0+0i ...</span>
 <span class="co">#&gt;   ..$ D.scale6: cplx [1:2, 1:2, 1:64] 0+0i 0+0i 0+0i ...</span>
 <span class="co">#&gt;   ..$ D.scale7: cplx [1:2, 1:2, 1:128] 0+0i 0+0i 0+0i ...</span>
 <span class="co">#&gt;   ..$ D.scale8: cplx [1:2, 1:2, 1:256] 0+0i 0+0i 0+0i ...</span>
-<span class="co">#&gt;  $ lam       : num 3.02</span>
+<span class="co">#&gt;  $ lam       : num 2.82</span>
 <span class="co">#&gt;  $ components:List of 8</span>
-<span class="co">#&gt;   ..$ : num [1:4, 1:2] -0.1187 -0.021 0.0647 1.5242 0.1656 ...</span>
-<span class="co">#&gt;   ..$ : num [1:4, 1:4] 0.0601 -0.1364 0.1477 -0.4068 -0.1262 ...</span>
+<span class="co">#&gt;   ..$ : num [1:4, 1:2] -0.1409 -0.0416 0.1308 0.9399 0.1764 ...</span>
+<span class="co">#&gt;   ..$ : num [1:4, 1:4] 0.0624 -0.0829 0.1195 -0.2534 -0.1588 ...</span>
 <span class="co">#&gt;   ..$ : num [1:4, 1:8] 0 0 0 0 0 0 0 0 0 0 ...</span>
 <span class="co">#&gt;   ..$ : num [1:4, 1:16] 0 0 0 0 0 0 0 0 0 0 ...</span>
 <span class="co">#&gt;   ..$ : num [1:4, 1:32] 0 0 0 0 0 0 0 0 0 0 ...</span>
@@ -154,7 +154,7 @@ plotspec &lt;-<span class="st"> </span>function(i){
 <span class="co">#&gt;   ..$ : num [1:4, 1:256] 0 0 0 0 0 0 0 0 0 0 ...</span></code></pre></div>
 <p>The figure below shows the true underlying spectral matrix given by <code>ts.sim$f</code> and the estimated spectral matrix obtained from <code>f.hat$f</code> at the frequencies <code>freq</code>. The spectral estimator is able to capture both the very smooth curve behavior in the first auto-spectral component of the matrix and the localized peak in the second auto-spectral component of the matrix, while guaranteeing positive-definiteness of the estimator. <br> <br></p>
 <div class="figure">
-<img src="data:image/png;base64,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" alt="Figure: True (left) and estimated (right) spectral matrices in the frequency domain." width="35%" /><img src="data:image/png;base64,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" alt="Figure: True (left) and estimated (right) spectral matrices in the frequency domain." width="35%" />
+<img src="data:image/png;base64,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" alt="Figure: True (left) and estimated (right) spectral matrices in the frequency domain." width="35%" /><img src="data:image/png;base64,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" alt="Figure: True (left) and estimated (right) spectral matrices in the frequency domain." width="35%" />
 <p class="caption">
 Figure: True (left) and estimated (right) spectral matrices in the frequency domain.
 </p>
@@ -168,17 +168,17 @@ Phi2 &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw
 pgram &lt;-<span class="st"> </span>function(Phi) <span class="kw">pdPgram</span>(<span class="kw">rARMA</span>(<span class="dv">2</span>^<span class="dv">10</span>, d, Phi, Theta, Sigma)$X)$P
 P &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(<span class="kw">replicate</span>(<span class="dv">5</span>, <span class="kw">pgram</span>(Phi1)), <span class="kw">replicate</span>(<span class="dv">5</span>, <span class="kw">pgram</span>(Phi2))), <span class="dt">dim=</span><span class="kw">c</span>(d, d, <span class="dv">2</span>^<span class="dv">8</span>, <span class="dv">10</span>))
 <span class="kw">pdSpecClust</span>(P, <span class="dt">K =</span> <span class="dv">2</span>, <span class="dt">lam =</span> <span class="dv">3</span>)
-<span class="co">#&gt;           Cluster1 Cluster2</span>
-<span class="co">#&gt; Subject1       0.5      0.5</span>
-<span class="co">#&gt; Subject2       0.5      0.5</span>
-<span class="co">#&gt; Subject3       0.5      0.5</span>
-<span class="co">#&gt; Subject4       0.5      0.5</span>
-<span class="co">#&gt; Subject5       0.5      0.5</span>
-<span class="co">#&gt; Subject6       0.5      0.5</span>
-<span class="co">#&gt; Subject7       0.5      0.5</span>
-<span class="co">#&gt; Subject8       0.5      0.5</span>
-<span class="co">#&gt; Subject9       0.5      0.5</span>
-<span class="co">#&gt; Subject10      0.5      0.5</span></code></pre></div>
+<span class="co">#&gt;             Cluster1   Cluster2</span>
+<span class="co">#&gt; Subject1  0.09306581 0.90693419</span>
+<span class="co">#&gt; Subject2  0.01732452 0.98267548</span>
+<span class="co">#&gt; Subject3  0.01527921 0.98472079</span>
+<span class="co">#&gt; Subject4  0.02611720 0.97388280</span>
+<span class="co">#&gt; Subject5  0.02951176 0.97048824</span>
+<span class="co">#&gt; Subject6  0.98101913 0.01898087</span>
+<span class="co">#&gt; Subject7  0.98230827 0.01769173</span>
+<span class="co">#&gt; Subject8  0.97573420 0.02426580</span>
+<span class="co">#&gt; Subject9  0.96717490 0.03282510</span>
+<span class="co">#&gt; Subject10 0.97144733 0.02855267</span></code></pre></div>
 </div>
 <div id="references" class="section level2 unnumbered">
 <h2>References</h2>

@@ -19,7 +19,7 @@ str(ts.sim)
 #  ## Plot time series observations
 #  par(mfrow = c(2,1), mar = c(4.5, 3, 2, 2))
 #  invisible(sapply(1:d, function(i) plot(ts.sim$X[, i], main = paste0("Component ", i), type = "l", xlab = "Time", ylab = "")))
-#
+#  
 #  ## Plot spectral matrix
 #  layout(mat = matrix(c(1,1,2,3,4,5,6,6), nrow = 4))
 #  plotspec <- function(i){
