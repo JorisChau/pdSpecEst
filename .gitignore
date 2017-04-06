@@ -4,3 +4,4 @@
 .Ruserdata
 inst/doc
 data/lfp.rda
+data/eeg.rda
