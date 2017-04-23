@@ -40,7 +40,7 @@
 #' @importFrom astsa mvspec
 #' @importFrom multitaper dpss
 #' @export
-pdPgram <- function(X, B, method = c("bartlett", "multitaper")) {
+pdPgram <- function(X, B, method = c("bartlett", "multitaper"), bias.corr = T) {
 
   method <- match.arg(method, c("bartlett", "multitaper"))
   d <- ncol(X)
@@ -55,7 +55,11 @@ pdPgram <- function(X, B, method = c("bartlett", "multitaper")) {
     h <- multitaper::dpss(n, B, 2, returnEigenvalues = F)$v * sqrt(n)
     Per <- sapply(1:B, function(k) 1/(2 * pi) * astsa::mvspec(h[, k] * X, plot = F)$fxx, simplify = "array")
   }
-  P <- B * exp(-1/d * sum(digamma(B - (d - 1:d)))) * apply(Per, c(1, 2, 3), mean)
+  if(bias.corr){
+    P <- B * exp(-1/d * sum(digamma(B - (d - 1:d)))) * apply(Per, c(1, 2, 3), mean)
+  } else{
+    P <- apply(Per, c(1, 2, 3), mean)
+  }
   freq <- pi * (1:dim(P)[3])/dim(P)[3]
 
   return(list(freq = freq, P = P))

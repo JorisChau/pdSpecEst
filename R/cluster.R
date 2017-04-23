@@ -73,7 +73,7 @@
 #' @references Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
 #'
 #' @export
-pdSpecClust <- function(P, D.hat = NULL, K, m = 2, jmax, d.jmax = 0.1, eps = c(1e-04, 1e-04), tau = 0.5, ...) {
+pdSpecClust <- function(P, D.hat = NULL, K, m = 2, jmax, d.jmax = 0.1, eps = c(1e-04, 1e-04), tau = 0.5, return.D = F, ...) {
 
   ## missing arguments
   if (missing(P)) {
@@ -112,7 +112,7 @@ pdSpecClust <- function(P, D.hat = NULL, K, m = 2, jmax, d.jmax = 0.1, eps = c(1
     for (s in 1:S) {
       D.hat <- pdSpecEst(P[, , , s], lam, order, return = "D", alpha)
       D[[s]] <- D.hat$D
-      d.nzero[s, ] <- sapply(1:jmax, function(j) sum(as.logical(D.hat$components[[j]]))/(dim^2 *  2^j))
+      d.nzero[s, ] <- sapply(1:jmax, function(j) sum(as.logical(D.hat$components$thresholded[[j]]))/(dim^2 *  2^j))
     }
     jmax <- min(jmax, sum(colMeans(d.nzero) > d.jmax))
   } else {
@@ -127,10 +127,12 @@ pdSpecClust <- function(P, D.hat = NULL, K, m = 2, jmax, d.jmax = 0.1, eps = c(1
     d.nzero <- matrix(1, ncol = jmax, nrow = S)
     for (s in 1:S) {
       D[[s]] <- D.hat[[s]]$D
-      d.nzero[s, ] <- sapply(1:jmax, function(j) sum(as.logical(D.hat[[s]]$components[[j]]))/(dim^2 * 2^j))
+      d.nzero[s, ] <- sapply(1:jmax, function(j) sum(as.logical(D.hat[[s]]$components$thresholded[[j]]))/(dim^2 * 2^j))
     }
     jmax <- min(jmax, sum(colMeans(d.nzero) > d.jmax))
   }
+
+  D0 <- D
 
   ## c-medoids algorithm
   M <- sapply(1:S, function(s) D[[s]][[1]], simplify = "array")
@@ -208,5 +210,11 @@ pdSpecClust <- function(P, D.hat = NULL, K, m = 2, jmax, d.jmax = 0.1, eps = c(1
   }
   rownames(clust) <- paste0("Subject", 1:S)
   colnames(clust) <- paste0("Cluster", 1:K)
-  return(clust)
+
+  if(!return.D){
+    cl <- clust
+  } else{
+    cl <- list(clust = clust, D = D0)
+  }
+  return(cl)
 }

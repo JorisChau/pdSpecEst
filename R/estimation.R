@@ -167,11 +167,13 @@ pdSpecEst <- function(P, lam = NULL, order = 5, return = "f", alpha = 0.75) {
     d.new[[j]] <- d[[j]]/sd.j(j)
     d.vec <- cbind(d.vec, d.new[[j]])
   }
+  d1 <- d.new
 
   ## Threshold coefficients
   for (j in 3:(J - 1)) {
     zero <- sapply(1:2^j, function(k) (abs(d.new[[j]][, k]) < lam.cv) |
                                        (d[[j - 1]][, ceiling(k/2)] == 0))
+    d.new[[j]][zero] <- 0
     d[[j]][zero] <- 0
   }
 
@@ -185,5 +187,5 @@ pdSpecEst <- function(P, lam = NULL, order = 5, return = "f", alpha = 0.75) {
   } else {
     f <- NULL
   }
-  return(list(f = f, D = D, lam = lam.cv, components = d))
+  return(list(f = f, D = D, lam = lam.cv, components = list(not_thresholded = d1, thresholded = d.new)))
 }
