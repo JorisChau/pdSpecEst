@@ -5,7 +5,7 @@ Version: 1.0.0
 Authors@R: person("Joris", "Chau", email = "j.chau@uclouvain.be", role = c("aut", "cre"))
 Description: Implementation of wavelet-based multivariate spectral density estimation and clustering methods in the Riemannian manifold of Hermitian and positive-definite matrices.
 URL: https://github.com/JorisChau/pdSpecEst
-Depends: R (>= 3.2.3)
+Depends: R (>= 3.3.1)
 License: GPL (>= 2)
 LazyData: TRUE
 Imports:
