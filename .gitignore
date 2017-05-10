@@ -6,3 +6,5 @@ inst/doc
 data/eeg.rda
 data/eeg_full.rda
 data/lfp.rda
+data/monkey_full.rda
+data/lfp_bart.rda

@@ -6,6 +6,17 @@
 
 using namespace Rcpp;
 
+// Chol
+arma::cx_mat Chol(arma::cx_mat M);
+RcppExport SEXP pdSpecEst_Chol(SEXP MSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cx_mat >::type M(MSEXP);
+    rcpp_result_gen = Rcpp::wrap(Chol(M));
+    return rcpp_result_gen;
+END_RCPP
+}
 // E_coeff
 arma::vec E_coeff(arma::cx_mat H, arma::cx_cube E);
 RcppExport SEXP pdSpecEst_E_coeff(SEXP HSEXP, SEXP ESEXP) {

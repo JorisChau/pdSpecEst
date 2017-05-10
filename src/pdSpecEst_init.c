@@ -17,6 +17,7 @@ SEXP pdSpecEst_NormF(SEXP MSEXP);
 SEXP pdSpecEst_RiemmDist(SEXP ASEXP, SEXP BSEXP);
 SEXP pdSpecEst_solveMid(SEXP BSEXP, SEXP CSEXP);
 SEXP pdSpecEst_Sqrt(SEXP MSEXP);
+SEXP pdSpecEst_Chol(SEXP MSEXP);
 
 R_CallMethodDef callMethods[]  = {
   {"pdSpecEst_ARMA", (DL_FUNC) &pdSpecEst_ARMA, 4},
@@ -31,6 +32,7 @@ R_CallMethodDef callMethods[]  = {
   {"pdSpecEst_RiemmDist", (DL_FUNC) &pdSpecEst_RiemmDist, 2},
   {"pdSpecEst_solveMid", (DL_FUNC) &pdSpecEst_solveMid, 2},
   {"pdSpecEst_Sqrt", (DL_FUNC) &pdSpecEst_Sqrt, 1},
+  {"pdSpecEst_Chol", (DL_FUNC) &pdSpecEst_Chol, 1},
   {NULL, NULL, 0}
 };
 
