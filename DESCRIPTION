@@ -5,7 +5,7 @@ Version: 1.0.0
 Authors@R: person("Joris", "Chau", email = "j.chau@uclouvain.be", role = c("aut", "cre"))
 Description: Implementation of wavelet-based multivariate spectral density estimation and clustering methods in the Riemannian manifold of Hermitian and positive-definite matrices.
 URL: https://github.com/JorisChau/pdSpecEst
-Depends: R (>= 3.3.1)
+Depends: R (>= 3.2.3)
 License: GPL (>= 2)
 LazyData: TRUE
 Imports:
@@ -15,7 +15,7 @@ Imports:
     ddalpha,
 RoxygenNote: 5.0.1
 LinkingTo: Rcpp, RcppArmadillo (>= 0.7.500.0.0)
-SystemRequirements: GNU make, C++11
+SystemRequirements: GNU make
 Suggests: knitr,
     rmarkdown,
     testthat
