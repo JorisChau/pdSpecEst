@@ -18,12 +18,12 @@ pdDepth <- function(y = NULL, X, method = c('zonoid', 'gdd')){
   if(method == 'zonoid'){
     if(length(dim(X)) == 3){
       X.vec <- sapply(1:n, function(i) E_coeff(Logm(y, X[,,i]), E))
-      depth <- depth.zonoid(t(as.matrix(rep(0, d^2))), t(X.vec))
+      depth <- ddalpha::depth.zonoid(t(as.matrix(rep(0, d^2))), t(X.vec))
     } else if(length(dim(X)) == 4){
       depth.t <- rep(NA, N)
       for(t in 1:N){
         X.vec <- sapply(1:n, function(i) E_coeff(Logm(y[,,t], X[,,t,i]), E))
-        depth.t[t] <- depth.zonoid(t(as.matrix(rep(0, d^2))), t(X.vec))
+        depth.t[t] <- ddalpha::depth.zonoid(t(as.matrix(rep(0, d^2))), t(X.vec))
       }
       depth <- mean(depth.t)
     }

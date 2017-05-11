@@ -1,5 +1,7 @@
 #' Depth-rank hypothesis testing for HPD matrices
 #'
+#' @importFrom stats pnorm
+#' @importFrom stats pchisq
 #' @export
 pdRankTests <- function(samples, sample.sizes, depth = c('gdd', 'zonoid'),
                         test = c('rank.sum', 'krusk.wall', 'signed.rank', 'bartels',
@@ -24,7 +26,7 @@ pdRankTests <- function(samples, sample.sizes, depth = c('gdd', 'zonoid'),
     }
     T1 <- (sum(rank(dd, ties.method = 'random')[1:n[1]]) - n[1]*(sum(n)+1)/2) / sqrt(n[1]*n[2]*(sum(n)+1) / 12)
 
-    output <- list(p.value = 2 * pnorm(abs(T1), lower.tail = F), statistic = T1,
+    output <- list(p.value = 2 * stats::pnorm(abs(T1), lower.tail = F), statistic = T1,
                    null.distr = 'Standard normal distribution')
   }
 
@@ -38,7 +40,7 @@ pdRankTests <- function(samples, sample.sizes, depth = c('gdd', 'zonoid'),
 
       T1 <- (sum(rank(dd, ties.method = 'random')[1:n[1]]) - n[1]*(sum(n)+1)/2) / sqrt(n[1]*n[2]*(sum(n)+1) / 12)
 
-      output <- list(p.value = 2 * pnorm(abs(T1), lower.tail = F), statistic = T1,
+      output <- list(p.value = 2 * stats::pnorm(abs(T1), lower.tail = F), statistic = T1,
                      null.distr = 'Standard normal distribution')
   }
 
@@ -57,7 +59,7 @@ pdRankTests <- function(samples, sample.sizes, depth = c('gdd', 'zonoid'),
     R_bar <- unname(unlist(lapply(split(rank(dd, ties.method = 'random'), f = rep(c(1,2,3), times = n)), mean)))
     T2 <- 12 / (N * (N+1)) * sum(n * (R_bar - (N+1)/2)^2)
 
-    output <- list(p.value = min(pchisq(T2, df = 2, lower.tail = T), pchisq(T2, df = 2, lower.tail = F)),
+    output <- list(p.value = min(stats::pchisq(T2, df = 2, lower.tail = T), pchisq(T2, df = 2, lower.tail = F)),
                 statistic = T2, null.distr = "Chi-squared distribution (df = 2)")
   }
 
