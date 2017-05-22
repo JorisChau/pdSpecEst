@@ -4,9 +4,9 @@
 \alias{pdRankTests}
 \title{Depth-rank hypothesis testing for HPD matrices}
 \usage{
-pdRankTests(samples, sample.sizes, depth = c("gdd", "zonoid"),
-  test = c("rank.sum", "krusk.wall", "signed.rank", "bartels",
-  "rank.sum.fun"))
+pdRankTests(samples, sample.sizes, depth = c("gdd", "zonoid", "spatial"),
+  test = c("rank.sum", "krusk.wall", "signed.rank", "bartels", "rank.sum.fun",
+  "bartels.fun"))
 }
 \description{
 Depth-rank hypothesis testing for HPD matrices

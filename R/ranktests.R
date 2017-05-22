@@ -3,14 +3,14 @@
 #' @importFrom stats pnorm
 #' @importFrom stats pchisq
 #' @export
-pdRankTests <- function(samples, sample.sizes, depth = c('gdd', 'zonoid'),
+pdRankTests <- function(samples, sample.sizes, depth = c('gdd', 'zonoid', 'spatial'),
                         test = c('rank.sum', 'krusk.wall', 'signed.rank', 'bartels',
-                                 'rank.sum.fun')){
+                                 'rank.sum.fun', 'bartels.fun')){
   if(missing(depth)){
     depth <- 'gdd'
   }
-  test <- match.arg(test, c('rank.sum', 'krusk.wall', 'signed.rank', 'bartels', 'rank.sum.fun'))
-  depth <- match.arg(depth, c('gdd', 'zonoid'))
+  test <- match.arg(test, c('rank.sum', 'krusk.wall', 'signed.rank', 'bartels', 'rank.sum.fun', 'bartels.fun'))
+  depth <- match.arg(depth, c('gdd', 'zonoid', 'spatial'))
   n <- sample.sizes
   ddim <- dim(samples)
 
@@ -21,8 +21,9 @@ pdRankTests <- function(samples, sample.sizes, depth = c('gdd', 'zonoid'),
     }
     if(depth == 'gdd'){
       dd <- pdDepth(X = samples, method = 'gdd')
-    } else if(depth == 'zonoid'){
-      dd <- sapply(1:sum(n), function(i) pdDepth(y = samples[,,i], X = samples, method = 'zonoid'))
+    } else if(depth != 'gdd'){
+      dd <- sapply(1:sum(n), function(i) pdDepth(y = samples[,,i], X = samples,
+                          method = ifelse(depth == 'zonoid', 'zonoid', 'spatial')))
     }
     T1 <- (sum(rank(dd, ties.method = 'random')[1:n[1]]) - n[1]*(sum(n)+1)/2) / sqrt(n[1]*n[2]*(sum(n)+1) / 12)
 
@@ -93,6 +94,22 @@ pdRankTests <- function(samples, sample.sizes, depth = c('gdd', 'zonoid'),
     output <- list(p.value = 2 * pnorm(abs((T4-2)/sigma), lower.tail = F), statistic = (T4-2)/sigma,
                    null.distr = 'Standard normal distribution')
   }
+
+  if(test == 'bartels.fun'){
+    if (!isTRUE((length(ddim) == 4) & (ddim[4] == n))) {
+      stop("Incorrect input lengths for arguments: 'samples' and/or 'sample.sizes',
+             consult the function documentation for the requested inputs.")
+    }
+    dd <- sapply(1:n, function(i) pdDepth(y = samples[,,,i], X = samples,
+                                               method = ifelse(depth == 'gdd', 'gdd', 'zonoid')))
+
+    T4 <- sum(diff(rank(dd, ties.method = 'random'))^2) / (n*(n^2-1)/12)
+    sigma <- sqrt(4*(n-2)*(5*n^2 - 2*n - 9) / (5*n*(n+1)*(n-1)^2))
+
+    output <- list(p.value = 2 * pnorm(abs((T4-2)/sigma), lower.tail = F), statistic = (T4-2)/sigma,
+                   null.distr = 'Standard normal distribution')
+  }
+
   return(output)
 }
 

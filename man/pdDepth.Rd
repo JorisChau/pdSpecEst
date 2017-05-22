@@ -4,7 +4,7 @@
 \alias{pdDepth}
 \title{Zonoid and Geodesic Distance Depth for HPD matrices}
 \usage{
-pdDepth(y = NULL, X, method = c("zonoid", "gdd"))
+pdDepth(y = NULL, X, method = c("zonoid", "gdd", "spatial"))
 }
 \description{
 Zonoid and Geodesic Distance Depth for HPD matrices

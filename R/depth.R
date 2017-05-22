@@ -2,9 +2,9 @@
 #'
 #' @importFrom ddalpha depth.zonoid
 #' @export
-pdDepth <- function(y = NULL, X, method = c('zonoid', 'gdd')){
+pdDepth <- function(y = NULL, X, method = c('zonoid', 'gdd', 'spatial')){
 
-  method <- match.arg(method, c('zonoid', 'gdd'))
+  method <- match.arg(method, c('zonoid', 'gdd', 'spatial'))
   d <- dim(X)[1]
   if(length(dim(X)) == 3){
     n <- dim(X)[3]
@@ -54,6 +54,36 @@ pdDepth <- function(y = NULL, X, method = c('zonoid', 'gdd')){
       }
     }
   }
+
+  ## Spatial depth
+  if(method == 'spatial'){
+    if(!is.null(y)){
+      if(length(dim(X)) == 3){
+        y.isqrt <- iSqrt(y)
+        log.yx <- sapply(1:n, function(i) Logm(diag(d), (y.isqrt %*% X[,,i]) %*% y.isqrt), simplify = "array")
+        depth <- 1 - NormF(apply(sapply(1:n, function(i) log.yx[,,i]/NormF(log.yx[,,i]),
+                                                  simplify = "array"), c(1,2), mean))
+
+      } else if(length(dim(X)) == 4){
+        depth.t <- rep(NA, N)
+        for(t in 1:N){
+          y.isqrt <- iSqrt(y[,,t])
+          log.yx <- sapply(1:n, function(i) Logm(y[,,t], X[,,t,i]), simplify = "array")
+          dist.yx <- sapply(1:n, function(i) NormF((y.isqrt %*% log.yx[,,i]) %*% y.isqrt))
+          depth.t[t] <- 1 - NormF((y.isqrt %*% apply(sapply(1:n, function(i) log.yx[,,i]/dist.yx[i],
+                                    simplify = "array"), c(1,2), mean)) %*% y.isqrt)
+        }
+        depth <- mean(depth.t)
+      }
+    } else if(is.null(y)){
+      if(length(dim(X)) == 3){
+        depth <- NaN
+      } else if(length(dim(X)) == 4){
+        depth <- NaN
+      }
+    }
+  }
+
   return(depth)
 }
 
