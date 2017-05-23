@@ -54,9 +54,11 @@ pdRankTests <- function(samples, sample.sizes, depth = c('gdd', 'zonoid', 'spati
 
     if(depth == 'gdd'){
       dd <- pdDepth(X = samples, method = 'gdd')
-    } else if(depth == 'zonoid'){
-      dd <- sapply(1:sum(n), function(i) pdDepth(y = samples[,,i], X = samples, method = 'zonoid'))
+    } else if(depth != 'gdd'){
+      dd <- sapply(1:sum(n), function(i) pdDepth(y = samples[,,i], X = samples,
+                                                 method = ifelse(depth == 'zonoid', 'zonoid', 'spatial')))
     }
+
     R_bar <- unname(unlist(lapply(split(rank(dd, ties.method = 'random'), f = rep(c(1,2,3), times = n)), mean)))
     T2 <- 12 / (N * (N+1)) * sum(n * (R_bar - (N+1)/2)^2)
 
@@ -84,8 +86,9 @@ pdRankTests <- function(samples, sample.sizes, depth = c('gdd', 'zonoid', 'spati
     }
     if(depth == 'gdd'){
       dd <- pdDepth(X = samples, method = 'gdd')
-    } else if(depth == 'zonoid'){
-      dd <- sapply(1:n, function(i) pdDepth(y = samples[,,i], X = samples, method = 'zonoid'))
+    } else if(depth != 'gdd'){
+      dd <- sapply(1:n, function(i) pdDepth(y = samples[,,i], X = samples,
+                                                 method = ifelse(depth == 'zonoid', 'zonoid', 'spatial')))
     }
 
     T4 <- sum(diff(rank(dd, ties.method = 'random'))^2) / (n*(n^2-1)/12)
