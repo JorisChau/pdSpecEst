@@ -75,8 +75,8 @@ pdRankTests <- function(samples, sample.sizes, depth = c('gdd', 'zonoid', 'spati
     ast <- function(A,B) t(Conj(A)) %*% B %*% A
     diff <- sapply(1:n, function(i) Re(sum(diag(Logm(diag(d), ast(iSqrt(samples[,,n+i]), samples[,,i]))))))
 
-    test <- stats::wilcox.test(x = diff, y = rep(0, n), mu = 0, paired = T)
-    output <- list(p.value = test$p.value, statistic = test$statistic, null.distr = test$method)
+    univ_test <- stats::wilcox.test(x = diff, y = rep(0, n), mu = 0, paired = T, correct = T)
+    output <- list(p.value = univ_test$p.value, statistic = univ_test$statistic, null.distr = univ_test$method)
   }
 
   if(test == 'bartels'){
