@@ -52,7 +52,7 @@ pdPgram <- function(X, B, method = c("bartlett", "multitaper"), bias.corr = T) {
     Per <- sapply(1:B, function(b) 1/(2 * pi) * astsa::mvspec(X[floor(n/B) * (b - 1) + 1:floor(n/B), ],
                                                              plot = F)$fxx, simplify = "array")
   } else if (method == "multitaper") {
-    h <- multitaper::dpss(n, B, 2, returnEigenvalues = F)$v * sqrt(n)
+    h <- multitaper::dpss(n, B, 1, returnEigenvalues = F)$v * sqrt(n)
     Per <- sapply(1:B, function(k) 1/(2 * pi) * astsa::mvspec(h[, k] * X, plot = F)$fxx, simplify = "array")
   }
   if(bias.corr){
