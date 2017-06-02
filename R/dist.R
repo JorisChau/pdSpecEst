@@ -1,8 +1,12 @@
-#' Vairous distance measures between HPD matrices
+#' Various distance measures between HPD matrices
 #'
 #' @export
 pdDist <- function(A, B, method = 'Riemannian'){
 
+  if (!(is.TRUE(all.equal(dim(Ad), dim(B)) & (length(dim(A)) == 3)))) {
+    stop("Incorrect input dimensions for arguments: 'A' and/or 'B',
+             consult the function documentation for the requested inputs.")
+  }
   method <- match.arg(method, c('Riemannian', 'logEuclidean', 'Cholesky', 'Euclidean', 'Procrustes'))
   d <- nrow(A)
 
