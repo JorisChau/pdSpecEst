@@ -63,7 +63,7 @@ scale \eqn{j} for which the proportion of nonzero components of thresholded wave
 across subjects) is smaller than \code{d.jmax}.\cr
 The \eqn{S} subjects are assigned to \eqn{K} different fuzzy clusters according to a two-step procedure.
 In the first step, a fuzzy c-medoids algorithm based on the Riemannian distance function as in
-\code{\link{RiemmDist}}, with fuzziness parameter \eqn{m}, is applied to the \eqn{S} coarsest-scale midpoint
+\code{\link{pdDist}}, with fuzziness parameter \eqn{m}, is applied to the \eqn{S} coarsest-scale midpoint
 vectors, i.e. scale \code{j = 1}. \cr
 In the second step, a weighted fuzzy c-means algorithm based on the Euclidean
 distance function, also with fuzziness parameter \eqn{m}, is applied to the nonzero thresholded wavelet
@@ -93,5 +93,5 @@ estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/ab
 Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
 }
 \seealso{
-\code{\link{pdPgram}}, \code{\link{pdSpecEst}}, \code{\link{RiemmDist}}
+\code{\link{pdPgram}}, \code{\link{pdSpecEst}}, \code{\link{pdDist}}
 }

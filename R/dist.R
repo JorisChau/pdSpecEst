@@ -6,7 +6,7 @@
 #' (Bhatia, 2009, Chapter 6), (ii) log-Euclidean distance, the Euclidean distance between matrix logarithms,
 #' (iii) Cholesky distance, the Euclidean distance between Cholesky decompositions, (iv) Euclidean distance,
 #' and (v) Procrustes distance as in (Dryden et al., 2009). In particular, \code{pdDist} generalizes the function
-#' \code{\link[shapes]{distCov}} computing the distance between two symmetric positive-definite matrices.
+#' \code{\link[shapes]{distcov}} computing the distance between two symmetric positive-definite matrices.
 #'
 #' @param A,B Hermitian positive-definite matrices (of equal dimension).
 #' @param method the distance measure, one of \code{'Riemannian'},
@@ -23,12 +23,12 @@
 #' @references Dryden, I.L., Koloydenko, A., Zhou, D. (2009). Non-Euclidean statistics for covariance matrices,
 #' with applications to diffusion tensor imaging. \emph{Annals of Applied Statistics}, 3(3), 1102-1123.
 #'
-#' @seealso \code{\link[shapes]{distCov}}
+#' @seealso \code{\link[shapes]{distcov}}
 #'
 #' @export
 pdDist <- function(A, B, method = 'Riemannian'){
 
-  if (!(isTRUE(all.equal(dim(A), dim(B)) & (length(dim(A)) == 3)))) {
+  if (!(isTRUE(all.equal(dim(A), dim(B)) & (dim(A)[1] == dim(A)[2]) & (length(dim(A)) == 2)))) {
     stop("Incorrect input dimensions for arguments: 'A' and/or 'B',
              consult the function documentation for the requested inputs.")
   }

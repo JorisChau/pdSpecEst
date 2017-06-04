@@ -20,7 +20,7 @@ Available distance functions between two Hermitian PD matrices are (i) Riemannia
 (Bhatia, 2009, Chapter 6), (ii) log-Euclidean distance, the Euclidean distance between matrix logarithms,
 (iii) Cholesky distance, the Euclidean distance between Cholesky decompositions, (iv) Euclidean distance,
 and (v) Procrustes distance as in (Dryden et al., 2009). In particular, \code{pdDist} generalizes the function
-\code{\link[shapes]{distCov}} computing the distance between two symmetric positive-definite matrices.
+\code{\link[shapes]{distcov}} computing the distance between two symmetric positive-definite matrices.
 }
 \examples{
  a <- matrix(complex(real = rnorm(9), imaginary = rnorm(9)), nrow = 3)
@@ -37,5 +37,5 @@ Dryden, I.L., Koloydenko, A., Zhou, D. (2009). Non-Euclidean statistics for cova
 with applications to diffusion tensor imaging. \emph{Annals of Applied Statistics}, 3(3), 1102-1123.
 }
 \seealso{
-\code{\link[shapes]{distCov}}
+\code{\link[shapes]{distcov}}
 }

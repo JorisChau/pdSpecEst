@@ -19,7 +19,7 @@
 #' across subjects) is smaller than \code{d.jmax}.\cr
 #' The \eqn{S} subjects are assigned to \eqn{K} different fuzzy clusters according to a two-step procedure.
 #' In the first step, a fuzzy c-medoids algorithm based on the Riemannian distance function as in
-#' \code{\link{RiemmDist}}, with fuzziness parameter \eqn{m}, is applied to the \eqn{S} coarsest-scale midpoint
+#' \code{\link{pdDist}}, with fuzziness parameter \eqn{m}, is applied to the \eqn{S} coarsest-scale midpoint
 #' vectors, i.e. scale \code{j = 1}. \cr
 #' In the second step, a weighted fuzzy c-means algorithm based on the Euclidean
 #' distance function, also with fuzziness parameter \eqn{m}, is applied to the nonzero thresholded wavelet
@@ -66,7 +66,7 @@
 #'
 #' cl <- pdSpecClust(P, K=2)
 #'
-#' @seealso \code{\link{pdPgram}}, \code{\link{pdSpecEst}}, \code{\link{RiemmDist}}
+#' @seealso \code{\link{pdPgram}}, \code{\link{pdSpecEst}}, \code{\link{pdDist}}
 #'
 #' @references Chau, J. and von Sachs, R. (2017). \emph{Positive-definite multivariate spectral
 #' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
