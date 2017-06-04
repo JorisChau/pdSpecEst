@@ -11,4 +11,3 @@ pdRankTests(samples, sample.sizes, depth = c("gdd", "zonoid", "spatial"),
 \description{
 Depth-rank hypothesis testing for HPD matrices
 }
-

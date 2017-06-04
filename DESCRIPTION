@@ -1,9 +1,10 @@
 Package: pdSpecEst
 Type: Package
-Title: Positive-Definite Wavelet-Based Multivariate Spectral Analysis
-Version: 1.0.0
+Title: Toolbox for Analysis of Hermitian Positive-Definite Matrices
+Version: 1.1.0
 Authors@R: person("Joris", "Chau", email = "j.chau@uclouvain.be", role = c("aut", "cre"))
-Description: Implementation of wavelet-based multivariate spectral density estimation and clustering methods in the Riemannian manifold of Hermitian and positive-definite matrices.
+Description: Data depth functions and rank-based hypothesis tests for collections of Hermitian positive-definite matrices. 
+  Integrated data depth functions, wavelet regression and clustering methods for curves of Hermitian and positive-definite matrices. 
 URL: https://github.com/JorisChau/pdSpecEst
 Depends: R (>= 3.3.1)
 License: GPL (>= 2)
@@ -13,7 +14,7 @@ Imports:
     multitaper,
     Rcpp,
     ddalpha,
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 LinkingTo: Rcpp, RcppArmadillo (>= 0.7.500.0.0)
 SystemRequirements: GNU make, C++11
 Suggests: knitr,

@@ -9,4 +9,3 @@ pdDepth(y = NULL, X, method = c("zonoid", "gdd", "spatial"))
 \description{
 Zonoid and Geodesic Distance Depth for HPD matrices
 }
-
