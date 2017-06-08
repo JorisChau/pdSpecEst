@@ -1,31 +1,106 @@
-#' Zonoid and Geodesic Distance Depth for HPD matrices
+#' Data depth for HPD matrices
+#'
+#' \code{pdDepth} calculates the data depth of a Hermitian PD matrix with respect
+#' to a given data cloud (i.e. a sample or collection) of Hermitian PD matrices, or the integrated
+#' data depth of a sequence (array) of Hermitian PD matrices with respect to a given data cloud of
+#' sequences (arrays) of Hermitian PD matrices.
+#'
+#' Available pointwise or integrated manifold data depth functions for samples of Hermtian PD matrices are (i)
+#' manifold zonoid depth, (ii) geodesic distance depth and (iii) manifold spatial depth.
+#' The various data depth measures and their theoretical properties are described in
+#' (Chau and von Sachs, 2017b). If \code{y} is a \eqn{(d \times d)}-dimensional Hermitian PD matrix (i.e.
+#' \eqn{(d,d)}-dimensional array), \code{X} should be a \eqn{(d,d,S)}-dimensional array of Hermitian PD matrices and the pointwise
+#' data depth values are computed. If \code{y} is a sequence of \eqn{(d \times d)}-dimensional Hermitian PD matrices of length \code{n}
+#' (i.e. \eqn{(d,d,n)}-dimensional array), \code{X} should be a \eqn{(d,d,n,S)}-dimensional array of sequences of Hermitian PD matrices
+#' and the integrated data depth values according to (Chau and von Sachs, 2017b) are computed. If \code{is.null(y)}, the data depth
+#' of each individual object (i.e. a Hermitian PD matrix or a sequence of Hermitian PD matrices) in \code{X} is computed with
+#' respect to the data cloud \code{X}.
+#'
+#' @param y either a \eqn{(d,d)}-dimensional array corresponding to a \eqn{(d \times d)}-dimensional Hermitian PD matrix,
+#'  or a \eqn{(d, d, n)}-dimensional array corresponding to a sequence or curve of Hermitian PD matrices.
+#'  Defaults to \code{NULL}, in which case the data depth of each individual object in \code{X} with respect to the
+#'  data cloud \code{X} itself is returned.
+#' @param X depending on the input \code{y} either a \eqn{(d,d,S)}-dimensional array corresponding to a data cloud
+#'  \code{S} individual Hermitian PD matrices, or a \eqn{(d,d,n,S)}-dimensional array corresponding to a data cloud of
+#'  sequences or curves of \code{S} individual Hermitian PD matrices.
+#' @param method the data depth measure, one of \code{'zonoid'}, \code{'gdd'}, or \code{'spatial'} corresponding to
+#' the manifold zonoid depth, geodesic distance depth and manifold spatial depth respectively.
+#'
+#' @return If \code{!is.null(y)}, \code{pdDepth} returns the numeric depth value of \code{y} with
+#' respect to \code{X}. If \code{is.null(y)}, \code{pdDepth} returns a numeric vector of length \code{S} corresponding to the depth values
+#' of each individual object (i.e. either a HPD matrix or a sequence of HPD matrices) in \code{X} with respect to \code{X} itself.
+#'
+#' @examples
+#' ## Pointwise depth
+#' E <- pdSpecEst:::E_basis(2)
+#' X1 <- replicate(50, Expm(diag(2), pdSpecEst:::E_coeff_inv(rnorm(4), E)))
+#' pdDepth(y = diag(2), X1, method = "gdd") ## depth of one point
+#' pdDepth(X = X1, method = "gdd") ## depth of each point in the data cloud
+#'
+#' ## Integrated depth
+#' X2 <- replicate(50, replicate(5, Expm(diag(2), pdSpecEst:::E_coeff_inv(rnorm(4), E))))
+#' pdDepth(y = replicate(5, diag(2)), X2, method = "gdd") ## depth of one curve
+#' pdDepth(X = X2, method = "gdd") ## depth of each curve in the data cloud
+#'
+#' @seealso \code{\link{pdDist}}, \code{\link{pdRankTests}}
+#'
+#' @references Chau, J. and von Sachs, R. (2017b). \emph{Statistical data depth and rank-based
+#' tests for spectral density matrices}. Available at \url{http://arxiv.org/abs/...}.
 #'
 #' @importFrom ddalpha depth.zonoid
 #' @export
-pdDepth <- function(y = NULL, X, method = c('zonoid', 'gdd', 'spatial')){
+  pdDepth <- function(y = NULL, X, method = c('zonoid', 'gdd', 'spatial')){
 
   method <- match.arg(method, c('zonoid', 'gdd', 'spatial'))
   d <- dim(X)[1]
+  err.message <- "Incorrect input dimensions for arguments: 'y' and/or 'X',
+             consult the function documentation for the requested inputs."
   if(length(dim(X)) == 3){
-    n <- dim(X)[3]
+    if(!is.null(y)){
+      if(!isTRUE(all.equal(dim(y), dim(X)[c(1,2)]))){
+        stop(err.message)
+      }
+    }
+    S <- dim(X)[3]
   } else if(length(dim(X)) == 4){
-    n <- dim(X)[4]
-    N <- dim(X)[3]
+    if(!is.null(y)){
+      if(!isTRUE(all.equal(dim(y), dim(X)[c(1,2,3)]))){
+        stop(err.message)
+      }
+    }
+    S <- dim(X)[4]
+    n <- dim(X)[3]
+  } else{
+    stop(err.message)
   }
   E <- E_basis(d)
 
-  ## Zonoid depth
+  ## Manifold zonoid depth
   if(method == 'zonoid'){
     if(length(dim(X)) == 3){
-      X.vec <- sapply(1:n, function(i) E_coeff(Logm(y, X[,,i]), E))
-      depth <- ddalpha::depth.zonoid(t(as.matrix(rep(0, d^2))), t(X.vec))
-    } else if(length(dim(X)) == 4){
-      depth.t <- rep(NA, N)
-      for(t in 1:N){
-        X.vec <- sapply(1:n, function(i) E_coeff(Logm(y[,,t], X[,,t,i]), E))
-        depth.t[t] <- ddalpha::depth.zonoid(t(as.matrix(rep(0, d^2))), t(X.vec))
+      ZD <- function(y, X){
+        return(ddalpha::depth.zonoid(t(as.matrix(rep(0, d^2))), t(sapply(1:S,
+                                            function(s) E_coeff(Logm(y, X[,,s]), E)))))
       }
-      depth <- mean(depth.t)
+      if(!is.null(y)){
+        depth <- ZD(y, X)
+      } else{
+        depth <- sapply(1:S, function(s) ZD(X[,,s], X))
+      }
+    } else if(length(dim(X)) == 4){
+      iZD <- function(y, X){
+        depth.t <- numeric(n)
+        for(t in 1:n){
+          depth.t[t] <- ddalpha::depth.zonoid(t(as.matrix(rep(0, d^2))), t(sapply(1:S,
+                                            function(s) E_coeff(Logm(y[,,t], X[,,t,s]), E))))
+        }
+        return(mean(depth.t))
+      }
+      if(!is.null(y)){
+        depth <- iZD(y, X)
+      } else{
+        depth <- sapply(1:S, function(s) iZD(X[,,,s], X))
+      }
     }
   }
 
@@ -33,53 +108,55 @@ pdDepth <- function(y = NULL, X, method = c('zonoid', 'gdd', 'spatial')){
   if(method == 'gdd'){
     if(!is.null(y)){
       if(length(dim(X)) == 3){
-        depth <- exp(-mean(sapply(1:n, function(i) RiemmDist(y, X[,,i]))))
+        depth <- exp(-mean(sapply(1:S, function(s) pdDist(y, X[,,s]))))
       } else if(length(dim(X)) == 4){
-        depth <- exp(-mean(sapply(1:n, function(i) mean(sapply(1:N, function(t)
-          RiemmDist(y[,,t], X[,,t,i]))))))
+        depth <- exp(-mean(sapply(1:S, function(s) mean(sapply(1:n, function(t)
+          pdDist(y[,,t], X[,,t,s]))))))
       }
-    } else if(is.null(y)){
+    } else {
+      dist <- matrix(0, nrow = S, ncol = S)
+      grid <- expand.grid(1:S, 1:S)
+      grid <- grid[grid$Var1 > grid$Var2,]
       if(length(dim(X)) == 3){
-        dist <- matrix(0, nrow = n, ncol = n)
-        for(i in 1:n){
-          for(j in 1:i){
-            if(j < i){
-              dist[i,j] <- dist[j,i] <- RiemmDist(X[,,i], X[,,j])
-            }
-          }
-        }
-        depth <- exp(-colMeans(dist))
+        dist[lower.tri(dist)] <- mapply(function(i,j) pdDist(X[,,i], X[,,j]), grid$Var1, grid$Var2)
       } else if(length(dim(X)) == 4){
-        depth <- NaN
+        dist[lower.tri(dist)] <- mapply(function(i,j) mean(sapply(1:n, function(t)
+          pdDist(X[,,t,i], X[,,t,j]))), grid$Var1, grid$Var2)
       }
+      dist[upper.tri(dist)] <- t(dist)[upper.tri(dist)]
+      depth <- exp(-colMeans(dist))
     }
   }
 
-  ## Spatial depth
+  ## Manifold spatial depth
   if(method == 'spatial'){
-    if(!is.null(y)){
-      if(length(dim(X)) == 3){
-        y.isqrt <- iSqrt(y)
-        log.yx <- sapply(1:n, function(i) Logm(diag(d), (y.isqrt %*% X[,,i]) %*% y.isqrt), simplify = "array")
-        depth <- 1 - NormF(apply(sapply(1:n, function(i) log.yx[,,i]/NormF(log.yx[,,i]),
-                                                  simplify = "array"), c(1,2), mean))
-
-      } else if(length(dim(X)) == 4){
-        depth.t <- rep(NA, N)
-        for(t in 1:N){
-          y.isqrt <- iSqrt(y[,,t])
-          log.yx <- sapply(1:n, function(i) Logm(y[,,t], X[,,t,i]), simplify = "array")
-          dist.yx <- sapply(1:n, function(i) NormF((y.isqrt %*% log.yx[,,i]) %*% y.isqrt))
-          depth.t[t] <- 1 - NormF((y.isqrt %*% apply(sapply(1:n, function(i) log.yx[,,i]/dist.yx[i],
-                                    simplify = "array"), c(1,2), mean)) %*% y.isqrt)
-        }
-        depth <- mean(depth.t)
+    if(length(dim(X)) == 3){
+      SD <- function(y, X){
+        y.isqrt <- pdSpecEst:::iSqrt(y)
+        log.yx <- sapply(1:S, function(s) Logm(diag(d), (y.isqrt %*% X[,,s]) %*% y.isqrt), simplify = "array")
+        return(1 - NormF(apply(sapply(1:S, function(s) log.yx[,,s]/NormF(log.yx[,,s]),
+                                      simplify = "array"), c(1,2), mean)))
       }
-    } else if(is.null(y)){
-      if(length(dim(X)) == 3){
-        depth <- NaN
-      } else if(length(dim(X)) == 4){
-        depth <- NaN
+      if(!is.null(y)){
+        depth <- SD(y, X)
+      } else {
+        depth <- sapply(1:S, function(s) SD(X[,,s], X))
+      }
+    } else if(length(dim(X)) == 4){
+      iSD <- function(y, X){
+        depth.t <- numeric(n)
+        for(t in 1:n){
+          y.isqrt <- iSqrt(y[,,t])
+          log.yx <- sapply(1:S, function(s) Logm(diag(d), (y.isqrt %*% X[,,t,s]) %*% y.isqrt), simplify = "array")
+          depth.t[t] <- 1 - NormF(apply(sapply(1:S, function(s) log.yx[,,s]/NormF(log.yx[,,s]),
+                                               simplify = "array"), c(1,2), mean))
+        }
+        return(mean(depth.t))
+      }
+      if(!is.null(y)){
+        depth <- iSD(y, X)
+      } else{
+        depth <- sapply(1:S, function(s) iSD(X[,,,s], X))
       }
     }
   }

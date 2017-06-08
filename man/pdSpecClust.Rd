@@ -5,7 +5,7 @@
 \title{Wavelet-based clustering of multivariate spectra.}
 \usage{
 pdSpecClust(P, D.hat = NULL, K, m = 2, jmax, d.jmax = 0.1,
-  eps = c(1e-04, 1e-04), tau = 0.5, return.D = F, ...)
+  eps = c(1e-04, 1e-04), tau = 0.5, return.D = FALSE, ...)
 }
 \arguments{
 \item{P}{a (\eqn{d,d,m,S})-dimensional array, with \eqn{m} a dyadic number.}
@@ -34,13 +34,17 @@ algorithm (i.e. first clustering step), and \code{eps[2]} determines the termina
 \item{tau}{an optional argument tuning the weight given to the cluster assignments obtained in the first step of
 the clustering algorithm. If \code{tau} is not specified, by default \code{tau = 0.5}.}
 
+\item{return.D}{an optional argument specifying whether to return also the list of coarsest midpoints and wavelet coefficients
+(i.e. the features) for each individual subject, by default \code{return.D = FALSE}.}
+
 \item{...}{additional arguments passed on to \code{\link{pdSpecEst}}. These arguments are only used if
 \code{is.null(D.hat)}, otherwise the function \code{\link{pdSpecEst}} is not called.}
 }
 \value{
 The function returns an (\eqn{S, K})-dimensional matrix, where the value at position (\eqn{s,k}) in the
 matrix corresponds to the probabilistic cluster membership assignment of subject \eqn{s} with respect to
-cluster \eqn{k}.
+cluster \eqn{k}. If \code{isTRUE(return.D)} also returns the list of coarsest midpoints and wavelet coefficients
+of each subject used in the clustering procedure.
 }
 \description{
 \code{pdSpecClust} performs clustering of multivariate spectral matrices via a two-step fuzzy

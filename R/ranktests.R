@@ -1,111 +1,153 @@
-#' Depth-rank hypothesis testing for HPD matrices
+#' Rank-based hypothesis tests for HPD matrices
 #'
-#' @importFrom stats pnorm
-#' @importFrom stats pchisq
+#' \code{pdRankTests} performs generalized rank-based hypothesis testing for samples of Hermitian PD matrices or
+#' samples of sequences (arrays) of Hermitian PD matrices as detailed in (Chau and von Sachs, 2017b).
+#'
+#' For samples of \eqn{(d \times d)}-dimensional Hermitian PD matrices with pooled sample size \eqn{S}, the argument
+#' \code{data} is a \eqn{(d,d,S)}-dimensional array of Hermitian PD matrices, where the individual samples are
+#' combined along the third array dimension (using e.g. \code{\link[abind]{abind}}). For samples of sequences of
+#' \eqn{(d \times d)}-dimensional Hermitian PD matrices with pooled sample size \eqn{S}, the argument \code{data} is a
+#' \eqn{(d,d,n,S)}-dimensional array of sequences of Hermitian PD matrices, where the individual samples
+#' are combined along the fourth array dimension. The argument \code{sample.sizes} specifies the sizes of the individual
+#' samples so that \code{sum(sample.sizes) == S}. \cr
+#' The available generalized rank-based testing procedures, specificied by the argument \code{test}, are:
+#' \describe{
+#' \item{\code{"rank.sum"}}{Manifold Wilcoxon rank-sum test to test for homogeneity of distributions of two independent
+#' samples of Hermitian PD matrices or samples of sequences of Hermitian PD matrices. The usual univariate ranks are replaced by data depth
+#' induced ranks via \code{\link{pdDepth}}.}
+#' \item{\code{"krusk.wall"}}{Manifold Kruskall-Wallis test to test for homogeneity of distributions of more than two independent
+#' samples of Hermitian PD matrices or samples of sequences of Hermitian PD matrices. The usual univariate ranks are replaced by data depth
+#' induced ranks via \code{\link{pdDepth}}.}
+#' \item{\code{"signed-rank"}}{Manifold signed-rank test to test for homogeneity of distributions of independent paired or matched samples
+#' of Hermitian PD matrices. The manifold signed-rank test is \emph{not} based on data depth induced ranks, but on a specific difference score on the Riemannian
+#' manifold of Hermitian PD matrices.}
+#' \item{\code{"bartels"}}{Manifold Bartels-von Neumann test to test for randomness (i.e. exchangeability) within a single indepdendent sample of
+#' Hermitian PD matrices or a sample of sequences of Hermitian PD matrices. The usual univariate ranks are replaced by data depth induced
+#' ranks via \code{\link{pdDepth}}.}
+#' }
+#' Note in particular that the manifold signed-rank test also provides a valid test for equivalence of spectral matrices of two multivariate stationary time
+#' series based on the Hermitian PD periodogram matrices obtained via \code{\link{pdPgram}}, see (Chau and von Sachs, 2017b) for the details.
+#'
+#' @param data either a \eqn{(d,d,S)}-dimensional array corresponding to an array of pooled individual samples of Hermitian PD matrices, or a
+#' \eqn{(d,d,n,S)}-dimensional array corresponding to an array of pooled individual samples of sequences of Hermitian PD matrices.
+#' @param sample.sizes a numeric vector corresponding to the individual sample sizes in the argument \code{data}, such that \code{sum(sample.sizes) == S}.
+#' For tests \code{"signed-rank"} and \code{"bartels"}, \code{sample.sizes} is not required and is automatically determined from \code{data}.
+#' @param depth data depth measure used in the rank-based tests, one of \code{"gdd"}, \code{"zonoid"}, or \code{"spatial"} corresponding to the
+#' geodesic distance depth, manifold zonoid depth and manifold spatial depth respectively. Defaults to \code{"gdd"} and is not required for test
+#' \code{"signed.rank"}.
+#' @param test rank-based hypothesis testing procedure, one of \code{"rank.sum"}, \code{"krusk.wall"}, \code{"signed.rank"}, \code{"bartels"} explained
+#' in the Details section below.
+#'
+#' @return The function returns a list with three components:
+#' \item{p.value }{p-value of the test}
+#' \item{statistic }{test statistic of the test}
+#' \item{null.distr }{the distribution of the test statistic under the null hypothesis}
+#'
+#' @examples
+#' ## null hypothesis is true
+#' E <- pdSpecEst:::E_basis(2)
+#' data <- replicate(100, Expm(diag(2), pdSpecEst:::E_coeff_inv(rnorm(4), E)))
+#' pdRankTests(data, sample.sizes = c(50, 50), test = "rank.sum") ## homogeneity 2 samples
+#' pdRankTests(data, sample.sizes = rep(25, 4), test = "krusk.wall") ## homogeneity 4 samples
+#' pdRankTests(data, test = "bartels") ## randomness
+#'
+#' ## null hypothesis is false
+#' data1 <- abind::abind(data, replicate(50, Expm(diag(2), pdSpecEst:::E_coeff_inv(0.5 * rnorm(4), E))))
+#' pdRankTests(data1, sample.sizes = c(100, 50), test = "rank.sum")
+#' pdRankTests(data1, sample.sizes = rep(50, 3), test = "krusk.wall")
+#' pdRankTests(data1, test = "bartels")
+#'
+#' ## signed-rank test for equivalence of spectra
+#' ## ARMA(1,1) process: Example 11.4.1 in (Brockwell and Davis, 1991)
+#' Phi <- array(c(0.7, 0, 0, 0.6, rep(0, 4)), dim = c(2, 2, 2))
+#' Theta <- array(c(0.5, -0.7, 0.6, 0.8, rep(0, 4)), dim = c(2, 2, 2))
+#' Sigma <- matrix(c(1, 0.71, 0.71, 2), nrow = 2)
+#' pgram <- function(Sigma) pdPgram(rARMA(2^9, 2, Phi, Theta, Sigma)$X)$P
+#'
+#' ## null is true
+#' pdRankTests(abind::abind(pgram(Sigma), pgram(Sigma)), test = "signed.rank")
+#' ## null is false
+#' pdRankTests(abind::abind(pgram(Sigma), pgram(0.5 * Sigma)), test = "signed.rank")
+#'
+#' @seealso \code{\link{pdDepth}}, \code{\link{pdPgram}}
+#'
+#' @references Chau, J. and von Sachs, R. (2017b). \emph{Statistical data depth and rank-based
+#' tests for spectral density matrices}. Available at \url{http://arxiv.org/abs/...}.
+#' @references Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
+#'
+#' @importFrom utils tail
+#'
 #' @export
-pdRankTests <- function(samples, sample.sizes, depth = c('gdd', 'zonoid', 'spatial'),
-                        test = c('rank.sum', 'krusk.wall', 'signed.rank', 'bartels',
-                                 'rank.sum.fun', 'bartels.fun')){
+pdRankTests <- function(data, sample.sizes, depth = c('gdd', 'zonoid', 'spatial'),
+                        test = c('rank.sum', 'krusk.wall', 'signed.rank', 'bartels')){
   if(missing(depth)){
     depth <- 'gdd'
   }
-  test <- match.arg(test, c('rank.sum', 'krusk.wall', 'signed.rank', 'bartels', 'rank.sum.fun', 'bartels.fun'))
+  ddim <- dim(data)
+  if(missing(sample.sizes)){
+    sample.sizes <- NA
+  }
+  test <- match.arg(test, c('rank.sum', 'krusk.wall', 'signed.rank', 'bartels'))
   depth <- match.arg(depth, c('gdd', 'zonoid', 'spatial'))
+  err.message <- "Incorrect input lenghts for arguments: 'samples' and/or 'sample.sizes',
+                  consult the function documentation for the requested inputs."
   n <- sample.sizes
-  ddim <- dim(samples)
+  if((test == 'krusk.wall') & (length(n) == 2)){
+    warning("Argument 'test' changed to 'rank.sum' to test for homogeneity of
+            distributions of two independent samples of HPD matrices.")
+    test <- 'rank.sum'
+  }
 
+  ## Manifold rank-sum test
   if(test == 'rank.sum'){
-    if (!isTRUE((length(n) == 2) & (length(ddim) == 3) & (ddim[3] == sum(n))))  {
-      stop("Incorrect input lenghts for arguments: 'samples' and/or 'sample.sizes',
-                  consult the function documentation for the requested inputs.")
+    if (!isTRUE((((length(ddim) == 3) & (ddim[3] == sum(n))) | ((length(ddim) == 4) & (ddim[4] == sum(n)))) &
+                (ddim[1] == ddim[2]) & (length(n) == 2))){
+      stop(err.message)
     }
-    if(depth == 'gdd'){
-      dd <- pdDepth(X = samples, method = 'gdd')
-    } else if(depth != 'gdd'){
-      dd <- sapply(1:sum(n), function(i) pdDepth(y = samples[,,i], X = samples,
-                          method = ifelse(depth == 'zonoid', 'zonoid', 'spatial')))
-    }
+
+    dd <- pdDepth(X = data, method = depth)
     T1 <- (sum(rank(dd, ties.method = 'random')[1:n[1]]) - n[1]*(sum(n)+1)/2) / sqrt(n[1]*n[2]*(sum(n)+1) / 12)
 
     output <- list(p.value = 2 * stats::pnorm(abs(T1), lower.tail = F), statistic = T1,
                    null.distr = 'Standard normal distribution')
   }
 
-  if(test == 'rank.sum.fun'){
-    if (!isTRUE((length(n) == 2) & (length(ddim) == 4) & (ddim[4] == sum(n)))) {
-      stop("Incorrect input lengths for arguments: 'samples' and/or 'sample.sizes',
-             consult the function documentation for the requested inputs.")
-    }
-      dd <- sapply(1:sum(n), function(i) pdDepth(y = samples[,,,i], X = samples,
-                                                 method = ifelse(depth == 'gdd', 'gdd', 'zonoid')))
-
-      T1 <- (sum(rank(dd, ties.method = 'random')[1:n[1]]) - n[1]*(sum(n)+1)/2) / sqrt(n[1]*n[2]*(sum(n)+1) / 12)
-
-      output <- list(p.value = 2 * stats::pnorm(abs(T1), lower.tail = F), statistic = T1,
-                     null.distr = 'Standard normal distribution')
-  }
-
+  ## Manifold Kruskal-Wallis test
   if(test == 'krusk.wall'){
     N <- sum(n)
-    if (!isTRUE((length(ddim) == 3) & (ddim[3] == N)))  {
-      stop("Incorrect input lenghts for arguments: 'samples' and/or 'sample.sizes',
-           consult the function documentation for the requested inputs.")
+    if (!isTRUE((((length(ddim) == 3) & (ddim[3] == N)) | ((length(ddim) == 4) & (ddim[4] == N))) &
+                (ddim[1] == ddim[2]) & (length(n) > 2))) {
+      stop(err.message)
     }
-
-    if(depth == 'gdd'){
-      dd <- pdDepth(X = samples, method = 'gdd')
-    } else if(depth != 'gdd'){
-      dd <- sapply(1:sum(n), function(i) pdDepth(y = samples[,,i], X = samples,
-                                                 method = ifelse(depth == 'zonoid', 'zonoid', 'spatial')))
-    }
-
-    R_bar <- unname(unlist(lapply(split(rank(dd, ties.method = 'random'), f = rep(c(1,2,3), times = n)), mean)))
+    dd <- pdDepth(X = data, method = depth)
+    R_bar <- unname(unlist(lapply(split(rank(dd, ties.method = 'random'), f = rep(1:length(n), times = n)), mean)))
     T2 <- 12 / (N * (N+1)) * sum(n * (R_bar - (N+1)/2)^2)
 
     output <- list(p.value = min(stats::pchisq(T2, df = 2, lower.tail = T), pchisq(T2, df = 2, lower.tail = F)),
-                statistic = T2, null.distr = "Chi-squared distribution (df = 2)")
+                   statistic = T2, null.distr = "Chi-squared distribution (df = 2)")
   }
 
+  ## Manifold signed-rank test
   if(test == 'signed.rank'){
-    if (!isTRUE((length(ddim) == 3) & (ddim[3] == 2*n)))  {
-      stop("Incorrect input lenghts for arguments: 'samples' and/or 'sample.sizes',
-           consult the function documentation for the requested inputs.")
+    if (!isTRUE((length(ddim) == 3) & (ddim[1] == ddim[2]) & (ddim[3] %% 2 == 0)))  {
+      stop(err.message)
     }
-    d <- dim(samples[,,1])[1]
+    n <- ddim[3]/2
+    d <- ddim[1]
     ast <- function(A,B) t(Conj(A)) %*% B %*% A
-    diff <- sapply(1:n, function(i) Re(sum(diag(Logm(diag(d), ast(iSqrt(samples[,,n+i]), samples[,,i]))))))
+    diff <- sapply(1:n, function(i) Re(sum(diag(Logm(diag(d), ast(iSqrt(data[,,n+i]), data[,,i]))))))
 
-    univ_test <- stats::wilcox.test(x = diff, y = rep(0, n), paired = T, correct = T)
-    output <- list(p.value = univ_test$p.value, statistic = univ_test$statistic, null.distr = univ_test$method)
+    T3 <- stats::wilcox.test(x = diff, y = rep(0, n), paired = T, correct = T)
+    output <- list(p.value = T3$p.value, statistic = T3$statistic, null.distr = T3$method)
   }
 
+  ## Manifold Bartels-von Neumann test
   if(test == 'bartels'){
-    if (!isTRUE((length(ddim) == 3) & (ddim[3] == n)))  {
-      stop("Incorrect input lenghts for arguments: 'samples' and/or 'sample.sizes',
-           consult the function documentation for the requested inputs.")
+    if (!isTRUE(((length(ddim) == 3) | ((length(ddim) == 4))) & (ddim[1] == ddim[2]))) {
+      stop(err.message)
     }
-    if(depth == 'gdd'){
-      dd <- pdDepth(X = samples, method = 'gdd')
-    } else if(depth != 'gdd'){
-      dd <- sapply(1:n, function(i) pdDepth(y = samples[,,i], X = samples,
-                                                 method = ifelse(depth == 'zonoid', 'zonoid', 'spatial')))
-    }
-
-    T4 <- sum(diff(rank(dd, ties.method = 'random'))^2) / (n*(n^2-1)/12)
-    sigma <- sqrt(4*(n-2)*(5*n^2 - 2*n - 9) / (5*n*(n+1)*(n-1)^2))
-
-    output <- list(p.value = 2 * pnorm(abs((T4-2)/sigma), lower.tail = F), statistic = (T4-2)/sigma,
-                   null.distr = 'Standard normal distribution')
-  }
-
-  if(test == 'bartels.fun'){
-    if (!isTRUE((length(ddim) == 4) & (ddim[4] == n))) {
-      stop("Incorrect input lengths for arguments: 'samples' and/or 'sample.sizes',
-             consult the function documentation for the requested inputs.")
-    }
-    dd <- sapply(1:n, function(i) pdDepth(y = samples[,,,i], X = samples,
-                                               method = ifelse(depth == 'gdd', 'gdd', 'zonoid')))
-
+    n <- utils::tail(ddim, 1)
+    dd <- pdDepth(X = data, method = depth)
     T4 <- sum(diff(rank(dd, ties.method = 'random'))^2) / (n*(n^2-1)/12)
     sigma <- sqrt(4*(n-2)*(5*n^2 - 2*n - 9) / (5*n*(n+1)*(n-1)^2))
 

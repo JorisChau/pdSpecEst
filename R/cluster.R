@@ -45,12 +45,15 @@
 #' (i.e. second clustering step). If \code{eps} is not specified, by default \code{eps = c(1E-4, 1E-4)}.
 #' @param tau an optional argument tuning the weight given to the cluster assignments obtained in the first step of
 #' the clustering algorithm. If \code{tau} is not specified, by default \code{tau = 0.5}.
+#' @param return.D an optional argument specifying whether to return also the list of coarsest midpoints and wavelet coefficients
+#' (i.e. the features) for each individual subject, by default \code{return.D = FALSE}.
 #' @param ... additional arguments passed on to \code{\link{pdSpecEst}}. These arguments are only used if
 #' \code{is.null(D.hat)}, otherwise the function \code{\link{pdSpecEst}} is not called.
 #'
 #' @return The function returns an (\eqn{S, K})-dimensional matrix, where the value at position (\eqn{s,k}) in the
 #' matrix corresponds to the probabilistic cluster membership assignment of subject \eqn{s} with respect to
-#' cluster \eqn{k}.
+#' cluster \eqn{k}. If \code{isTRUE(return.D)} also returns the list of coarsest midpoints and wavelet coefficients
+#' of each subject used in the clustering procedure.
 #'
 #' @examples
 #' ## ARMA(1,1) process: Example 11.4.1 in (Brockwell and Davis, 1991)
@@ -73,7 +76,7 @@
 #' @references Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
 #'
 #' @export
-pdSpecClust <- function(P, D.hat = NULL, K, m = 2, jmax, d.jmax = 0.1, eps = c(1e-04, 1e-04), tau = 0.5, return.D = F, ...) {
+pdSpecClust <- function(P, D.hat = NULL, K, m = 2, jmax, d.jmax = 0.1, eps = c(1e-04, 1e-04), tau = 0.5, return.D = FALSE, ...) {
 
   ## missing arguments
   if (missing(P)) {
