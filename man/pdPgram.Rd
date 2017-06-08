@@ -15,7 +15,7 @@ of the time series.}
 \code{B = d}, such that the averaged periodogram is guaranteed to be positive-definite.}
 
 \item{method}{the tapering method, either \code{"multitaper"} or \code{"bartlett"} explained in the Details
-section below.}
+section below. Defaults to \code{"bartlett"}.}
 
 \item{bias.corr}{should the manifold bias-correction be applied to the Hermitian PD periodogram matrix?
 Defaults to \code{TRUE}.}

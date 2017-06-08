@@ -19,7 +19,7 @@
 #'  or the number of non-overlapping segments over which the averaged periodogram is computed. By default,
 #' \code{B = d}, such that the averaged periodogram is guaranteed to be positive-definite.
 #' @param method the tapering method, either \code{"multitaper"} or \code{"bartlett"} explained in the Details
-#' section below.
+#' section below. Defaults to \code{"bartlett"}.
 #' @param bias.corr should the manifold bias-correction be applied to the Hermitian PD periodogram matrix?
 #' Defaults to \code{TRUE}.
 #'
@@ -55,6 +55,9 @@
 #' @export
 pdPgram <- function(X, B, method = c("multitaper", "bartlett"), bias.corr = T) {
 
+  if(missing(method)){
+    method <- "bartlett"
+  }
   method <- match.arg(method, c("multitaper", "bartlett"))
   d <- ncol(X)
   n <- nrow(X)
