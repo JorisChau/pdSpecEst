@@ -52,7 +52,8 @@
 #' pdRankTests(data, test = "bartels") ## randomness
 #'
 #' ## null hypothesis is false
-#' data1 <- abind::abind(data, replicate(50, Expm(diag(2), pdSpecEst:::E_coeff_inv(0.5 * rnorm(4), E))))
+#' data1 <- array(c(data, replicate(50, Expm(diag(2), pdSpecEst:::E_coeff_inv(0.5 * rnorm(4), E)))),
+#'                  dim = c(2,2,150))
 #' pdRankTests(data1, sample.sizes = c(100, 50), test = "rank.sum")
 #' pdRankTests(data1, sample.sizes = rep(50, 3), test = "krusk.wall")
 #' pdRankTests(data1, test = "bartels")
@@ -65,9 +66,9 @@
 #' pgram <- function(Sigma) pdPgram(rARMA(2^9, 2, Phi, Theta, Sigma)$X)$P
 #'
 #' ## null is true
-#' pdRankTests(abind::abind(pgram(Sigma), pgram(Sigma)), test = "signed.rank")
+#' pdRankTests(array(c(pgram(Sigma), pgram(Sigma)), dim = c(2,2,2^8)), test = "signed.rank")
 #' ## null is false
-#' pdRankTests(abind::abind(pgram(Sigma), pgram(0.5 * Sigma)), test = "signed.rank")
+#' pdRankTests(array(c(pgram(Sigma), pgram(0.5 * Sigma)), dim = c(2,2,2^8)), test = "signed.rank")
 #'
 #' @seealso \code{\link{pdDepth}}, \code{\link{pdPgram}}
 #'
@@ -76,6 +77,8 @@
 #' @references Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
 #'
 #' @importFrom utils tail
+#' @importFrom stats pchisq
+#' @importFrom stats pnorm
 #'
 #' @export
 pdRankTests <- function(data, sample.sizes, depth = c('gdd', 'zonoid', 'spatial'),
@@ -135,7 +138,7 @@ pdRankTests <- function(data, sample.sizes, depth = c('gdd', 'zonoid', 'spatial'
     n <- ddim[3]/2
     d <- ddim[1]
     ast <- function(A,B) t(Conj(A)) %*% B %*% A
-    diff <- sapply(1:n, function(i) Re(sum(diag(Logm(diag(d), ast(iSqrt(data[,,n+i]), data[,,i]))))))
+      diff <- sapply(1:n, function(i) Re(sum(diag(Logm(diag(d), ast(iSqrt(data[,,n+i]), data[,,i]))))))
 
     T3 <- stats::wilcox.test(x = diff, y = rep(0, n), paired = T, correct = T)
     output <- list(p.value = T3$p.value, statistic = T3$statistic, null.distr = T3$method)

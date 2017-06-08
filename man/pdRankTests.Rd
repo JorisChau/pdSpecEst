@@ -66,7 +66,8 @@ pdRankTests(data, sample.sizes = rep(25, 4), test = "krusk.wall") ## homogeneity
 pdRankTests(data, test = "bartels") ## randomness
 
 ## null hypothesis is false
-data1 <- abind::abind(data, replicate(50, Expm(diag(2), pdSpecEst:::E_coeff_inv(0.5 * rnorm(4), E))))
+data1 <- array(c(data, replicate(50, Expm(diag(2), pdSpecEst:::E_coeff_inv(0.5 * rnorm(4), E)))),
+                 dim = c(2,2,150))
 pdRankTests(data1, sample.sizes = c(100, 50), test = "rank.sum")
 pdRankTests(data1, sample.sizes = rep(50, 3), test = "krusk.wall")
 pdRankTests(data1, test = "bartels")
@@ -79,9 +80,9 @@ Sigma <- matrix(c(1, 0.71, 0.71, 2), nrow = 2)
 pgram <- function(Sigma) pdPgram(rARMA(2^9, 2, Phi, Theta, Sigma)$X)$P
 
 ## null is true
-pdRankTests(abind::abind(pgram(Sigma), pgram(Sigma)), test = "signed.rank")
+pdRankTests(array(c(pgram(Sigma), pgram(Sigma)), dim = c(2,2,2^8)), test = "signed.rank")
 ## null is false
-pdRankTests(abind::abind(pgram(Sigma), pgram(0.5 * Sigma)), test = "signed.rank")
+pdRankTests(array(c(pgram(Sigma), pgram(0.5 * Sigma)), dim = c(2,2,2^8)), test = "signed.rank")
 
 }
 \references{

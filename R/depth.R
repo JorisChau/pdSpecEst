@@ -132,7 +132,7 @@
   if(method == 'spatial'){
     if(length(dim(X)) == 3){
       SD <- function(y, X){
-        y.isqrt <- pdSpecEst:::iSqrt(y)
+        y.isqrt <- iSqrt(y)
         log.yx <- sapply(1:S, function(s) Logm(diag(d), (y.isqrt %*% X[,,s]) %*% y.isqrt), simplify = "array")
         return(1 - NormF(apply(sapply(1:S, function(s) log.yx[,,s]/NormF(log.yx[,,s]),
                                       simplify = "array"), c(1,2), mean)))

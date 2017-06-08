@@ -35,7 +35,7 @@ PD periodogram matrix is rescaled by the \emph{manifold} bias-correction in (Cha
 \details{
 If \code{method == "multitaper"}, \code{pdPgram} calculates a \eqn{(d \times d)}-dimensional multitaper
 periodogram matrix based on \eqn{B} Discrete Prolate Spheroidal (i.e. Slepian) orthogonal tapering functions
-as in \cite{\link[dpss]{multitaper}} applied to the \eqn{d}-dimensional time series \code{X}. If \eqn{B \geq d}, the multitaper periodogram matrix
+as in \cite{\link[multitaper]{dpss}} applied to the \eqn{d}-dimensional time series \code{X}. If \eqn{B \geq d}, the multitaper periodogram matrix
 is guaranteed to be Hermitian positive-definite. If \code{method == "bartlett"}, \code{pdPgram} calculates
 an averaged periodogram matrix based on Bartlett's method by averaging the periodogram matrices of \code{B}
 non-overlapping segments of the \eqn{d}-dimensional time series \code{X}. Again, if \eqn{B \geq d}, the averaged
@@ -67,5 +67,5 @@ estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/ab
 Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
 }
 \seealso{
-\code{\link{rARMA}}, \code{\link[dpss]{multitaper}}
+\code{\link{rARMA}}, \code{\link[multitaper]{dpss}}
 }

@@ -6,7 +6,7 @@
 #'
 #' If \code{method == "multitaper"}, \code{pdPgram} calculates a \eqn{(d \times d)}-dimensional multitaper
 #' periodogram matrix based on \eqn{B} Discrete Prolate Spheroidal (i.e. Slepian) orthogonal tapering functions
-#' as in \cite{\link[dpss]{multitaper}} applied to the \eqn{d}-dimensional time series \code{X}. If \eqn{B \geq d}, the multitaper periodogram matrix
+#' as in \cite{\link[multitaper]{dpss}} applied to the \eqn{d}-dimensional time series \code{X}. If \eqn{B \geq d}, the multitaper periodogram matrix
 #' is guaranteed to be Hermitian positive-definite. If \code{method == "bartlett"}, \code{pdPgram} calculates
 #' an averaged periodogram matrix based on Bartlett's method by averaging the periodogram matrices of \code{B}
 #' non-overlapping segments of the \eqn{d}-dimensional time series \code{X}. Again, if \eqn{B \geq d}, the averaged
@@ -38,7 +38,7 @@
 #' @note The curve of HPD periodogram matrices obtained from \code{pdPgram(X)$P} can be
 #' used as input in the functions \code{\link{WavTransf}} or \code{\link{pdSpecEst}}.
 #'
-#' @seealso \code{\link{rARMA}}, \code{\link[dpss]{multitaper}}
+#' @seealso \code{\link{rARMA}}, \code{\link[multitaper]{dpss}}
 #'
 #' @examples
 #' ## ARMA(1,1) process: Example 11.4.1 in (Brockwell and Davis, 1991)
