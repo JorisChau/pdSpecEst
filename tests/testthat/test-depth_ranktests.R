@@ -6,10 +6,10 @@ test_that("Correctly working data depth and rank-based tests", {
   d <- 2
   mu <- diag(d)
   imu <- replicate(3, mu)
-  E <- pdSpecEst:::E_basis(d)
+  E <- E_basis(d)
 
   ## Pointwise depth
-  X1 <- replicate(10, Expm(mu, pdSpecEst:::E_coeff_inv(rnorm(d^2), E)))
+  X1 <- replicate(10, Expm(mu, E_coeff_inv(rnorm(d^2), E)))
   dd1 <- pdDepth(mu, X1, "zonoid")
   dd2 <- pdDepth(mu, X1, "gdd")
   dd3 <- pdDepth(mu, X1, "spatial")
@@ -18,7 +18,7 @@ test_that("Correctly working data depth and rank-based tests", {
   dd6 <- pdDepth(X = X1, method = "spatial")
 
   ## Integrated depth
-  X2 <- replicate(10, replicate(3, Expm(mu, pdSpecEst:::E_coeff_inv(rnorm(d^2), E))))
+  X2 <- replicate(10, replicate(3, Expm(mu, E_coeff_inv(rnorm(d^2), E))))
   idd1 <- pdDepth(imu, X2, "zonoid")
   idd2 <- pdDepth(imu, X2, "gdd")
   idd3 <- pdDepth(imu, X2, "spatial")
