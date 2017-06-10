@@ -13,6 +13,10 @@ test_that("Correctly working geometric tools", {
   expect_equal(c(Sqrt(P1) %*% iSqrt(P1)), as.complex(diag(d)))
   expect_equal(E_coeff_inv(E_coeff(P1, E), E), P1)
   expect_equal(KarchMean(array(c(P1, P2), dim = c(d, d, 2))), Mid(P1, P2))
-  expect_true(is.numeric(RiemmDist(P1, P2)))
+  expect_true(is.numeric(pdDist(P1, P2)))
+  expect_true(is.numeric(pdDist(P1, P2), method = "logEuclidean"))
+  expect_true(is.numeric(pdDist(P1, P2), method = "Cholesky"))
+  expect_true(is.numeric(pdDist(P1, P2), method = "Euclidean"))
+  expect_true(is.numeric(pdDist(P1, P2), method = "Procrustes"))
 
 })

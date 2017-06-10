@@ -82,7 +82,7 @@ Y3a <- make_sample(null = F) ## null false (scale change)
 
 ## Signed-rank test
 pdRankTests(array(c(X3, Y3), dim = c(2, 2, 100)), test = "signed.rank") ## null true
-pdRankTests(array(c(X3, Y3a), dim = c(2, 2, 100)), test = "signed.rank") ## null false
+pdRankTests(array(c(X3, Y3a), dim = c(2, 2, 100)), test = "signed.rank")[1] ## null false
 
 
 ## ------------------------------------------------------------------------
