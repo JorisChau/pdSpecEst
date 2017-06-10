@@ -4,8 +4,8 @@
 \alias{pdRankTests}
 \title{Rank-based hypothesis tests for HPD matrices}
 \usage{
-pdRankTests(data, sample.sizes, depth = c("gdd", "zonoid", "spatial"),
-  test = c("rank.sum", "krusk.wall", "signed.rank", "bartels"))
+pdRankTests(data, sample.sizes, test = c("rank.sum", "krusk.wall",
+  "signed.rank", "bartels"), depth = c("gdd", "zonoid", "spatial"))
 }
 \arguments{
 \item{data}{either a \eqn{(d,d,S)}-dimensional array corresponding to an array of pooled individual samples of Hermitian PD matrices, or a
@@ -14,12 +14,12 @@ pdRankTests(data, sample.sizes, depth = c("gdd", "zonoid", "spatial"),
 \item{sample.sizes}{a numeric vector corresponding to the individual sample sizes in the argument \code{data}, such that \code{sum(sample.sizes) == S}.
 For tests \code{"signed-rank"} and \code{"bartels"}, \code{sample.sizes} is not required and is automatically determined from \code{data}.}
 
+\item{test}{rank-based hypothesis testing procedure, one of \code{"rank.sum"}, \code{"krusk.wall"}, \code{"signed.rank"}, \code{"bartels"} explained
+in the Details section below.}
+
 \item{depth}{data depth measure used in the rank-based tests, one of \code{"gdd"}, \code{"zonoid"}, or \code{"spatial"} corresponding to the
 geodesic distance depth, manifold zonoid depth and manifold spatial depth respectively. Defaults to \code{"gdd"} and is not required for test
 \code{"signed.rank"}.}
-
-\item{test}{rank-based hypothesis testing procedure, one of \code{"rank.sum"}, \code{"krusk.wall"}, \code{"signed.rank"}, \code{"bartels"} explained
-in the Details section below.}
 }
 \value{
 The function returns a list with three components:
@@ -34,11 +34,10 @@ samples of sequences (arrays) of Hermitian PD matrices as detailed in (Chau and 
 \details{
 For samples of \eqn{(d \times d)}-dimensional Hermitian PD matrices with pooled sample size \eqn{S}, the argument
 \code{data} is a \eqn{(d,d,S)}-dimensional array of Hermitian PD matrices, where the individual samples are
-combined along the third array dimension (using e.g. \code{\link[abind]{abind}}). For samples of sequences of
-\eqn{(d \times d)}-dimensional Hermitian PD matrices with pooled sample size \eqn{S}, the argument \code{data} is a
-\eqn{(d,d,n,S)}-dimensional array of sequences of Hermitian PD matrices, where the individual samples
-are combined along the fourth array dimension. The argument \code{sample.sizes} specifies the sizes of the individual
-samples so that \code{sum(sample.sizes) == S}. \cr
+combined along the third array dimension. For samples of sequences of \eqn{(d \times d)}-dimensional Hermitian PD
+matrices with pooled sample size \eqn{S}, the argument \code{data} is a \eqn{(d,d,n,S)}-dimensional array of sequences
+of Hermitian PD matrices, where the individual samples are combined along the fourth array dimension. The argument
+\code{sample.sizes} specifies the sizes of the individual samples so that \code{sum(sample.sizes) == S}. \cr
 The available generalized rank-based testing procedures, specificied by the argument \code{test}, are:
 \describe{
 \item{\code{"rank.sum"}}{Manifold Wilcoxon rank-sum test to test for homogeneity of distributions of two independent

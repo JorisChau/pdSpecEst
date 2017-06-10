@@ -1,11 +1,11 @@
 Package: pdSpecEst
 Type: Package
-Title: Toolbox for Analysis of Hermitian Positive-Definite Matrices
+Title: Data Analysis for Symmetric or Hermitian Positive-Definite Matrices
 Version: 1.1.0
 Authors@R: person("Joris", "Chau", email = "j.chau@uclouvain.be", role = c("aut", "cre"))
 Description: Data depth functions and rank-based hypothesis tests for collections of Hermitian positive-definite matrices. 
   Integrated data depth functions, wavelet regression and clustering methods for curves of Hermitian and positive-definite matrices. 
-URL: https://github.com/JorisChau/pdSpecEst
+URL: https://github.com/JorisChau/pdSpecEst, https://jchau.shinyapps.io/pdSpecEst_app/
 Depends: R (>= 3.3.1)
 License: GPL (>= 2)
 LazyData: TRUE

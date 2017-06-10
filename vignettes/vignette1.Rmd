@@ -1,12 +1,12 @@
 ---
-title: "The `pdSpecEst` package"
+title: "Wavelet-based multivariate spectral analysis"
 author: "Joris Chau"
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
     fig_caption: yes
 vignette: >
-  %\VignetteIndexEntry{"The `pdSpecEst` package"}
+  %\VignetteIndexEntry{"Wavelet-based multivariate spectral analysis"}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 references:
@@ -26,8 +26,7 @@ references:
 ```{r, echo = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
-
-## Introduction
+## Introduction 
 
 In nonparametric estimation of the autocovariance matrices or the spectral density
 matrix of a second-order stationary multivariate time series, it is important to preserve

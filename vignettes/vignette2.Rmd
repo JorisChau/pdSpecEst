@@ -1,0 +1,200 @@
+---
+title: "Data depth and rank-based tests for HPD matrices"
+author: "Joris Chau"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    fig_caption: yes
+vignette: >
+  %\VignetteIndexEntry{"Data depth and rank-based tests for HPD matrices"}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+references:
+- id: COvS17
+  title: 'Statistical data depth and rank-based tests for spectral density matrices'
+  author:
+  - family: Chau  
+    given: J.
+  - family: Ombao
+    given: H.
+  - family: von Sachs
+    given: R.
+  URL: 'http://arxiv.org/abs/...'
+  type: article-journal
+  issued:
+    year: 2017
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+## Introduction 
+
+In multivariate time series analysis, the non-degenerate autocovariance matrices or the non-
+degenerate spectral density matrix of a (second-order stationary) multivariate time series are necessarily Hermitian positive-definite (HPD) matrices. In [@COvS17], we generalize the concept of data depth from real vectors in a Euclidean space to *manifold* data depth for matrix-valued observations in the non-Euclidean space of HPD matrices. Data depth is an important tool in statistical data analysis measuring the *depth* of a point with respect to a data cloud or probability distribution. In this way, depth functions provide a center-to-outward ordering of multivariate data observations, thereby generalizing the notion of a rank for univariate observations.
+
+The proposed data depth measures can be used to characterize central regions and points or detect outlying objects in samples of HPD matrices, such as collections of covariance or spectral density matrices. The data depth measures also provide a practical framework for rank-based hypothesis testing in the context of samples of HPD matrices, by replacing the usual ranks by the ranks induced by the data depth. Other applications of data depth include the construction of confidence regions, clustering, or classification for samples of HPD matrices.
+
+In this vignette we demonstrate the use of the functions `pdDepth()` and `pdRankTests()` to compute data depth values of HPD matrix-valued observations and perform rank-based hypothesis testing for samples of HPD matrices.
+
+## Data depth of HPD matrices with `pdDepth()`
+
+First, we generate a pointwise random sample of `(2,2)`-dimensional HPD matrix-valued observations, such as a random collection covariance matrices, using the exponential map `Expm()`, with underlying geometric (i.e. Karcher or Fréchet) mean equal to the identity matrix `diag(2)`. Second, we generate a random sample of sequences (curves) of `(2,2)`-dimensional HPD matrix-valued observations, such as a random collection of spectral density matrices, with underlying geometric mean curve equal to an array of rescaled identity matrices. 
+ 
+```{r}
+library(pdSpecEst)
+set.seed(100)
+
+## Pointwise random sample
+E <- pdSpecEst:::E_basis(2) 
+X1 <- replicate(50, Expm(diag(2), pdSpecEst:::E_coeff_inv(0.5 * rnorm(4), E))) 
+str(X1)
+
+## Curve random sample
+X2 <- replicate(50, sapply(1:5, function(i) Expm(i * diag(2), pdSpecEst:::E_coeff_inv(0.5 * rnorm(4), i * E)), simplify = "array"))
+str(X2)
+```
+
+**Remark:** The internal function `E_basis(2)` constructs an orthonormal basis of the tangent space at the identity element `diag(2)`, and the internal function `E_coeff_inv()` converts (real-valued) basis components to tangent space elements using the orthonormal basis.
+
+With `pdDepth()`, we can compute the data depth of a single HPD matrix (resp. curve of HPD matrices) `y` with respect to a sample of HPD matrices (resp. sample of curves of HPD matrices) `X`. For details on the available manifold depth functions, see [@COvS17].
+
+```{r}
+## Pointwise depth
+pdDepth(y = diag(2), X = X1, method = "gdd") ## geodesic distance depth
+pdDepth(y = diag(2), X = X1, method = "zonoid") ## manifold zonoid depth
+pdDepth(y = diag(2), X = X1, method = "spatial") ## manifold spatial depth
+
+## Integrated depth 
+pdDepth(y = sapply(1:5, function(i) i * diag(2), simplify = "array"), X = X2, method = "gdd") 
+pdDepth(y = sapply(1:5, function(i) i * diag(2), simplify = "array"), X = X2, method = "zonoid") 
+pdDepth(y = sapply(1:5, function(i) i * diag(2), simplify = "array"), X = X2, method = "spatial") 
+```
+
+We can also compute the data depth of each individual object in `X` with respect to the sample `X` itself by leaving the argument `y` unspecified.
+
+```{r}
+(dd1 <- pdDepth(X = X1, method = "gdd")) ## pointwise geodesic distance depth
+
+(dd2 <- pdDepth(X = X2, method = "gdd")) ## integrated geodesic distance depth
+```
+
+A center-to-outwards ordering of the individual objects is then obtained by computing the data depth induced ranks, with the most central observation having smallest rank and the most outlying observation having largest rank.
+
+```{r}
+(dd1.ranks <- rank(1 - dd1)) ## pointwise depth ranks
+
+(dd2.ranks <- rank(1 - dd2)) ## integrated depth ranks
+
+## Explore sample X1
+head(order(dd1.ranks)) ## most central observations 
+rev(tail(order(dd1.ranks))) ## most outlying observations
+X1[ , , which(dd1.ranks == 1)] ## most central HPD matrix 
+X1[ , , which(dd1.ranks == 50)] ## most outlying HPD matrix
+
+```
+
+It is insightful to compare the most central HPD matrix with the (approximate) empirical geometric mean obtained with `KarchMean()` that maximizes the data depth for centrally symmetric distributions. For additional details, see [@COvS17].
+
+```{r}
+(mean.X1 <- KarchMean(X1)) 
+
+pdDepth(y = mean.X1, X = X1, method = "gdd")
+```
+
+## Rank-based tests for HPD matrices with `pdRankTests()`
+
+The null hypotheses of the available rank-bases hypothesis tests in `pdRankTests()` are:
+
+* `"rank.sum"`: homogeneity of distributions of two independent samples of HPD matrices (resp. sequences of HPD matrices).
+* `"krusk.wall"`: homogeneity of distributions of more than two independent samples of HPD matrices (resp. sequences of HPD matrices).
+* `"signed-rank"`: homogeneity of distributions of independent paired or matched samples of HPD matrices.
+* `"bartels"`: exchangeability (i.e. randomness) within a single independent sample of HPD matrices (resp. sequences of HPD matrices).
+ 
+Below, we construct several simulated examples for which (i) the null hypotheses listed above are satisfied, and (ii) the null hypotheses listed above are not satisfied. Analogous to the previous section, we generate pointwise random samples (resp. random samples of sequences) of `(2,2)`-dimensional HPD matrix-valued observations, with underlying geometric mean equal to the identity matrix (resp. sequence of scaled identity matrices). 
+
+Let us first consider simulated examples of the manifold Wilcoxon rank-sum test (`"rank.sum"`) and manifold Kruskal-Wallis test (`"krusk.wall"`).
+
+
+```{r}
+## Null hypothesis true
+data1 <- array(c(X1, replicate(50, Expm(diag(2), pdSpecEst:::E_coeff_inv(0.5 * rnorm(4), E)))), dim = c(2, 2, 100)) ## pointwise samples
+data2 <- array(c(X2, replicate(50, sapply(1:5, function(i) Expm(i * diag(2), pdSpecEst:::E_coeff_inv(0.5 * rnorm(4), i * E)), simplify = "array"))), dim = c(2, 2, 5, 100)) ## curve samples
+
+## Null hypothesis false
+data1a <- array(c(X1, replicate(50, Expm(diag(2), pdSpecEst:::E_coeff_inv(rnorm(4), E)))), dim = c(2, 2, 100)) ## pointwise scale change
+data2a <- array(c(X2, replicate(50, sapply(1:5, function(i) Expm(i * diag(2), pdSpecEst:::E_coeff_inv(rnorm(4), i * E)), simplify = "arra"))), dim = c(2, 2, 5, 100)) ## curve scale change
+
+## Rank-sum test
+pdRankTests(data1, sample.sizes = c(50, 50), "rank.sum") ## null true (pointwise)
+pdRankTests(data2, sample.sizes = c(50, 50), "rank.sum")[1] ## null true (curve)
+pdRankTests(data1a, sample.sizes = c(50, 50), "rank.sum")[1] ## null false (pointwise)
+pdRankTests(data2a, sample.sizes = c(50, 50), "rank.sum")[1] ## null false (curve)
+
+## Kruskal-Wallis test
+pdRankTests(data1, sample.sizes = c(50, 25, 25), "krusk.wall") ## null true (pointwise)
+pdRankTests(data2, sample.sizes = c(50, 25, 25), "krusk.wall")[1] ## null true (curve)
+pdRankTests(data1a, sample.sizes = c(50, 25, 25), "krusk.wall")[1] ## null false (pointwise)
+pdRankTests(data2a, sample.sizes = c(50, 25, 25), "krusk.wall")[1] ## null false (curve)
+```
+
+Second, we consider several examples of the manifold Wilcoxon signed-rank test (`"signed-rank"`). We generate paired observations for $100$ independent trials (or subjects) by introducing a  trial-specific random effect, such that the paired observations in each trial share a trial-specific geometric mean. For such data, the manifold Wilcoxon rank-sum test is no longer valid due to the introduced sample dependence and thus we resort to the manifold Wilcoxon rank-sum test.
+
+```{r}
+## Trial-specific means
+mu <- replicate(50, Expm(diag(2), pdSpecEst:::E_coeff_inv(0.1 * rnorm(4), E)))
+E_mu <- array(apply(mu, 3, function(mu) pdSpecEst:::T_basis(E, mu)), dim = c(2, 2, 4, 50))
+
+## Generate paired samples X,Y
+make_sample <- function(null) sapply(1:50, function(i) Expm(mu[, , i], pdSpecEst:::E_coeff_inv(ifelse(null, 1, 0.5) * rexp(4) - 1, E_mu[, , , i])), simplify = "array") 
+
+X3 <- make_sample(null = T)
+Y3 <- make_sample(null = T) ## null true
+Y3a <- make_sample(null = F) ## null false (scale change)
+
+## Signed-rank test
+pdRankTests(array(c(X3, Y3), dim = c(2, 2, 100)), test = "signed.rank") ## null true
+pdRankTests(array(c(X3, Y3a), dim = c(2, 2, 100)), test = "signed.rank")[1] ## null false
+
+``` 
+
+**Remark:** The internal function `T_basis()` constructs an orthonormal basis of the tangent space attached to a specific point (HPD matrix) in the Riemannian manifold of HPD matrices as detailed in [@COvS17].
+
+The manifold signed-rank test also provides a valid test procedure to test for equivalence of spectral matrices of two (independent) multivariate stationary time series based on the HPD periodogram matrices obtained via `pdPgram()` as illustrated below.
+
+
+```{r}
+## Signed-rank test for equivalence of spectra
+## ARMA(1,1) process: Example 11.4.1 in (Brockwell and Davis, 1991)
+Phi <- array(c(0.7, 0, 0, 0.6, rep(0, 4)), dim = c(2, 2, 2))
+Theta <- array(c(0.5, -0.7, 0.6, 0.8, rep(0, 4)), dim = c(2, 2, 2))
+Sigma <- matrix(c(1, 0.71, 0.71, 2), nrow = 2)
+pgram <- function(Sigma) pdPgram(rARMA(2^9, 2, Phi, Theta, Sigma)$X)$P ## HPD periodogram
+
+## Null is true
+pdRankTests(array(c(pgram(Sigma), pgram(Sigma)), dim = c(2, 2, 2^8)), test = "signed.rank")[1]
+
+## Null is false
+pdRankTests(array(c(pgram(Sigma), pgram(0.5 * Sigma)), dim = c(2, 2, 2^8)), test = "signed.rank")[1]
+```
+
+To conclude we consider several examples of the manifold Bartels-von Neumman test (`"bartels"`). In particular, we generate an independent sample with a gradual trend in the scale of the distribution, such that the null hypothesis of randomness fails to hold.
+
+```{r}
+## Null is true
+data3 <- replicate(200, Expm(diag(2), pdSpecEst:::E_coeff_inv(rnorm(4), E))) ## pointwise samples
+data4 <- replicate(100, sapply(1:5, function(i) Expm(i * diag(2), pdSpecEst:::E_coeff_inv(rnorm(4), i * E)), simplify = "array")) ## curve samples
+
+## Null is false
+data3a <- sapply(1:200, function(j) Expm(diag(2), pdSpecEst:::E_coeff_inv(((200 - j) / 200 + j * 2 / 200) * rnorm(4), E)), simplify = "array") ## pointwise trend in scale
+data4a <- sapply(1:100, function(j) sapply(1:5, function(i) Expm(i * diag(2), pdSpecEst:::E_coeff_inv(((100 - j) / 100 + j * 2 / 100) * rnorm(4), i * E)), simplify = "array"), simplify = "array") ## curve trend in scale
+
+## Bartels-von Neumann test
+pdRankTests(data3, test = "bartels") ## null true (pointwise)
+pdRankTests(data4, test = "bartels")[1] ## null true (curve)
+pdRankTests(data3a, test = "bartels")[1] ## null false (pointwise)
+pdRankTests(data4a, test = "bartels")[1] ## null false (curve)
+```
+
+## References
+
