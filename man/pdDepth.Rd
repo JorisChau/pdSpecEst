@@ -62,4 +62,3 @@ tests for spectral density matrices}. Working paper.
 \seealso{
 \code{\link{pdDist}}, \code{\link{pdRankTests}}
 }
-

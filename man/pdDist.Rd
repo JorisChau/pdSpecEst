@@ -39,4 +39,3 @@ with applications to diffusion tensor imaging. \emph{Annals of Applied Statistic
 \seealso{
 \code{\link[shapes]{distcov}}
 }
-

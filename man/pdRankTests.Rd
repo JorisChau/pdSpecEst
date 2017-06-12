@@ -93,4 +93,3 @@ Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. 
 \seealso{
 \code{\link{pdDepth}}, \code{\link{pdPgram}}
 }
-

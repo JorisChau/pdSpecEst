@@ -32,4 +32,3 @@ measurements. \emph{Journal of Mathematical Imaging and Vision} 25(1), 127-154.
 \seealso{
 \code{\link{Logm}}
 }
-
