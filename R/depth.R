@@ -49,79 +49,79 @@
 #'
 #' @importFrom ddalpha depth.zonoid
 #' @export
-  pdDepth <- function(y = NULL, X, method = c('zonoid', 'gdd', 'spatial')){
+pdDepth <- function(y = NULL, X, method = c("zonoid", "gdd", "spatial")) {
 
-  method <- match.arg(method, c('zonoid', 'gdd', 'spatial'))
+  method <- match.arg(method, c("zonoid", "gdd", "spatial"))
   d <- dim(X)[1]
   err.message <- "Incorrect input dimensions for arguments: 'y' and/or 'X',
-             consult the function documentation for the requested inputs."
-  if(length(dim(X)) == 3){
-    if(!is.null(y)){
-      if(!isTRUE(all.equal(dim(y), dim(X)[c(1,2)]))){
+                      consult the function documentation for the requested inputs."
+  if (length(dim(X)) == 3) {
+    if (!is.null(y)) {
+      if (!isTRUE(all.equal(dim(y), dim(X)[c(1, 2)]))) {
         stop(err.message)
       }
     }
     S <- dim(X)[3]
-  } else if(length(dim(X)) == 4){
-    if(!is.null(y)){
-      if(!isTRUE(all.equal(dim(y), dim(X)[c(1,2,3)]))){
+  } else if (length(dim(X)) == 4) {
+    if (!is.null(y)) {
+      if (!isTRUE(all.equal(dim(y), dim(X)[c(1, 2, 3)]))) {
         stop(err.message)
       }
     }
     S <- dim(X)[4]
     n <- dim(X)[3]
-  } else{
+  } else {
     stop(err.message)
   }
   E <- E_basis(d)
 
   ## Manifold zonoid depth
-  if(method == 'zonoid'){
-    if(length(dim(X)) == 3){
-      ZD <- function(y, X){
+  if (method == "zonoid") {
+    if (length(dim(X)) == 3) {
+      ZD <- function(y, X) {
         return(ddalpha::depth.zonoid(t(as.matrix(rep(0, d^2))), t(sapply(1:S,
-                                            function(s) E_coeff(Logm(y, X[,,s]), E)))))
+                                        function(s) E_coeff(Logm(y, X[, , s]), E)))))
       }
-      if(!is.null(y)){
+      if (!is.null(y)) {
         depth <- ZD(y, X)
-      } else{
-        depth <- sapply(1:S, function(s) ZD(X[,,s], X))
+      } else {
+        depth <- sapply(1:S, function(s) ZD(X[, , s], X))
       }
-    } else if(length(dim(X)) == 4){
-      iZD <- function(y, X){
+    } else if (length(dim(X)) == 4) {
+      iZD <- function(y, X) {
         depth.t <- numeric(n)
-        for(t in 1:n){
+        for (t in 1:n) {
           depth.t[t] <- ddalpha::depth.zonoid(t(as.matrix(rep(0, d^2))), t(sapply(1:S,
-                                            function(s) E_coeff(Logm(y[,,t], X[,,t,s]), E))))
+                                        function(s) E_coeff(Logm(y[, , t], X[, , t, s]), E))))
         }
         return(mean(depth.t))
       }
-      if(!is.null(y)){
+      if (!is.null(y)) {
         depth <- iZD(y, X)
-      } else{
-        depth <- sapply(1:S, function(s) iZD(X[,,,s], X))
+      } else {
+        depth <- sapply(1:S, function(s) iZD(X[, , , s], X))
       }
     }
   }
 
   ## Geodesic distance depth
-  if(method == 'gdd'){
-    if(!is.null(y)){
-      if(length(dim(X)) == 3){
-        depth <- exp(-mean(sapply(1:S, function(s) pdDist(y, X[,,s]))))
-      } else if(length(dim(X)) == 4){
-        depth <- exp(-mean(sapply(1:S, function(s) mean(sapply(1:n, function(t)
-          pdDist(y[,,t], X[,,t,s]))))))
+  if (method == "gdd") {
+    if (!is.null(y)) {
+      if (length(dim(X)) == 3) {
+        depth <- exp(-mean(sapply(1:S, function(s) pdDist(y, X[, , s]))))
+      } else if (length(dim(X)) == 4) {
+        depth <- exp(-mean(sapply(1:S, function(s) mean(sapply(1:n,
+                                            function(t) pdDist(y[, , t], X[, , t, s]))))))
       }
     } else {
       dist <- matrix(0, nrow = S, ncol = S)
       grid <- expand.grid(1:S, 1:S)
-      grid <- grid[grid$Var1 > grid$Var2,]
-      if(length(dim(X)) == 3){
-        dist[lower.tri(dist)] <- mapply(function(i,j) pdDist(X[,,i], X[,,j]), grid$Var1, grid$Var2)
-      } else if(length(dim(X)) == 4){
-        dist[lower.tri(dist)] <- mapply(function(i,j) mean(sapply(1:n, function(t)
-          pdDist(X[,,t,i], X[,,t,j]))), grid$Var1, grid$Var2)
+      grid <- grid[grid$Var1 > grid$Var2, ]
+      if (length(dim(X)) == 3) {
+        dist[lower.tri(dist)] <- mapply(function(i, j) pdDist(X[, , i], X[, , j]), grid$Var1, grid$Var2)
+      } else if (length(dim(X)) == 4) {
+        dist[lower.tri(dist)] <- mapply(function(i, j) mean(sapply(1:n,
+                                            function(t) pdDist(X[, , t, i], X[, , t, j]))), grid$Var1, grid$Var2)
       }
       dist[upper.tri(dist)] <- t(dist)[upper.tri(dist)]
       depth <- exp(-colMeans(dist))
@@ -129,38 +129,37 @@
   }
 
   ## Manifold spatial depth
-  if(method == 'spatial'){
-    if(length(dim(X)) == 3){
-      SD <- function(y, X){
+  if (method == "spatial") {
+    if (length(dim(X)) == 3) {
+      SD <- function(y, X) {
         y.isqrt <- iSqrt(y)
-        log.yx <- sapply(1:S, function(s) Logm(diag(d), (y.isqrt %*% X[,,s]) %*% y.isqrt), simplify = "array")
-        return(1 - NormF(apply(sapply(1:S, function(s) log.yx[,,s]/NormF(log.yx[,,s]),
-                                      simplify = "array"), c(1,2), mean)))
+        log.yx <- sapply(1:S, function(s) Logm(diag(d), (y.isqrt %*% X[, , s]) %*% y.isqrt), simplify = "array")
+        return(1 - NormF(apply(sapply(1:S,
+            function(s) log.yx[, , s]/NormF(log.yx[, , s]), simplify = "array"), c(1, 2), mean)))
       }
-      if(!is.null(y)){
+      if (!is.null(y)) {
         depth <- SD(y, X)
       } else {
-        depth <- sapply(1:S, function(s) SD(X[,,s], X))
+        depth <- sapply(1:S, function(s) SD(X[, , s], X))
       }
-    } else if(length(dim(X)) == 4){
-      iSD <- function(y, X){
+    } else if (length(dim(X)) == 4) {
+      iSD <- function(y, X) {
         depth.t <- numeric(n)
-        for(t in 1:n){
-          y.isqrt <- iSqrt(y[,,t])
-          log.yx <- sapply(1:S, function(s) Logm(diag(d), (y.isqrt %*% X[,,t,s]) %*% y.isqrt), simplify = "array")
-          depth.t[t] <- 1 - NormF(apply(sapply(1:S, function(s) log.yx[,,s]/NormF(log.yx[,,s]),
-                                               simplify = "array"), c(1,2), mean))
+        for (t in 1:n) {
+          y.isqrt <- iSqrt(y[, , t])
+          log.yx <- sapply(1:S, function(s) Logm(diag(d), (y.isqrt %*% X[, , t, s]) %*% y.isqrt), simplify = "array")
+          depth.t[t] <- 1 - NormF(apply(sapply(1:S,
+                                function(s) log.yx[, , s]/NormF(log.yx[, , s]), simplify = "array"), c(1, 2), mean))
         }
         return(mean(depth.t))
       }
-      if(!is.null(y)){
+      if (!is.null(y)) {
         depth <- iSD(y, X)
-      } else{
-        depth <- sapply(1:S, function(s) iSD(X[,,,s], X))
+      } else {
+        depth <- sapply(1:S, function(s) iSD(X[, , , s], X))
       }
     }
   }
-
   return(depth)
 }
 

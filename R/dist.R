@@ -27,32 +27,31 @@
 #' @seealso \code{\link[shapes]{distcov}}
 #'
 #' @export
-pdDist <- function(A, B, method = 'Riemannian'){
+pdDist <- function(A, B, method = "Riemannian") {
 
   if (!(isTRUE(all.equal(dim(A), dim(B)) & (dim(A)[1] == dim(A)[2]) & (length(dim(A)) == 2)))) {
     stop("Incorrect input dimensions for arguments: 'A' and/or 'B',
-             consult the function documentation for the requested inputs.")
+         consult the function documentation for the requested inputs.")
   }
-  method <- match.arg(method, c('Riemannian', 'logEuclidean', 'Cholesky', 'Euclidean', 'Procrustes'))
+  method <- match.arg(method, c("Riemannian", "logEuclidean", "Cholesky", "Euclidean", "Procrustes"))
   d <- nrow(A)
 
-  if(method == 'Riemannian'){
+  if (method == "Riemannian") {
     dd <- RiemmDist(A, B)
   }
-  if(method == 'logEuclidean'){
+  if (method == "logEuclidean") {
     dd <- NormF(Logm(diag(d), A) - Logm(diag(d), B))
   }
-  if(method == 'Cholesky'){
+  if (method == "Cholesky") {
     dd <- NormF(Chol(A) - Chol(B))
   }
-  if(method == 'Euclidean'){
+  if (method == "Euclidean") {
     dd <- NormF(A - B)
   }
-  if(method == 'Procrustes'){
+  if (method == "Procrustes") {
     l1 <- Sqrt(A)
     l2 <- Sqrt(B)
     dd <- sqrt(NormF(l1)^2 + NormF(l2)^2 - 2 * sum(svd(t(Conj(l2)) %*% l1)$d))
   }
   return(dd)
 }
-

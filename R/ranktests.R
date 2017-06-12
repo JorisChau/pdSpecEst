@@ -81,83 +81,85 @@
 #' @importFrom stats pnorm
 #'
 #' @export
-pdRankTests <- function(data, sample.sizes, test = c('rank.sum', 'krusk.wall', 'signed.rank', 'bartels'),
-                        depth = c('gdd', 'zonoid', 'spatial')){
-  if(missing(depth)){
-    depth <- 'gdd'
+pdRankTests <- function(data, sample.sizes, test = c("rank.sum", "krusk.wall",
+                                    "signed.rank", "bartels"), depth = c("gdd", "zonoid", "spatial")) {
+  if (missing(depth)) {
+    depth <- "gdd"
   }
   ddim <- dim(data)
-  if(missing(sample.sizes)){
+  if (missing(sample.sizes)) {
     sample.sizes <- NA
   }
-  test <- match.arg(test, c('rank.sum', 'krusk.wall', 'signed.rank', 'bartels'))
-  depth <- match.arg(depth, c('gdd', 'zonoid', 'spatial'))
+  test <- match.arg(test, c("rank.sum", "krusk.wall", "signed.rank", "bartels"))
+  depth <- match.arg(depth, c("gdd", "zonoid", "spatial"))
   err.message <- "Incorrect input lenghts for arguments: 'samples' and/or 'sample.sizes',
-                  consult the function documentation for the requested inputs."
+                                    consult the function documentation for the requested inputs."
   n <- sample.sizes
-  if((test == 'krusk.wall') & (length(n) == 2)){
+  if ((test == "krusk.wall") & (length(n) == 2)) {
     warning("Argument 'test' changed to 'rank.sum' to test for homogeneity of
-            distributions of two independent samples of HPD matrices.")
-    test <- 'rank.sum'
+                        distributions of two independent samples of HPD matrices.")
+    test <- "rank.sum"
   }
 
   ## Manifold rank-sum test
-  if(test == 'rank.sum'){
-    if (!isTRUE((((length(ddim) == 3) & (ddim[3] == sum(n))) | ((length(ddim) == 4) & (ddim[4] == sum(n)))) &
-                (ddim[1] == ddim[2]) & (length(n) == 2))){
+  if (test == "rank.sum") {
+    if (!isTRUE((((length(ddim) == 3) & (ddim[3] == sum(n))) | ((length(ddim) == 4) &
+                      (ddim[4] == sum(n)))) & (ddim[1] == ddim[2]) & (length(n) == 2))) {
       stop(err.message)
     }
 
     dd <- pdDepth(X = data, method = depth)
-    T1 <- (sum(rank(dd, ties.method = 'random')[1:n[1]]) - n[1]*(sum(n)+1)/2) / sqrt(n[1]*n[2]*(sum(n)+1) / 12)
+    T1 <- (sum(rank(dd, ties.method = "random")[1:n[1]]) - n[1] * (sum(n) + 1)/2) /
+                                                    sqrt(n[1] * n[2] * (sum(n) + 1)/12)
 
     output <- list(p.value = 2 * stats::pnorm(abs(T1), lower.tail = F), statistic = T1,
-                   null.distr = 'Standard normal distribution')
+                                                  null.distr = "Standard normal distribution")
   }
 
   ## Manifold Kruskal-Wallis test
-  if(test == 'krusk.wall'){
+  if (test == "krusk.wall") {
     N <- sum(n)
-    if (!isTRUE((((length(ddim) == 3) & (ddim[3] == N)) | ((length(ddim) == 4) & (ddim[4] == N))) &
-                (ddim[1] == ddim[2]) & (length(n) > 2))) {
+    if (!isTRUE((((length(ddim) == 3) & (ddim[3] == N)) | ((length(ddim) == 4) &
+                            (ddim[4] == N))) & (ddim[1] == ddim[2]) & (length(n) > 2))) {
       stop(err.message)
     }
     dd <- pdDepth(X = data, method = depth)
-    R_bar <- unname(unlist(lapply(split(rank(dd, ties.method = 'random'), f = rep(1:length(n), times = n)), mean)))
-    T2 <- 12 / (N * (N+1)) * sum(n * (R_bar - (N+1)/2)^2)
+    R_bar <- unname(unlist(lapply(split(rank(dd, ties.method = "random"),
+                                      f = rep(1:length(n), times = n)), mean)))
+    T2 <- 12/(N * (N + 1)) * sum(n * (R_bar - (N + 1)/2)^2)
 
-    output <- list(p.value = min(stats::pchisq(T2, df = 2, lower.tail = T), pchisq(T2, df = 2, lower.tail = F)),
-                   statistic = T2, null.distr = "Chi-squared distribution (df = 2)")
+    output <- list(p.value = min(stats::pchisq(T2, df = 2, lower.tail = T),
+                            pchisq(T2, df = 2, lower.tail = F)), statistic = T2,
+                                    null.distr = "Chi-squared distribution (df = 2)")
   }
 
   ## Manifold signed-rank test
-  if(test == 'signed.rank'){
-    if (!isTRUE((length(ddim) == 3) & (ddim[1] == ddim[2]) & (ddim[3] %% 2 == 0)))  {
+  if (test == "signed.rank") {
+    if (!isTRUE((length(ddim) == 3) & (ddim[1] == ddim[2]) & (ddim[3]%%2 == 0))) {
       stop(err.message)
     }
     n <- ddim[3]/2
     d <- ddim[1]
-    ast <- function(A,B) t(Conj(A)) %*% B %*% A
-      diff <- sapply(1:n, function(i) Re(sum(diag(Logm(diag(d), ast(iSqrt(data[,,n+i]), data[,,i]))))))
+    ast <- function(A, B) t(Conj(A)) %*% B %*% A
+    diff <- sapply(1:n, function(i) Re(sum(diag(Logm(diag(d), ast(iSqrt(data[, , n + i]), data[, , i]))))))
 
     T3 <- stats::wilcox.test(x = diff, y = rep(0, n), paired = T, correct = T)
     output <- list(p.value = T3$p.value, statistic = T3$statistic, null.distr = T3$method)
   }
 
   ## Manifold Bartels-von Neumann test
-  if(test == 'bartels'){
+  if (test == "bartels") {
     if (!isTRUE(((length(ddim) == 3) | ((length(ddim) == 4))) & (ddim[1] == ddim[2]))) {
       stop(err.message)
     }
     n <- utils::tail(ddim, 1)
     dd <- pdDepth(X = data, method = depth)
-    T4 <- sum(diff(rank(dd, ties.method = 'random'))^2) / (n*(n^2-1)/12)
-    sigma <- sqrt(4*(n-2)*(5*n^2 - 2*n - 9) / (5*n*(n+1)*(n-1)^2))
+    T4 <- sum(diff(rank(dd, ties.method = "random"))^2)/(n * (n^2 - 1)/12)
+    sigma <- sqrt(4 * (n - 2) * (5 * n^2 - 2 * n - 9)/(5 * n * (n + 1) * (n - 1)^2))
 
-    output <- list(p.value = 2 * pnorm(abs((T4-2)/sigma), lower.tail = F), statistic = (T4-2)/sigma,
-                   null.distr = 'Standard normal distribution')
+    output <- list(p.value = 2 * pnorm(abs((T4 - 2)/sigma), lower.tail = F),
+                      statistic = (T4 - 2)/sigma, null.distr = "Standard normal distribution")
   }
 
   return(output)
 }
-

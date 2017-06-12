@@ -48,11 +48,11 @@ X1[ , , which(dd1.ranks == 50)] ## most outlying HPD matrix
 pdDepth(y = mean.X1, X = X1, method = "gdd")
 
 ## ------------------------------------------------------------------------
-## Null hypothesis true
-data1 <- array(c(X1, replicate(50, Expm(diag(2), pdSpecEst:::E_coeff_inv(0.5 * rnorm(4), E)))), dim = c(2, 2, 100)) ## pointwise samples
-data2 <- array(c(X2, replicate(50, sapply(1:5, function(i) Expm(i * diag(2), pdSpecEst:::E_coeff_inv(0.5 * rnorm(4), i * E)), simplify = "array"))), dim = c(2, 2, 5, 100)) ## curve samples
+## Generate data (null true)
+data1 <- array(c(X1, replicate(50, Expm(diag(2), pdSpecEst:::E_coeff_inv(0.5 * rnorm(4), E)))), dim = c(2, 2, 100)) ## pointwise sample
+data2 <- array(c(X2, replicate(50, sapply(1:5, function(i) Expm(i * diag(2), pdSpecEst:::E_coeff_inv(0.5 * rnorm(4), i * E)), simplify = "array"))), dim = c(2, 2, 5, 100)) ## curve sample
 
-## Null hypothesis false
+## Generate data (null false)
 data1a <- array(c(X1, replicate(50, Expm(diag(2), pdSpecEst:::E_coeff_inv(rnorm(4), E)))), dim = c(2, 2, 100)) ## pointwise scale change
 data2a <- array(c(X2, replicate(50, sapply(1:5, function(i) Expm(i * diag(2), pdSpecEst:::E_coeff_inv(rnorm(4), i * E)), simplify = "arra"))), dim = c(2, 2, 5, 100)) ## curve scale change
 
