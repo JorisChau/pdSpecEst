@@ -57,7 +57,7 @@
 #'
 #' @seealso \code{\link{pdPgram}}, \code{\link{WavTransf}}, \code{\link{InvWavTransf}}
 #'
-#' @references Chau, J. and von Sachs, R. (2017a). \emph{Positive-definite multivariate spectral
+#' @references Chau, J. and von Sachs, R. (2017a). \emph{Positive definite multivariate spectral
 #' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
 #' @references Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
 #'

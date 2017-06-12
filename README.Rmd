@@ -2,7 +2,7 @@
 output: github_document
 references:
 - id: CvS17
-  title: 'Positive-definite multivariate spectral estimation: a geometric wavelet approach'
+  title: 'Positive Definite multivariate spectral estimation: a geometric wavelet approach'
   author:
   - family: Chau  
     given: J.
@@ -13,7 +13,7 @@ references:
   issued:
     year: 2017
 - id: COvS17
-  title: 'Statistical data depth and rank-based tests for spectral density matrices. (Working Paper)'
+  title: Statistical data depth and rank-based tests for spectral density matrices
   author:
   - family: Chau  
     given: J.
@@ -22,6 +22,7 @@ references:
   - family: von Sachs
     given: R.
   type: article-journal
+  container-title: Working paper
   issued:
     year: 2017
 ---
@@ -52,7 +53,7 @@ The tools in this package can be used to perform:
 
 For more details and examples on how to use the package see the accompanying vignettes in the vignettes folder. 
 
-A demo Shiny app to test out wavelet-based spectral matrix estimation and clustering is available [here](http://jchau.shinyapps.io/pdSpecEst_app).
+A demo Shiny app to test out wavelet-based spectral matrix estimation and clustering is available [here](https://jchau.shinyapps.io/pdspecest/).
 
 *Author and maintainer:* Joris Chau (<j.chau@uclouvain.be>).
 

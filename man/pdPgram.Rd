@@ -10,9 +10,9 @@ pdPgram(X, B, method = c("multitaper", "bartlett"), bias.corr = T)
 \item{X}{a multivariate time series, with the \code{d} columns corresponding to the components
 of the time series.}
 
-\item{B}{depending on the input \code{method}, either the number of orthogonal Slepian tapers
- or the number of non-overlapping segments over which the averaged periodogram is computed. By default,
-\code{B = d}, such that the averaged periodogram is guaranteed to be positive-definite.}
+\item{B}{depending on \code{method}, either the number of orthogonal Slepian tapers, or the number of
+non-overlapping segments to compute Bartlett's averaged periodogram. By default,
+\code{B = d}, such that the averaged periodogram is  positive definite.}
 
 \item{method}{the tapering method, either \code{"multitaper"} or \code{"bartlett"} explained in the Details
 section below. Defaults to \code{"bartlett"}.}
@@ -35,11 +35,9 @@ PD periodogram matrix is rescaled by the \emph{manifold} bias-correction in (Cha
 \details{
 If \code{method == "multitaper"}, \code{pdPgram} calculates a \eqn{(d \times d)}-dimensional multitaper
 periodogram matrix based on \eqn{B} Discrete Prolate Spheroidal (i.e. Slepian) orthogonal tapering functions
-as in \cite{\link[multitaper]{dpss}} applied to the \eqn{d}-dimensional time series \code{X}. If \eqn{B \geq d}, the multitaper periodogram matrix
-is guaranteed to be Hermitian positive-definite. If \code{method == "bartlett"}, \code{pdPgram} calculates
-an averaged periodogram matrix based on Bartlett's method by averaging the periodogram matrices of \code{B}
-non-overlapping segments of the \eqn{d}-dimensional time series \code{X}. Again, if \eqn{B \geq d}, the averaged
-periodogram matrix is guaranteed to be Hermitian positive-definite. Note that Bartlett's spectral estimator is a
+as in \code{\link[multitaper]{dpss}} applied to the \eqn{d}-dimensional time series \code{X}. If \code{method == "bartlett"}, \code{pdPgram} calculates
+Bartlett's spectral estimator by averaging the periodogram matrices of \code{B} non-overlapping segments of the
+\eqn{d}-dimensional time series \code{X}.Note that Bartlett's spectral estimator is a
 specific (trivial) case of a multitaper spectral estimator with uniform orthogonal tapering windows.
 }
 \note{
@@ -61,7 +59,7 @@ pgram <- pdPgram(ts.sim$X)
 Bartlett, M.S. (1950). \emph{Periodogram analysis and continuous spectra}.
 Biometrika 37 (1-2): 1-16.
 
-Chau, J. and von Sachs, R. (2017). \emph{Positive-definite multivariate spectral
+Chau, J. and von Sachs, R. (2017). \emph{Positive definite multivariate spectral
 estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
 
 Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.

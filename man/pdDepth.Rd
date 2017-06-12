@@ -10,35 +10,35 @@ pdDepth(y = NULL, X, method = c("zonoid", "gdd", "spatial"))
 \item{y}{either a \eqn{(d,d)}-dimensional array corresponding to a \eqn{(d \times d)}-dimensional Hermitian PD matrix,
 or a \eqn{(d, d, n)}-dimensional array corresponding to a sequence or curve of Hermitian PD matrices.
 Defaults to \code{NULL}, in which case the data depth of each individual object in \code{X} with respect to the
-data cloud \code{X} itself is returned.}
+data cloud \code{X} itself is calculated.}
 
-\item{X}{depending on the input \code{y} either a \eqn{(d,d,S)}-dimensional array corresponding to a data cloud
-\code{S} individual Hermitian PD matrices, or a \eqn{(d,d,n,S)}-dimensional array corresponding to a data cloud of
-sequences or curves of \code{S} individual Hermitian PD matrices.}
+\item{X}{depending on the input \code{y} either a \eqn{(d,d,S)}-dimensional array corresponding to a data cloud of
+\eqn{S} individual Hermitian PD matrices, or a \eqn{(d,d,n,S)}-dimensional array corresponding to a data cloud of \eqn{S}
+sequences or curves of \eqn{n} individual Hermitian PD matrices.}
 
 \item{method}{the data depth measure, one of \code{'zonoid'}, \code{'gdd'}, or \code{'spatial'} corresponding to
-the manifold zonoid depth, geodesic distance depth and manifold spatial depth respectively.}
+the manifold zonoid depth, geodesic distance depth, and manifold spatial depth respectively.}
 }
 \value{
 If \code{!is.null(y)}, \code{pdDepth} returns the numeric depth value of \code{y} with
 respect to \code{X}. If \code{is.null(y)}, \code{pdDepth} returns a numeric vector of length \code{S} corresponding to the depth values
-of each individual object (i.e. either a HPD matrix or a sequence of HPD matrices) in \code{X} with respect to \code{X} itself.
+of each individual object in \code{X} with respect to \code{X} itself.
 }
 \description{
 \code{pdDepth} calculates the data depth of a Hermitian PD matrix with respect
 to a given data cloud (i.e. a sample or collection) of Hermitian PD matrices, or the integrated
-data depth of a sequence (array) of Hermitian PD matrices with respect to a given data cloud of
-sequences (arrays) of Hermitian PD matrices.
+data depth of a sequence (curve) of Hermitian PD matrices with respect to a given data cloud of
+sequences (curves) of Hermitian PD matrices.
 }
 \details{
 Available pointwise or integrated manifold data depth functions for samples of Hermtian PD matrices are (i)
 manifold zonoid depth, (ii) geodesic distance depth and (iii) manifold spatial depth.
 The various data depth measures and their theoretical properties are described in
-(Chau and von Sachs, 2017b). If \code{y} is a \eqn{(d \times d)}-dimensional Hermitian PD matrix (i.e.
+(Chau, Ombao, and von Sachs, 2017b). If \code{y} is a \eqn{(d \times d)}-dimensional Hermitian PD matrix (i.e.
 \eqn{(d,d)}-dimensional array), \code{X} should be a \eqn{(d,d,S)}-dimensional array of Hermitian PD matrices and the pointwise
 data depth values are computed. If \code{y} is a sequence of \eqn{(d \times d)}-dimensional Hermitian PD matrices of length \code{n}
 (i.e. \eqn{(d,d,n)}-dimensional array), \code{X} should be a \eqn{(d,d,n,S)}-dimensional array of sequences of Hermitian PD matrices
-and the integrated data depth values according to (Chau and von Sachs, 2017b) are computed. If \code{is.null(y)}, the data depth
+and the integrated data depth values according to (Chau, Ombao, and von Sachs, 2017b) are computed. If \code{is.null(y)}, the data depth
 of each individual object (i.e. a Hermitian PD matrix or a sequence of Hermitian PD matrices) in \code{X} is computed with
 respect to the data cloud \code{X}.
 }
@@ -56,7 +56,7 @@ pdDepth(X = X2, method = "gdd") ## depth of each curve in the data cloud
 
 }
 \references{
-Chau, J. and von Sachs, R. (2017b). \emph{Statistical data depth and rank-based
+Chau, J., Ombao, H., and von Sachs, R. (2017b). \emph{Statistical data depth and rank-based
 tests for spectral density matrices}. Working paper.
 }
 \seealso{

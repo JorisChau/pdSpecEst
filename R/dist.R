@@ -1,14 +1,15 @@
 #' Compute distance between two HPD matrices
 #'
-#' \code{pdDist} calculates the user-specified distance between two Hermitian PD matrices.
+#' \code{pdDist} calculates a distance between two Hermitian PD matrices.
 #'
-#' Available distance functions between two Hermitian PD matrices are (i) Riemannian distance (default) as in
+#' Available distance measures between two Hermitian PD matrices are (i) Riemannian distance (default) as in
 #' (Bhatia, 2009, Chapter 6), (ii) log-Euclidean distance, the Euclidean distance between matrix logarithms,
 #' (iii) Cholesky distance, the Euclidean distance between Cholesky decompositions, (iv) Euclidean distance,
 #' and (v) Procrustes distance as in (Dryden et al., 2009). In particular, \code{pdDist} generalizes the function
-#' \code{\link[shapes]{distcov}} computing the distance between two symmetric positive-definite matrices.
+#' \code{\link[shapes]{distcov}} to compute the distance between two symmetric positive definite matrices to the
+#' distance between two Hermitian positive definite matrices.
 #'
-#' @param A,B Hermitian positive-definite matrices (of equal dimension).
+#' @param A,B Hermitian positive definite matrices (of equal dimension).
 #' @param method the distance measure, one of \code{'Riemannian'},
 #' \code{'logEuclidean'}, \code{'Cholesky'}, \code{'Euclidean'} or \code{'Procrustes'}. Defaults to \code{'Riemannian'}.
 #'
@@ -17,7 +18,7 @@
 #'  A <- t(Conj(a)) %*% a
 #'  b <- matrix(complex(real = rnorm(9), imaginary = rnorm(9)), nrow = 3)
 #'  B <- t(Conj(b)) %*% b
-#'  pdDist(A, B) ## By default the Riemannian distance is computed
+#'  pdDist(A, B) ## Riemannian distance
 #'
 #' @references Bhatia, R. (2009). \emph{Positive Definite Matrices}. New Jersey: Princeton University Press.
 #' @references Dryden, I.L., Koloydenko, A., Zhou, D. (2009). Non-Euclidean statistics for covariance matrices,

@@ -15,7 +15,7 @@ The tools in this package can be used to perform:
 
 For more details and examples on how to use the package see the accompanying vignettes in the vignettes folder.
 
-A demo Shiny app to test out wavelet-based spectral matrix estimation and clustering is available [here](http://jchau.shinyapps.io/pdSpecEst_app).
+A demo Shiny app to test out wavelet-based spectral matrix estimation and clustering is available [here](https://jchau.shinyapps.io/pdspecest/).
 
 *Author and maintainer:* Joris Chau (<j.chau@uclouvain.be>).
 
@@ -29,6 +29,6 @@ Installation
 References
 ----------
 
-Chau, J., and R. von Sachs. 2017. “Positive-Definite Multivariate Spectral Estimation: A Geometric Wavelet Approach.” <http://arxiv.org/abs/1701.03314>.
+Chau, J., and R. von Sachs. 2017. “Positive Definite Multivariate Spectral Estimation: A Geometric Wavelet Approach.” <http://arxiv.org/abs/1701.03314>.
 
-Chau, J., H. Ombao, and R. von Sachs. 2017. “Statistical Data Depth and Rank-Based Tests for Spectral Density Matrices. (Working Paper).”
+Chau, J., H. Ombao, and R. von Sachs. 2017. “Statistical Data Depth and Rank-Based Tests for Spectral Density Matrices.” *Working Paper*.

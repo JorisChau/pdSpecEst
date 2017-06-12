@@ -12,7 +12,7 @@ pdRankTests(data, sample.sizes, test = c("rank.sum", "krusk.wall",
 \eqn{(d,d,n,S)}-dimensional array corresponding to an array of pooled individual samples of sequences of Hermitian PD matrices.}
 
 \item{sample.sizes}{a numeric vector corresponding to the individual sample sizes in the argument \code{data}, such that \code{sum(sample.sizes) == S}.
-For tests \code{"signed-rank"} and \code{"bartels"}, \code{sample.sizes} is not required and is automatically determined from \code{data}.}
+Not required for tests \code{"signed-rank"} and \code{"bartels"}, as the sample sizes are automatically determined from \code{data}.}
 
 \item{test}{rank-based hypothesis testing procedure, one of \code{"rank.sum"}, \code{"krusk.wall"}, \code{"signed.rank"}, \code{"bartels"} explained
 in the Details section below.}
@@ -24,12 +24,12 @@ geodesic distance depth, manifold zonoid depth and manifold spatial depth respec
 \value{
 The function returns a list with three components:
 \item{p.value }{p-value of the test}
-\item{statistic }{test statistic of the test}
+\item{statistic }{computed test statistic}
 \item{null.distr }{the distribution of the test statistic under the null hypothesis}
 }
 \description{
 \code{pdRankTests} performs generalized rank-based hypothesis testing for samples of Hermitian PD matrices or
-samples of sequences (arrays) of Hermitian PD matrices as detailed in (Chau and von Sachs, 2017b).
+samples of sequences (curves) of Hermitian PD matrices as described in (Chau, Ombao, and von Sachs, 2017b).
 }
 \details{
 For samples of \eqn{(d \times d)}-dimensional Hermitian PD matrices with pooled sample size \eqn{S}, the argument
@@ -53,8 +53,10 @@ manifold of Hermitian PD matrices.}
 Hermitian PD matrices or a sample of sequences of Hermitian PD matrices. The usual univariate ranks are replaced by data depth induced
 ranks via \code{\link{pdDepth}}.}
 }
-Note in particular that the manifold signed-rank test also provides a valid test for equivalence of spectral matrices of two multivariate stationary time
-series based on the Hermitian PD periodogram matrices obtained via \code{\link{pdPgram}}, see (Chau and von Sachs, 2017b) for the details.
+}
+\note{
+the manifold signed-rank test also provides a valid test for equivalence of spectral matrices of two multivariate stationary time
+series based on the Hermitian PD periodogram matrices obtained via \code{\link{pdPgram}}, see (Chau, Ombao, and von Sachs, 2017b) for the details.
 }
 \examples{
 ## null hypothesis is true
@@ -85,7 +87,7 @@ pdRankTests(array(c(pgram(Sigma), pgram(0.5 * Sigma)), dim = c(2,2,2^8)), test =
 
 }
 \references{
-Chau, J. and von Sachs, R. (2017b). \emph{Statistical data depth and rank-based
+Chau, J., Ombao, H., and von Sachs, R. (2017b). \emph{Statistical data depth and rank-based
 tests for spectral density matrices}. Working paper.
 
 Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
