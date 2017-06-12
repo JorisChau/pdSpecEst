@@ -71,7 +71,7 @@ f <- pdSpecEst(pgram$P)
 
 }
 \references{
-Chau, J. and von Sachs, R. (2017a). \emph{Positive-definite multivariate spectral
+Chau, J. and von Sachs, R. (2017a). \emph{Positive definite multivariate spectral
 estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
 
 Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.

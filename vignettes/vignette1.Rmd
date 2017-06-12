@@ -11,7 +11,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 references:
 - id: CvS17
-  title: 'Positive-definite multivariate spectral estimation: a geometric wavelet approach'
+  title: 'Positive definite multivariate spectral estimation: a geometric wavelet approach'
   author:
   - family: Chau  
     given: J.
@@ -30,11 +30,11 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
 In nonparametric estimation of the autocovariance matrices or the spectral density
 matrix of a second-order stationary multivariate time series, it is important to preserve
-positive-definiteness of the estimator. This in order to ensure interpretability of the
+positive definiteness of the estimator. This in order to ensure interpretability of the
 estimator as an estimated covariance or spectral matrix, but also to avoid computational
 issues in e.g. simulation or bootstrapping procedures. 
 
-For this purpose, in [@CvS17] we considered multivariate spectral estimation in the Riemannian manifold of Hermitian and positive-definite matrices based on a geometric wavelet approach. Nonlinear wavelet curve denoising in the Riemannian manifold allows one to capture local smoothness behavior of the spectral matrix across frequency, but also varying degrees of smoothness across components of the spectral matrix. Moreover, and in contrast to existing approaches, due to its geometric nature the wavelet-based spectral estimator enjoys the important property that it is invariant to permutations of the components of the time series. 
+For this purpose, in [@CvS17] we considered multivariate spectral estimation in the Riemannian manifold of Hermitian and positive definite matrices based on a geometric wavelet approach. Nonlinear wavelet curve denoising in the Riemannian manifold allows one to capture local smoothness behavior of the spectral matrix across frequency, but also varying degrees of smoothness across components of the spectral matrix. Moreover, and in contrast to existing approaches, due to its geometric nature the wavelet-based spectral estimator enjoys the important property that it is invariant to permutations of the components of the time series. 
 
 In addition to spectral estimation, we proposed computationally fast clustering of spectral matrices based on their representations in the wavelet domain, exploiting the fact that smooth curves in the Riemannian manifold are summarized by few high-energy wavelet coefficients.
 
@@ -80,7 +80,7 @@ invisible(apply(expand.grid(1:d, 1:d), 1, plotspec))
 ```
 
 ## Bias-corrected periodogram with `pdPgram()` 
-`pdPgram()` computes an initial noisy spectral estimator based on an averaged periodogram matrix, rescaled by the manifold bias-correction described in [@CvS17]. If `B >= d`, i.e. the number of segments over which the averaged periodogram is computed is larger than or equal to the dimension of the time series, then the initial spectral estimator is guaranteed to be Hermitian positive-definite (HPD).
+`pdPgram()` computes an initial noisy spectral estimator based on an averaged periodogram matrix, rescaled by the manifold bias-correction described in [@CvS17]. If `B >= d`, i.e. the number of segments over which the averaged periodogram is computed is larger than or equal to the dimension of the time series, then the initial spectral estimator is guaranteed to be Hermitian positive definite (HPD).
 
 ```{r}
 pgram <- pdPgram(ts.sim$X)
@@ -95,7 +95,7 @@ f.hat <- pdSpecEst(pgram$P)
 str(f.hat)
 ```
 
-The figure below shows the true underlying spectral matrix given by `ts.sim$f` and the estimated spectral matrix obtained from `f.hat$f` at the frequencies `freq`. The spectral estimator is able to capture both the very smooth curve behavior in the first auto-spectral component of the matrix and the localized peak in the second auto-spectral component of the matrix, while guaranteeing positive-definiteness of the estimator. <br>
+The figure below shows the true underlying spectral matrix given by `ts.sim$f` and the estimated spectral matrix obtained from `f.hat$f` at the frequencies `freq`. The spectral estimator is able to capture both the very smooth curve behavior in the first auto-spectral component of the matrix and the localized peak in the second auto-spectral component of the matrix, while guaranteeing positive definiteness of the estimator. <br>
 <br>
 
 ```{r, echo=FALSE, fig.show='hold', fig.cap='Figure: True (left) and estimated (right) spectral matrices in the frequency domain.', out.width='35%'}
@@ -132,7 +132,7 @@ pdSpecClust(P, K = 2, lam = 3)
 
 ## Shiny app
 
-A demo [Shiny app](https://jchau.shinyapps.io/pdSpecEst_app/) for wavelet-based spectral estimation and clustering is available on the web. The app allows the user to test the wavelet-based spectral matrix estimation or wavelet-based spectral matrix clustering procedures on simulated multivariate time series data. The estimated spectral matrices and cluster assignments can be compared to the known generating spectral matrices and clusters, or in the case of the wavelet-based spectral estimate with a benchmark multitaper spectral estimate (obtained via `pdPgram()`).
+A demo Shiny app for wavelet-based spectral estimation and clustering is available [here](https://jchau.shinyapps.io/pdspecest/). The app allows the user to test the wavelet-based spectral matrix estimation or wavelet-based spectral matrix clustering procedures on simulated multivariate time series data. The estimated spectral matrices and cluster assignments can be compared to the known generating spectral matrices and clusters, or in the case of the wavelet-based spectral estimate with a benchmark multitaper spectral estimate (obtained via `pdPgram()`).
 
 The app also includes a real brain signal data example consisting of local field potential (LFP) time series trials recorded over the course of an associative learning experiment with a male macaque. The goal of the analysis is to study evolving spectral characteristics of the time series trials over the course of the experiment and to this end we perform a fuzzy cluster analysis of the trial-specific spectra via `pdSpecClust()`.
 
