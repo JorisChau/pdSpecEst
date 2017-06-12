@@ -34,3 +34,4 @@ estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/ab
 \seealso{
 \code{\link{Mid}}
 }
+

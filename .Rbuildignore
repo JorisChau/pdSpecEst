@@ -4,5 +4,5 @@
 ^README-.*\.png$
 ^cran-comments\.md$
 ^\.travis\.yml$
-^data$
+#^data$
 ^\.RDataTmp$

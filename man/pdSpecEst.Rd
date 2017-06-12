@@ -2,7 +2,7 @@
 % Please edit documentation in R/estimation.R
 \name{pdSpecEst}
 \alias{pdSpecEst}
-\title{Wavelet-thresholded multivariate spectral estimator.}
+\title{Wavelet-thresholded multivariate spectral estimator}
 \usage{
 pdSpecEst(P, lam = NULL, order = 5, return = "f", alpha = 0.75)
 }
@@ -79,3 +79,4 @@ Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. 
 \seealso{
 \code{\link{pdPgram}}, \code{\link{WavTransf}}, \code{\link{InvWavTransf}}
 }
+

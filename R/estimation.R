@@ -1,4 +1,4 @@
-#' Wavelet-thresholded multivariate spectral estimator.
+#' Wavelet-thresholded multivariate spectral estimator
 #'
 #' \code{pdSpecEst} calculates a \eqn{(d \times d)}-dimensional Hermitian PD wavelet-denoised multivariate
 #' spectral estimator by thresholding wavelet coefficients in the manifold wavelet domain. The

@@ -26,3 +26,4 @@ Bhatia, R. (2009). \emph{Positive Definite Matrices}. New Jersey: Princeton Univ
 \seealso{
 \code{\link{KarchMean}}
 }
+

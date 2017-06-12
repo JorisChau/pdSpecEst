@@ -11,7 +11,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 references:
 - id: COvS17
-  title: 'Statistical data depth and rank-based tests for spectral density matrices'
+  title: 'Statistical data depth and rank-based tests for spectral density matrices. (Working paper)'
   author:
   - family: Chau  
     given: J.
@@ -19,9 +19,8 @@ references:
     given: H.
   - family: von Sachs
     given: R.
-  URL: 'http://arxiv.org/abs/...'
   type: article-journal
-  issued:
+  issued: 
     year: 2017
 ---
 

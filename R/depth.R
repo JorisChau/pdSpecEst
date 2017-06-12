@@ -45,7 +45,7 @@
 #' @seealso \code{\link{pdDist}}, \code{\link{pdRankTests}}
 #'
 #' @references Chau, J. and von Sachs, R. (2017b). \emph{Statistical data depth and rank-based
-#' tests for spectral density matrices}. Available at \url{http://arxiv.org/abs/...}.
+#' tests for spectral density matrices}. Working paper.
 #'
 #' @importFrom ddalpha depth.zonoid
 #' @export

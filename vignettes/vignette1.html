@@ -12,7 +12,7 @@
 
 <meta name="author" content="Joris Chau" />
 
-<meta name="date" content="2017-06-09" />
+<meta name="date" content="2017-06-11" />
 
 <title>Wavelet-based multivariate spectral analysis</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Wavelet-based multivariate spectral analysis</h1>
 <h4 class="author"><em>Joris Chau</em></h4>
-<h4 class="date"><em>2017-06-09</em></h4>
+<h4 class="date"><em>2017-06-11</em></h4>
 
 
 
@@ -189,6 +189,11 @@ P &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c
 <span class="co">#&gt; Subject8  0.97573420 0.02426580</span>
 <span class="co">#&gt; Subject9  0.96717490 0.03282510</span>
 <span class="co">#&gt; Subject10 0.97144733 0.02855267</span></code></pre></div>
+</div>
+<div id="shiny-app" class="section level2">
+<h2>Shiny app</h2>
+<p>A demo <a href="https://jchau.shinyapps.io/pdSpecEst_app/">Shiny app</a> for wavelet-based spectral estimation and clustering is available on the web. The app allows the user to test the wavelet-based spectral matrix estimation or wavelet-based spectral matrix clustering procedures on simulated multivariate time series data. The estimated spectral matrices and cluster assignments can be compared to the known generating spectral matrices and clusters, or in the case of the wavelet-based spectral estimate with a benchmark multitaper spectral estimate (obtained via <code>pdPgram()</code>).</p>
+<p>The app also includes a real brain signal data example consisting of local field potential (LFP) time series trials recorded over the course of an associative learning experiment with a male macaque. The goal of the analysis is to study evolving spectral characteristics of the time series trials over the course of the experiment and to this end we perform a fuzzy cluster analysis of the trial-specific spectra via <code>pdSpecClust()</code>.</p>
 </div>
 <div id="references" class="section level2 unnumbered">
 <h2>References</h2>

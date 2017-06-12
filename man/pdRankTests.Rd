@@ -86,10 +86,11 @@ pdRankTests(array(c(pgram(Sigma), pgram(0.5 * Sigma)), dim = c(2,2,2^8)), test =
 }
 \references{
 Chau, J. and von Sachs, R. (2017b). \emph{Statistical data depth and rank-based
-tests for spectral density matrices}. Available at \url{http://arxiv.org/abs/...}.
+tests for spectral density matrices}. Working paper.
 
 Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
 }
 \seealso{
 \code{\link{pdDepth}}, \code{\link{pdPgram}}
 }
+
