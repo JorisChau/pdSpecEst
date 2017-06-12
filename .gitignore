@@ -7,5 +7,4 @@ data/eeg.rda
 data/eeg_full.rda
 data/lfp.rda
 data/lfp_bart.rda
-data/monkey.rda
 data/monkey_full.rda
