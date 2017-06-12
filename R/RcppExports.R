@@ -2,19 +2,19 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 ARMA <- function(Phi, Theta, Z, len) {
-    .Call('pdSpecEst_ARMA', PACKAGE = 'pdSpecEst', Phi, Theta, Z, len)
+    .Call(pdSpecEst_ARMA, Phi, Theta, Z, len)
 }
 
 Chol <- function(M) {
-    .Call('pdSpecEst_Chol', PACKAGE = 'pdSpecEst', M)
+    .Call(pdSpecEst_Chol, M)
 }
 
 E_coeff <- function(H, E) {
-    .Call('pdSpecEst_E_coeff', PACKAGE = 'pdSpecEst', H, E)
+    .Call(pdSpecEst_E_coeff, H, E)
 }
 
 E_coeff_inv <- function(coeff, E) {
-    .Call('pdSpecEst_E_coeff_inv', PACKAGE = 'pdSpecEst', coeff, E)
+    .Call(pdSpecEst_E_coeff_inv, coeff, E)
 }
 
 #' Exponential map
@@ -42,15 +42,15 @@ E_coeff_inv <- function(coeff, E) {
 #'
 #' @export
 Expm <- function(P, H) {
-    .Call('pdSpecEst_Expm', PACKAGE = 'pdSpecEst', P, H)
+    .Call(pdSpecEst_Expm, P, H)
 }
 
 iSqrt <- function(M) {
-    .Call('pdSpecEst_iSqrt', PACKAGE = 'pdSpecEst', M)
+    .Call(pdSpecEst_iSqrt, M)
 }
 
 kMean <- function(M, mu) {
-    .Call('pdSpecEst_kMean', PACKAGE = 'pdSpecEst', M, mu)
+    .Call(pdSpecEst_kMean, M, mu)
 }
 
 #' Logarithmic map
@@ -77,7 +77,7 @@ kMean <- function(M, mu) {
 #'
 #' @export
 Logm <- function(P, Q) {
-    .Call('pdSpecEst_Logm', PACKAGE = 'pdSpecEst', P, Q)
+    .Call(pdSpecEst_Logm, P, Q)
 }
 
 #' Geodesic midpoint between HPD-matrices
@@ -99,22 +99,22 @@ Logm <- function(P, Q) {
 #'
 #' @export
 Mid <- function(A, B) {
-    .Call('pdSpecEst_Mid', PACKAGE = 'pdSpecEst', A, B)
+    .Call(pdSpecEst_Mid, A, B)
 }
 
 NormF <- function(M) {
-    .Call('pdSpecEst_NormF', PACKAGE = 'pdSpecEst', M)
+    .Call(pdSpecEst_NormF, M)
 }
 
 RiemmDist <- function(A, B) {
-    .Call('pdSpecEst_RiemmDist', PACKAGE = 'pdSpecEst', A, B)
+    .Call(pdSpecEst_RiemmDist, A, B)
 }
 
 solveMid <- function(B, C) {
-    .Call('pdSpecEst_solveMid', PACKAGE = 'pdSpecEst', B, C)
+    .Call(pdSpecEst_solveMid, B, C)
 }
 
 Sqrt <- function(M) {
-    .Call('pdSpecEst_Sqrt', PACKAGE = 'pdSpecEst', M)
+    .Call(pdSpecEst_Sqrt, M)
 }
 
