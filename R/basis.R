@@ -19,25 +19,10 @@ E_basis <- function(d) {
 ## Basis Tangent space
 
 T_basis <- function(E, y) {
-  V <- E
-  d <- nrow(V)
-  y_inv <- solve(y)
-  Inner_y <- function(e_i, e_j) sum(diag((y_inv %*% e_i) %*% (y_inv %*% e_j)))
-  Proj <- function(v,u) Inner_y(u, v) / Inner_y(u, u) * u
-
-  U <- array(dim=c(d,d,d^2))
-  U[,,1] <- V[,,1] / sqrt(Inner_y(V[,,1], V[,,1]))
-
-  for(k in 2:d^2){
-      U_k <- V[,,k] - apply(sapply(1:(k-1), function(j) Proj(V[,,k], U[,,j]),
-                                   simplify = "array"), c(1,2), sum)
-      U[,,k] <- U_k / sqrt(Inner_y(U_k, U_k))
-  }
-  return(U)
+  d <- nrow(E)
+  y.sqrt <- Sqrt(y)
+  return(array(c(apply(E, 3, function(E) (y.sqrt %*% E) %*% y.sqrt)), dim = c(d, d, d^2)))
 }
-
-
-
 
 
 

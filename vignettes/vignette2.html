@@ -12,7 +12,7 @@
 
 <meta name="author" content="Joris Chau" />
 
-<meta name="date" content="2017-06-12" />
+<meta name="date" content="2017-06-25" />
 
 <title>Data depth and rank-based tests for HPD matrices</title>
 
@@ -70,14 +70,14 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Data depth and rank-based tests for HPD matrices</h1>
 <h4 class="author"><em>Joris Chau</em></h4>
-<h4 class="date"><em>2017-06-12</em></h4>
+<h4 class="date"><em>2017-06-25</em></h4>
 
 
 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
 <p>In second-order stationary multivariate time series analysis, non-degenerate autocovariance matrices or spectral density matrices at the Fourier frequencies are necessarily elements of the space of Hermitian positive definite (HPD) matrices. In <span class="citation">(Chau, Ombao, and von Sachs 2017)</span>, we generalize the classical concept of data depth for Euclidean vectors to <em>manifold</em> data depth for matrix-valued observations in the non-Euclidean space of HPD matrices. Data depth is an important tool in statistical data analysis measuring the <em>depth</em> of a point with respect to a data cloud or probability distribution. In this way, data depth provides a center-to-outward ordering of multivariate data observations, generalizing the notion of a rank for univariate observations.</p>
-<p>The proposed data depth measures can be used to characterize central regions or detect outlying observations in samples of HPD matrices, such as collections of covariance or spectral density matrices. The depth functions also provide a practical framework to perform rank-based hypothesis testing for samples of HPD matrices, by replacing the usual ranks by their depth-induced counterparts. Other applications of data depth include the construction of confidence regions, clustering, or classification for samples of HPD matrices.</p>
+<p>The proposed data depth measures can be used to characterize central regions or detect outlying observations in samples of HPD matrices, such as collections of covariance or spectral density matrices. The depth functions also provide a practical framework to perform rank-based hypothesis testing for samples of HPD matrices by replacing the usual ranks by their depth-induced counterparts. Other applications of data depth include the construction of confidence regions, clustering, or classification for samples of HPD matrices.</p>
 <p>In this vignette we demonstrate the use of the functions <code>pdDepth()</code> and <code>pdRankTests()</code> to compute data depth values of HPD matrix-valued observations and perform rank-based hypothesis testing for samples of HPD matrices.</p>
 </div>
 <div id="data-depth-of-hpd-matrices-with-pddepth" class="section level2">
@@ -96,7 +96,7 @@ X1 &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="
 X2 &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">50</span>, <span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">5</span>, function(i) <span class="kw">Expm</span>(i *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(<span class="fl">0.5</span> *<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">4</span>), i *<span class="st"> </span>E)), <span class="dt">simplify =</span> <span class="st">&quot;array&quot;</span>))
 <span class="kw">str</span>(X2)
 <span class="co">#&gt;  cplx [1:2, 1:2, 1:5, 1:50] 1.074+0i 0.352+0.147i 0.352-0.147i ...</span></code></pre></div>
-<p><strong>Remark:</strong> The internal function <code>pdSpecEst:::E_basis(2)</code> constructs an orthonormal basis of the tangent space at the identity element <code>diag(2)</code>, and the internal function <code>pdSpecEst:::E_coeff_inv()</code> converts (real-valued) basis components to tangent space elements using the constructed orthonormal basis.</p>
+<p><strong>Remark:</strong> The internal function <code>pdSpecEst:::E_basis(2)</code> constructs an orthonormal basis of the tangent space at the identity element <code>diag(2)</code>, and the internal function <code>pdSpecEst:::E_coeff_inv()</code> converts (real-valued) basis components to tangent space elements using the constructed orthonormal basis. See <span class="citation">(Chau, Ombao, and von Sachs 2017)</span> for more details.</p>
 <p>With <code>pdDepth()</code>, we can compute the data depth of a single HPD matrix (resp. curve of HPD matrices) <code>y</code> with respect to a sample of HPD matrices (resp. sample of curves of HPD matrices) <code>X</code>. For more details and properties of the available manifold depth functions, see <span class="citation">(Chau, Ombao, and von Sachs 2017)</span>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Pointwise depth
 <span class="kw">pdDepth</span>(<span class="dt">y =</span> <span class="kw">diag</span>(<span class="dv">2</span>), <span class="dt">X =</span> X1, <span class="dt">method =</span> <span class="st">&quot;gdd&quot;</span>) ## geodesic distance depth
@@ -113,7 +113,7 @@ X2 &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="
 <span class="co">#&gt; [1] 0.8631369</span>
 <span class="kw">pdDepth</span>(<span class="dt">y =</span> <span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">5</span>, function(i) i *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>), <span class="dt">simplify =</span> <span class="st">&quot;array&quot;</span>), <span class="dt">X =</span> X2, <span class="dt">method =</span> <span class="st">&quot;spatial&quot;</span>) 
 <span class="co">#&gt; [1] 0.8825155</span></code></pre></div>
-<p>We can also compute the data depth of each individual object in <code>X</code> with respect to the sample <code>X</code> itself by leaving the argument <code>y</code> unspecified.</p>
+<p>We can also compute the data depth of each individual object in <code>X</code> with respect to the sample <code>X</code> itself by leaving the argument <code>y</code> in the function <code>pdDepth()</code> unspecified.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">(dd1 &lt;-<span class="st"> </span><span class="kw">pdDepth</span>(<span class="dt">X =</span> X1, <span class="dt">method =</span> <span class="st">&quot;gdd&quot;</span>)) ## pointwise geodesic distance depth
 <span class="co">#&gt;  [1] 0.4136872 0.4072360 0.4025387 0.4044413 0.2559378 0.3873209 0.3832640</span>
 <span class="co">#&gt;  [8] 0.3002407 0.4034977 0.3358114 0.2597040 0.3120139 0.1967228 0.1876342</span>
@@ -157,7 +157,7 @@ X1[ , , <span class="kw">which</span>(dd1.ranks ==<span class="st"> </span><span
 <span class="co">#&gt;                     [,1]                [,2]</span>
 <span class="co">#&gt; [1,]  1.847918+0.000000i -1.288255+1.075924i</span>
 <span class="co">#&gt; [2,] -1.288255-1.075924i  2.490724+0.000000i</span></code></pre></div>
-<p>Let us compare the most central HPD matrix with the (approximate) empirical geometric mean obtained with <code>KarchMean()</code>, which we know maximizes the data depth for <em>centrally symmetric</em> distributions. For additional details, see <span class="citation">(Chau, Ombao, and von Sachs 2017)</span>.</p>
+<p>It is interesting to compare the most central HPD matrix above with the (approximate) empirical geometric mean of the observations obtained with <code>KarchMean()</code>. The empirical geometric mean is known to maximize the data depth for observations from a <em>centrally symmetric</em> distribution (as in this example). For more details, see <span class="citation">(Chau, Ombao, and von Sachs 2017)</span>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">(mean.X1 &lt;-<span class="st"> </span><span class="kw">KarchMean</span>(X1)) 
 <span class="co">#&gt;                         [,1]                    [,2]</span>
 <span class="co">#&gt; [1,]  0.92208421+0.00000000i -0.04690471+0.02281304i</span>
@@ -168,7 +168,7 @@ X1[ , , <span class="kw">which</span>(dd1.ranks ==<span class="st"> </span><span
 </div>
 <div id="rank-based-tests-for-hpd-matrices-with-pdranktests" class="section level2">
 <h2>Rank-based tests for HPD matrices with <code>pdRankTests()</code></h2>
-<p>The null hypotheses of the available rank-bases hypothesis tests in <code>pdRankTests()</code> are:</p>
+<p>The null hypotheses of the available rank-based hypothesis tests in <code>pdRankTests()</code> are:</p>
 <ul>
 <li><code>&quot;rank.sum&quot;</code>: homogeneity of distributions of two independent samples of HPD matrices (resp. sequences of HPD matrices).</li>
 <li><code>&quot;krusk.wall&quot;</code>: homogeneity of distributions of more than two independent samples of HPD matrices (resp. sequences of HPD matrices).</li>
@@ -186,7 +186,10 @@ data1a &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="
 data2a &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(X2, <span class="kw">replicate</span>(<span class="dv">50</span>, <span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">5</span>, function(i) <span class="kw">Expm</span>(i *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(<span class="kw">rnorm</span>(<span class="dv">4</span>), i *<span class="st"> </span>E)), <span class="dt">simplify =</span> <span class="st">&quot;arra&quot;</span>))), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">100</span>)) ## curve scale change
 
 ## Rank-sum test
-<span class="kw">pdRankTests</span>(data1, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">50</span>), <span class="st">&quot;rank.sum&quot;</span>) ## null true (pointwise)
+<span class="kw">pdRankTests</span>(data1, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">50</span>), <span class="st">&quot;rank.sum&quot;</span>)[<span class="dv">1</span>:<span class="dv">4</span>] ## null true (pointwise)
+<span class="co">#&gt; $test</span>
+<span class="co">#&gt; [1] &quot;Manifold Wilcoxon rank-sum&quot;</span>
+<span class="co">#&gt; </span>
 <span class="co">#&gt; $p.value</span>
 <span class="co">#&gt; [1] 0.1037495</span>
 <span class="co">#&gt; </span>
@@ -196,17 +199,20 @@ data2a &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="
 <span class="co">#&gt; $null.distr</span>
 <span class="co">#&gt; [1] &quot;Standard normal distribution&quot;</span>
 <span class="kw">pdRankTests</span>(data2, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">50</span>), <span class="st">&quot;rank.sum&quot;</span>)[<span class="dv">1</span>] ## null true (curve)
-<span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 0.7668985</span>
+<span class="co">#&gt; $test</span>
+<span class="co">#&gt; [1] &quot;Manifold Wilcoxon rank-sum&quot;</span>
 <span class="kw">pdRankTests</span>(data1a, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">50</span>), <span class="st">&quot;rank.sum&quot;</span>)[<span class="dv">1</span>] ## null false (pointwise)
-<span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 6.958285e-11</span>
+<span class="co">#&gt; $test</span>
+<span class="co">#&gt; [1] &quot;Manifold Wilcoxon rank-sum&quot;</span>
 <span class="kw">pdRankTests</span>(data2a, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">50</span>), <span class="st">&quot;rank.sum&quot;</span>)[<span class="dv">1</span>] ## null false (curve)
-<span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 1.585078e-17</span>
+<span class="co">#&gt; $test</span>
+<span class="co">#&gt; [1] &quot;Manifold Wilcoxon rank-sum&quot;</span>
 
 ## Kruskal-Wallis test
-<span class="kw">pdRankTests</span>(data1, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">25</span>, <span class="dv">25</span>), <span class="st">&quot;krusk.wall&quot;</span>) ## null true (pointwise)
+<span class="kw">pdRankTests</span>(data1, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">25</span>, <span class="dv">25</span>), <span class="st">&quot;krusk.wall&quot;</span>)[<span class="dv">1</span>:<span class="dv">4</span>] ## null true (pointwise)
+<span class="co">#&gt; $test</span>
+<span class="co">#&gt; [1] &quot;Manifold Kruskal-Wallis&quot;</span>
+<span class="co">#&gt; </span>
 <span class="co">#&gt; $p.value</span>
 <span class="co">#&gt; [1] 0.1443239</span>
 <span class="co">#&gt; </span>
@@ -216,14 +222,14 @@ data2a &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="
 <span class="co">#&gt; $null.distr</span>
 <span class="co">#&gt; [1] &quot;Chi-squared distribution (df = 2)&quot;</span>
 <span class="kw">pdRankTests</span>(data2, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">25</span>, <span class="dv">25</span>), <span class="st">&quot;krusk.wall&quot;</span>)[<span class="dv">1</span>] ## null true (curve)
-<span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 0.3711518</span>
+<span class="co">#&gt; $test</span>
+<span class="co">#&gt; [1] &quot;Manifold Kruskal-Wallis&quot;</span>
 <span class="kw">pdRankTests</span>(data1a, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">25</span>, <span class="dv">25</span>), <span class="st">&quot;krusk.wall&quot;</span>)[<span class="dv">1</span>] ## null false (pointwise)
-<span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 5.495634e-10</span>
+<span class="co">#&gt; $test</span>
+<span class="co">#&gt; [1] &quot;Manifold Kruskal-Wallis&quot;</span>
 <span class="kw">pdRankTests</span>(data2a, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">25</span>, <span class="dv">25</span>), <span class="st">&quot;krusk.wall&quot;</span>)[<span class="dv">1</span>] ## null false (curve)
-<span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 1.715428e-16</span></code></pre></div>
+<span class="co">#&gt; $test</span>
+<span class="co">#&gt; [1] &quot;Manifold Kruskal-Wallis&quot;</span></code></pre></div>
 <p>Second, let us consider several examples of the manifold Wilcoxon signed-rank test (<code>&quot;signed-rank&quot;</code>). We generate paired observations for independent trials (or subjects) by introducing trial-specific random effects, such that the paired observations in each trial share a trial-specific geometric mean. Note that for such data the manifold Wilcoxon rank-sum test is no longer valid due to the introduced sample dependence.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Trial-specific means
 mu &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">50</span>, <span class="kw">Expm</span>(<span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(<span class="fl">0.1</span> *<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">4</span>), E)))
@@ -237,7 +243,10 @@ Y3 &lt;-<span class="st"> </span><span class="kw">make_sample</span>(<span class
 Y3a &lt;-<span class="st"> </span><span class="kw">make_sample</span>(<span class="dt">null =</span> F) ## null false (scale change)
 
 ## Signed-rank test
-<span class="kw">pdRankTests</span>(<span class="kw">array</span>(<span class="kw">c</span>(X3, Y3), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">100</span>)), <span class="dt">test =</span> <span class="st">&quot;signed.rank&quot;</span>) ## null true
+<span class="kw">pdRankTests</span>(<span class="kw">array</span>(<span class="kw">c</span>(X3, Y3), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">100</span>)), <span class="dt">test =</span> <span class="st">&quot;signed.rank&quot;</span>)[<span class="dv">1</span>:<span class="dv">4</span>] ## null true
+<span class="co">#&gt; $test</span>
+<span class="co">#&gt; [1] &quot;Manifold Wilcoxon signed-rank&quot;</span>
+<span class="co">#&gt; </span>
 <span class="co">#&gt; $p.value</span>
 <span class="co">#&gt; [1] 0.2506631</span>
 <span class="co">#&gt; </span>
@@ -248,8 +257,8 @@ Y3a &lt;-<span class="st"> </span><span class="kw">make_sample</span>(<span clas
 <span class="co">#&gt; $null.distr</span>
 <span class="co">#&gt; [1] &quot;Wilcoxon signed rank test with continuity correction&quot;</span>
 <span class="kw">pdRankTests</span>(<span class="kw">array</span>(<span class="kw">c</span>(X3, Y3a), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">100</span>)), <span class="dt">test =</span> <span class="st">&quot;signed.rank&quot;</span>)[<span class="dv">1</span>] ## null false
-<span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 0.0001483959</span></code></pre></div>
+<span class="co">#&gt; $test</span>
+<span class="co">#&gt; [1] &quot;Manifold Wilcoxon signed-rank&quot;</span></code></pre></div>
 <p><strong>Remark:</strong> The internal function <code>pdSpecEst:::T_basis()</code> constructs an orthonormal basis of the tangent space attached to a specific point (HPD matrix) in the Riemannian manifold of HPD matrices as detailed in <span class="citation">(Chau, Ombao, and von Sachs 2017)</span>.</p>
 <p>The manifold signed-rank test also provides a valid procedure to test for equivalence of spectral matrices of two (independent) multivariate stationary time series based on the HPD periodogram matrices obtained via <code>pdPgram()</code> as illustrated below. In contrast to other available tests in the literature, this asymptotic test does not require consistent spectral estimators or resampling/bootstrapping of test statistics, and therefore remains computationally efficient for higher-dimensional spectral matrices or a large number of sampled Fourier frequencies.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Signed-rank test for equivalence of spectra
@@ -261,13 +270,13 @@ pgram &lt;-<span class="st"> </span>function(Sigma) <span class="kw">pdPgram</sp
 
 ## Null is true
 <span class="kw">pdRankTests</span>(<span class="kw">array</span>(<span class="kw">c</span>(<span class="kw">pgram</span>(Sigma), <span class="kw">pgram</span>(Sigma)), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>^<span class="dv">8</span>)), <span class="dt">test =</span> <span class="st">&quot;signed.rank&quot;</span>)[<span class="dv">1</span>]
-<span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 0.4045394</span>
+<span class="co">#&gt; $test</span>
+<span class="co">#&gt; [1] &quot;Manifold Wilcoxon signed-rank&quot;</span>
 
 ## Null is false
 <span class="kw">pdRankTests</span>(<span class="kw">array</span>(<span class="kw">c</span>(<span class="kw">pgram</span>(Sigma), <span class="kw">pgram</span>(<span class="fl">0.5</span> *<span class="st"> </span>Sigma)), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>^<span class="dv">8</span>)), <span class="dt">test =</span> <span class="st">&quot;signed.rank&quot;</span>)[<span class="dv">1</span>]
-<span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 5.058065e-14</span></code></pre></div>
+<span class="co">#&gt; $test</span>
+<span class="co">#&gt; [1] &quot;Manifold Wilcoxon signed-rank&quot;</span></code></pre></div>
 <p>To conclude, let us consider several examples of the manifold Bartels-von Neumman test (<code>&quot;bartels&quot;</code>). Below, we generate an independent sample with a gradual trend in the scale of the distribution, such that the null hypothesis of randomness breaks down.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Null is true
 data3 &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">200</span>, <span class="kw">Expm</span>(<span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(<span class="kw">rnorm</span>(<span class="dv">4</span>), E))) ## pointwise samples
@@ -278,7 +287,10 @@ data3a &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class=
 data4a &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">100</span>, function(j) <span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">5</span>, function(i) <span class="kw">Expm</span>(i *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(((<span class="dv">100</span> -<span class="st"> </span>j) /<span class="st"> </span><span class="dv">100</span> +<span class="st"> </span>j *<span class="st"> </span><span class="dv">2</span> /<span class="st"> </span><span class="dv">100</span>) *<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">4</span>), i *<span class="st"> </span>E)), <span class="dt">simplify =</span> <span class="st">&quot;array&quot;</span>), <span class="dt">simplify =</span> <span class="st">&quot;array&quot;</span>) ## curve trend in scale
 
 ## Bartels-von Neumann test
-<span class="kw">pdRankTests</span>(data3, <span class="dt">test =</span> <span class="st">&quot;bartels&quot;</span>) ## null true (pointwise)
+<span class="kw">pdRankTests</span>(data3, <span class="dt">test =</span> <span class="st">&quot;bartels&quot;</span>)[<span class="dv">1</span>:<span class="dv">4</span>] ## null true (pointwise)
+<span class="co">#&gt; $test</span>
+<span class="co">#&gt; [1] &quot;Manifold Bartels-von Neumann&quot;</span>
+<span class="co">#&gt; </span>
 <span class="co">#&gt; $p.value</span>
 <span class="co">#&gt; [1] 0.8931316</span>
 <span class="co">#&gt; </span>
@@ -288,20 +300,20 @@ data4a &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class=
 <span class="co">#&gt; $null.distr</span>
 <span class="co">#&gt; [1] &quot;Standard normal distribution&quot;</span>
 <span class="kw">pdRankTests</span>(data4, <span class="dt">test =</span> <span class="st">&quot;bartels&quot;</span>)[<span class="dv">1</span>] ## null true (curve)
-<span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 0.407387</span>
+<span class="co">#&gt; $test</span>
+<span class="co">#&gt; [1] &quot;Manifold Bartels-von Neumann&quot;</span>
 <span class="kw">pdRankTests</span>(data3a, <span class="dt">test =</span> <span class="st">&quot;bartels&quot;</span>)[<span class="dv">1</span>] ## null false (pointwise)
-<span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 0.0005847046</span>
+<span class="co">#&gt; $test</span>
+<span class="co">#&gt; [1] &quot;Manifold Bartels-von Neumann&quot;</span>
 <span class="kw">pdRankTests</span>(data4a, <span class="dt">test =</span> <span class="st">&quot;bartels&quot;</span>)[<span class="dv">1</span>] ## null false (curve)
-<span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 9.374569e-08</span></code></pre></div>
+<span class="co">#&gt; $test</span>
+<span class="co">#&gt; [1] &quot;Manifold Bartels-von Neumann&quot;</span></code></pre></div>
 </div>
 <div id="references" class="section level2 unnumbered">
 <h2>References</h2>
 <div id="refs" class="references">
 <div id="ref-COvS17">
-<p>Chau, J., H. Ombao, and R. von Sachs. 2017. “Statistical Data Depth and Rank-Based Tests for Spectral Density Matrices.” <em>Working Paper</em>.</p>
+<p>Chau, J., H. Ombao, and R. von Sachs. 2017. “Data Depth and Rank-Based Tests for Covariance and Spectral Density Matrices.” <em>Available on ArXiv</em>.</p>
 </div>
 </div>
 </div>

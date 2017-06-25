@@ -23,9 +23,11 @@ geodesic distance depth, manifold zonoid depth and manifold spatial depth respec
 }
 \value{
 The function returns a list with three components:
+\item{test }{name of the rank-based test}
 \item{p.value }{p-value of the test}
 \item{statistic }{computed test statistic}
 \item{null.distr }{the distribution of the test statistic under the null hypothesis}
+\item{depth.values }{computed data depth values if available}
 }
 \description{
 \code{pdRankTests} performs generalized rank-based hypothesis testing for samples of Hermitian PD matrices or

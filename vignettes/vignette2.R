@@ -57,13 +57,13 @@ data1a <- array(c(X1, replicate(50, Expm(diag(2), pdSpecEst:::E_coeff_inv(rnorm(
 data2a <- array(c(X2, replicate(50, sapply(1:5, function(i) Expm(i * diag(2), pdSpecEst:::E_coeff_inv(rnorm(4), i * E)), simplify = "arra"))), dim = c(2, 2, 5, 100)) ## curve scale change
 
 ## Rank-sum test
-pdRankTests(data1, sample.sizes = c(50, 50), "rank.sum") ## null true (pointwise)
+pdRankTests(data1, sample.sizes = c(50, 50), "rank.sum")[1:4] ## null true (pointwise)
 pdRankTests(data2, sample.sizes = c(50, 50), "rank.sum")[1] ## null true (curve)
 pdRankTests(data1a, sample.sizes = c(50, 50), "rank.sum")[1] ## null false (pointwise)
 pdRankTests(data2a, sample.sizes = c(50, 50), "rank.sum")[1] ## null false (curve)
 
 ## Kruskal-Wallis test
-pdRankTests(data1, sample.sizes = c(50, 25, 25), "krusk.wall") ## null true (pointwise)
+pdRankTests(data1, sample.sizes = c(50, 25, 25), "krusk.wall")[1:4] ## null true (pointwise)
 pdRankTests(data2, sample.sizes = c(50, 25, 25), "krusk.wall")[1] ## null true (curve)
 pdRankTests(data1a, sample.sizes = c(50, 25, 25), "krusk.wall")[1] ## null false (pointwise)
 pdRankTests(data2a, sample.sizes = c(50, 25, 25), "krusk.wall")[1] ## null false (curve)
@@ -81,7 +81,7 @@ Y3 <- make_sample(null = T) ## null true
 Y3a <- make_sample(null = F) ## null false (scale change)
 
 ## Signed-rank test
-pdRankTests(array(c(X3, Y3), dim = c(2, 2, 100)), test = "signed.rank") ## null true
+pdRankTests(array(c(X3, Y3), dim = c(2, 2, 100)), test = "signed.rank")[1:4] ## null true
 pdRankTests(array(c(X3, Y3a), dim = c(2, 2, 100)), test = "signed.rank")[1] ## null false
 
 
@@ -109,7 +109,7 @@ data3a <- sapply(1:200, function(j) Expm(diag(2), pdSpecEst:::E_coeff_inv(((200 
 data4a <- sapply(1:100, function(j) sapply(1:5, function(i) Expm(i * diag(2), pdSpecEst:::E_coeff_inv(((100 - j) / 100 + j * 2 / 100) * rnorm(4), i * E)), simplify = "array"), simplify = "array") ## curve trend in scale
 
 ## Bartels-von Neumann test
-pdRankTests(data3, test = "bartels") ## null true (pointwise)
+pdRankTests(data3, test = "bartels")[1:4] ## null true (pointwise)
 pdRankTests(data4, test = "bartels")[1] ## null true (curve)
 pdRankTests(data3a, test = "bartels")[1] ## null false (pointwise)
 pdRankTests(data4a, test = "bartels")[1] ## null false (curve)

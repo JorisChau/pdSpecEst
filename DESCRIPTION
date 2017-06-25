@@ -1,6 +1,6 @@
 Package: pdSpecEst
 Type: Package
-Title: Analysis Toolbox for Hermitian Positive Definite Matrices
+Title: An Analysis Toolbox for Hermitian Positive Definite Matrices
 Version: 1.1.0
 Authors@R: person("Joris", "Chau", email = "j.chau@uclouvain.be", role = c("aut", "cre"))
 Description: An implementation of data analysis tools for samples of symmetric or 

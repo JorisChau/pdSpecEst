@@ -79,6 +79,7 @@ pdDepth <- function(y = NULL, X, method = c("zonoid", "gdd", "spatial")) {
   if (method == "zonoid") {
     if (length(dim(X)) == 3) {
       ZD <- function(y, X) {
+        # E_y <- T_basis(E, y)
         return(ddalpha::depth.zonoid(t(as.matrix(rep(0, d^2))), t(sapply(1:S,
                                         function(s) E_coeff(Logm(y, X[, , s]), E)))))
       }
@@ -91,6 +92,7 @@ pdDepth <- function(y = NULL, X, method = c("zonoid", "gdd", "spatial")) {
       iZD <- function(y, X) {
         depth.t <- numeric(n)
         for (t in 1:n) {
+          # E_y <- T_basis(E, y[, , t])
           depth.t[t] <- ddalpha::depth.zonoid(t(as.matrix(rep(0, d^2))), t(sapply(1:S,
                                         function(s) E_coeff(Logm(y[, , t], X[, , t, s]), E))))
         }

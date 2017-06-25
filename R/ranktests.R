@@ -39,9 +39,11 @@
 #' \code{"signed.rank"}.
 #'
 #' @return The function returns a list with three components:
+#' \item{test }{name of the rank-based test}
 #' \item{p.value }{p-value of the test}
 #' \item{statistic }{computed test statistic}
 #' \item{null.distr }{the distribution of the test statistic under the null hypothesis}
+#' \item{depth.values }{computed data depth values if available}
 #'
 #' @examples
 #' ## null hypothesis is true
@@ -112,8 +114,8 @@ pdRankTests <- function(data, sample.sizes, test = c("rank.sum", "krusk.wall",
     T1 <- (sum(rank(dd, ties.method = "random")[1:n[1]]) - n[1] * (sum(n) + 1)/2) /
                                                     sqrt(n[1] * n[2] * (sum(n) + 1)/12)
 
-    output <- list(p.value = 2 * stats::pnorm(abs(T1), lower.tail = F), statistic = T1,
-                                                  null.distr = "Standard normal distribution")
+    output <- list(test = "Manifold Wilcoxon rank-sum", p.value = 2 * stats::pnorm(abs(T1), lower.tail = F), statistic = T1,
+                                                  null.distr = "Standard normal distribution", depth.values = dd)
   }
 
   ## Manifold Kruskal-Wallis test
@@ -128,9 +130,9 @@ pdRankTests <- function(data, sample.sizes, test = c("rank.sum", "krusk.wall",
                                       f = rep(1:length(n), times = n)), mean)))
     T2 <- 12/(N * (N + 1)) * sum(n * (R_bar - (N + 1)/2)^2)
 
-    output <- list(p.value = min(stats::pchisq(T2, df = 2, lower.tail = T),
+    output <- list(test = "Manifold Kruskal-Wallis", p.value = min(stats::pchisq(T2, df = 2, lower.tail = T),
                             pchisq(T2, df = 2, lower.tail = F)), statistic = T2,
-                                    null.distr = "Chi-squared distribution (df = 2)")
+                                    null.distr = "Chi-squared distribution (df = 2)", depth.values = dd)
   }
 
   ## Manifold signed-rank test
@@ -144,7 +146,7 @@ pdRankTests <- function(data, sample.sizes, test = c("rank.sum", "krusk.wall",
     diff <- sapply(1:n, function(i) Re(sum(diag(Logm(diag(d), ast(iSqrt(data[, , n + i]), data[, , i]))))))
 
     T3 <- stats::wilcox.test(x = diff, y = rep(0, n), paired = T, correct = T)
-    output <- list(p.value = T3$p.value, statistic = T3$statistic, null.distr = T3$method)
+    output <- list(test = "Manifold Wilcoxon signed-rank", p.value = T3$p.value, statistic = T3$statistic, null.distr = T3$method)
   }
 
   ## Manifold Bartels-von Neumann test
@@ -157,8 +159,9 @@ pdRankTests <- function(data, sample.sizes, test = c("rank.sum", "krusk.wall",
     T4 <- sum(diff(rank(dd, ties.method = "random"))^2)/(n * (n^2 - 1)/12)
     sigma <- sqrt(4 * (n - 2) * (5 * n^2 - 2 * n - 9)/(5 * n * (n + 1) * (n - 1)^2))
 
-    output <- list(p.value = 2 * pnorm(abs((T4 - 2)/sigma), lower.tail = F),
-                      statistic = (T4 - 2)/sigma, null.distr = "Standard normal distribution")
+    output <- list(test = "Manifold Bartels-von Neumann", p.value = 2 * pnorm(abs((T4 - 2)/sigma), lower.tail = F),
+                      statistic = (T4 - 2)/sigma, null.distr = "Standard normal distribution",
+                   depth.values = dd)
   }
 
   return(output)

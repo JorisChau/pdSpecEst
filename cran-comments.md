@@ -1,21 +1,25 @@
 ## Test environments
 
-* local windows 7 install, R 3.3.1
-* local ubuntu 16.04 install, R 3.4.0
-* ubuntu 12.04 (on travis-ci), R 3.3.2
-* osx 10.11.6 (on travis-ci), R 3.3.2
-* win-builder (devel and release)
+* local windows 7 install, R 3.3.1, pass
+* local ubuntu 16.04 install, R 3.4.0, 1 note
+* ubuntu 12.04 (on travis-ci), R 3.3.2, pass
+* osx 10.11.6 (on travis-ci), R 3.3.2, pass
+* win-builder (devel and release), 1 note
 
 ## R CMD check results
 
 0 errors | 0 warnings | 1 note
 
-Win-builder devel and release note:
+**Win-builder devel and release note:**
 
 * checking CRAN incoming feasibility ... NOTE
 Maintainer: 'Joris Chau <j.chau@uclouvain.be>'
 
-Ubuntu 16.04 note:
+Possibly mis-spelled words in DESCRIPTION:
+  Hermitian (3:29, 7:3, 9:60, 11:3)
+  covariance (7:64)
+
+**Ubuntu 16.04 (local) and Ubuntu 12.04 (travis-ci) note:**
 
 * checking installed package size ... NOTE
   installed size is  7.2Mb
