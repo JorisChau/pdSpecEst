@@ -74,8 +74,8 @@
 #'
 #' @seealso \code{\link{pdDepth}}, \code{\link{pdPgram}}
 #'
-#' @references Chau, J., Ombao, H., and von Sachs, R. (2017b). \emph{Statistical data depth and rank-based
-#' tests for spectral density matrices}. Working paper.
+#' @references Chau, J., Ombao, H., and von Sachs, R. (2017b). \emph{Data depth and rank-based
+#' tests for covariance and spectral density matrices}. Available on ArXiv.
 #' @references Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
 #'
 #' @importFrom utils tail
