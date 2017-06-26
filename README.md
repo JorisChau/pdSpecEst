@@ -3,8 +3,8 @@
 The `pdSpecEst` package
 =======================
 
-  [![CRAN version](http://www.r-pkg.org/badges/version/pdSpecEst)](https://CRAN.r-project.org/package=pdSpecEst) [![Travis-CI Build Status](https://travis-ci.org/JorisChau/pdSpecEst.svg?branch=master)](https://travis-ci.org/JorisChau/pdSpecEst)
-
+<!-- [![CRAN version](http://www.r-pkg.org/badges/version/pdSpecEst)](https://cran.r-project.org/package=pdSpecEst) -->
+<!-- [![Travis-CI Build Status](https://travis-ci.org/JorisChau/pdSpecEst.svg?branch=master)](https://travis-ci.org/JorisChau/pdSpecEst) -->
 This package provides data analysis tools for samples of symmetric or Hermitian positive definite matrices, such as collections of (non-degenerate) covariance matrices or spectral density matrices.
 
 The tools in this package can be used to perform:
@@ -31,4 +31,4 @@ References
 
 Chau, J., and R. von Sachs. 2017. “Positive Definite Multivariate Spectral Estimation: A Geometric Wavelet Approach.” <http://arxiv.org/abs/1701.03314>.
 
-Chau, J., H. Ombao, and R. von Sachs. 2017. “Statistical Data Depth and Rank-Based Tests for Spectral Density Matrices.” *Working Paper*.
+Chau, J., H. Ombao, and R. von Sachs. 2017. “Data Depth and Rank-Based Tests for Covariance and Spectral Density Matrices.” *Available on ArXiv*.
