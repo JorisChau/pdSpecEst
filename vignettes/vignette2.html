@@ -198,15 +198,15 @@ data2a &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $null.distr</span>
 <span class="co">#&gt; [1] &quot;Standard normal distribution&quot;</span>
-<span class="kw">pdRankTests</span>(data2, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">50</span>), <span class="st">&quot;rank.sum&quot;</span>)[<span class="dv">1</span>] ## null true (curve)
-<span class="co">#&gt; $test</span>
-<span class="co">#&gt; [1] &quot;Manifold Wilcoxon rank-sum&quot;</span>
-<span class="kw">pdRankTests</span>(data1a, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">50</span>), <span class="st">&quot;rank.sum&quot;</span>)[<span class="dv">1</span>] ## null false (pointwise)
-<span class="co">#&gt; $test</span>
-<span class="co">#&gt; [1] &quot;Manifold Wilcoxon rank-sum&quot;</span>
-<span class="kw">pdRankTests</span>(data2a, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">50</span>), <span class="st">&quot;rank.sum&quot;</span>)[<span class="dv">1</span>] ## null false (curve)
-<span class="co">#&gt; $test</span>
-<span class="co">#&gt; [1] &quot;Manifold Wilcoxon rank-sum&quot;</span>
+<span class="kw">pdRankTests</span>(data2, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">50</span>), <span class="st">&quot;rank.sum&quot;</span>)[<span class="dv">2</span>] ## null true (curve)
+<span class="co">#&gt; $p.value</span>
+<span class="co">#&gt; [1] 0.7668985</span>
+<span class="kw">pdRankTests</span>(data1a, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">50</span>), <span class="st">&quot;rank.sum&quot;</span>)[<span class="dv">2</span>] ## null false (pointwise)
+<span class="co">#&gt; $p.value</span>
+<span class="co">#&gt; [1] 6.958285e-11</span>
+<span class="kw">pdRankTests</span>(data2a, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">50</span>), <span class="st">&quot;rank.sum&quot;</span>)[<span class="dv">2</span>] ## null false (curve)
+<span class="co">#&gt; $p.value</span>
+<span class="co">#&gt; [1] 1.585078e-17</span>
 
 ## Kruskal-Wallis test
 <span class="kw">pdRankTests</span>(data1, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">25</span>, <span class="dv">25</span>), <span class="st">&quot;krusk.wall&quot;</span>)[<span class="dv">1</span>:<span class="dv">4</span>] ## null true (pointwise)
@@ -221,15 +221,15 @@ data2a &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $null.distr</span>
 <span class="co">#&gt; [1] &quot;Chi-squared distribution (df = 2)&quot;</span>
-<span class="kw">pdRankTests</span>(data2, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">25</span>, <span class="dv">25</span>), <span class="st">&quot;krusk.wall&quot;</span>)[<span class="dv">1</span>] ## null true (curve)
-<span class="co">#&gt; $test</span>
-<span class="co">#&gt; [1] &quot;Manifold Kruskal-Wallis&quot;</span>
-<span class="kw">pdRankTests</span>(data1a, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">25</span>, <span class="dv">25</span>), <span class="st">&quot;krusk.wall&quot;</span>)[<span class="dv">1</span>] ## null false (pointwise)
-<span class="co">#&gt; $test</span>
-<span class="co">#&gt; [1] &quot;Manifold Kruskal-Wallis&quot;</span>
-<span class="kw">pdRankTests</span>(data2a, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">25</span>, <span class="dv">25</span>), <span class="st">&quot;krusk.wall&quot;</span>)[<span class="dv">1</span>] ## null false (curve)
-<span class="co">#&gt; $test</span>
-<span class="co">#&gt; [1] &quot;Manifold Kruskal-Wallis&quot;</span></code></pre></div>
+<span class="kw">pdRankTests</span>(data2, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">25</span>, <span class="dv">25</span>), <span class="st">&quot;krusk.wall&quot;</span>)[<span class="dv">2</span>] ## null true (curve)
+<span class="co">#&gt; $p.value</span>
+<span class="co">#&gt; [1] 0.3711518</span>
+<span class="kw">pdRankTests</span>(data1a, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">25</span>, <span class="dv">25</span>), <span class="st">&quot;krusk.wall&quot;</span>)[<span class="dv">2</span>] ## null false (pointwise)
+<span class="co">#&gt; $p.value</span>
+<span class="co">#&gt; [1] 5.495634e-10</span>
+<span class="kw">pdRankTests</span>(data2a, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">25</span>, <span class="dv">25</span>), <span class="st">&quot;krusk.wall&quot;</span>)[<span class="dv">2</span>] ## null false (curve)
+<span class="co">#&gt; $p.value</span>
+<span class="co">#&gt; [1] 1.715428e-16</span></code></pre></div>
 <p>Second, let us consider several examples of the manifold Wilcoxon signed-rank test (<code>&quot;signed-rank&quot;</code>). We generate paired observations for independent trials (or subjects) by introducing trial-specific random effects, such that the paired observations in each trial share a trial-specific geometric mean. Note that for such data the manifold Wilcoxon rank-sum test is no longer valid due to the introduced sample dependence.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Trial-specific means
 mu &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">50</span>, <span class="kw">Expm</span>(<span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(<span class="fl">0.1</span> *<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">4</span>), E)))
@@ -256,9 +256,9 @@ Y3a &lt;-<span class="st"> </span><span class="kw">make_sample</span>(<span clas
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $null.distr</span>
 <span class="co">#&gt; [1] &quot;Wilcoxon signed rank test with continuity correction&quot;</span>
-<span class="kw">pdRankTests</span>(<span class="kw">array</span>(<span class="kw">c</span>(X3, Y3a), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">100</span>)), <span class="dt">test =</span> <span class="st">&quot;signed.rank&quot;</span>)[<span class="dv">1</span>] ## null false
-<span class="co">#&gt; $test</span>
-<span class="co">#&gt; [1] &quot;Manifold Wilcoxon signed-rank&quot;</span></code></pre></div>
+<span class="kw">pdRankTests</span>(<span class="kw">array</span>(<span class="kw">c</span>(X3, Y3a), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">100</span>)), <span class="dt">test =</span> <span class="st">&quot;signed.rank&quot;</span>)[<span class="dv">2</span>] ## null false
+<span class="co">#&gt; $p.value</span>
+<span class="co">#&gt; [1] 0.0001483959</span></code></pre></div>
 <p><strong>Remark:</strong> The internal function <code>pdSpecEst:::T_basis()</code> constructs an orthonormal basis of the tangent space attached to a specific point (HPD matrix) in the Riemannian manifold of HPD matrices as detailed in <span class="citation">(Chau, Ombao, and von Sachs 2017)</span>.</p>
 <p>The manifold signed-rank test also provides a valid procedure to test for equivalence of spectral matrices of two (independent) multivariate stationary time series based on the HPD periodogram matrices obtained via <code>pdPgram()</code> as illustrated below. In contrast to other available tests in the literature, this asymptotic test does not require consistent spectral estimators or resampling/bootstrapping of test statistics, and therefore remains computationally efficient for higher-dimensional spectral matrices or a large number of sampled Fourier frequencies.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Signed-rank test for equivalence of spectra
@@ -269,14 +269,14 @@ Sigma &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="
 pgram &lt;-<span class="st"> </span>function(Sigma) <span class="kw">pdPgram</span>(<span class="kw">rARMA</span>(<span class="dv">2</span>^<span class="dv">9</span>, <span class="dv">2</span>, Phi, Theta, Sigma)$X)$P ## HPD periodogram
 
 ## Null is true
-<span class="kw">pdRankTests</span>(<span class="kw">array</span>(<span class="kw">c</span>(<span class="kw">pgram</span>(Sigma), <span class="kw">pgram</span>(Sigma)), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>^<span class="dv">8</span>)), <span class="dt">test =</span> <span class="st">&quot;signed.rank&quot;</span>)[<span class="dv">1</span>]
-<span class="co">#&gt; $test</span>
-<span class="co">#&gt; [1] &quot;Manifold Wilcoxon signed-rank&quot;</span>
+<span class="kw">pdRankTests</span>(<span class="kw">array</span>(<span class="kw">c</span>(<span class="kw">pgram</span>(Sigma), <span class="kw">pgram</span>(Sigma)), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>^<span class="dv">8</span>)), <span class="dt">test =</span> <span class="st">&quot;signed.rank&quot;</span>)[<span class="dv">2</span>]
+<span class="co">#&gt; $p.value</span>
+<span class="co">#&gt; [1] 0.4045394</span>
 
 ## Null is false
-<span class="kw">pdRankTests</span>(<span class="kw">array</span>(<span class="kw">c</span>(<span class="kw">pgram</span>(Sigma), <span class="kw">pgram</span>(<span class="fl">0.5</span> *<span class="st"> </span>Sigma)), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>^<span class="dv">8</span>)), <span class="dt">test =</span> <span class="st">&quot;signed.rank&quot;</span>)[<span class="dv">1</span>]
-<span class="co">#&gt; $test</span>
-<span class="co">#&gt; [1] &quot;Manifold Wilcoxon signed-rank&quot;</span></code></pre></div>
+<span class="kw">pdRankTests</span>(<span class="kw">array</span>(<span class="kw">c</span>(<span class="kw">pgram</span>(Sigma), <span class="kw">pgram</span>(<span class="fl">0.5</span> *<span class="st"> </span>Sigma)), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>^<span class="dv">8</span>)), <span class="dt">test =</span> <span class="st">&quot;signed.rank&quot;</span>)[<span class="dv">2</span>]
+<span class="co">#&gt; $p.value</span>
+<span class="co">#&gt; [1] 5.058065e-14</span></code></pre></div>
 <p>To conclude, let us consider several examples of the manifold Bartels-von Neumman test (<code>&quot;bartels&quot;</code>). Below, we generate an independent sample with a gradual trend in the scale of the distribution, such that the null hypothesis of randomness breaks down.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Null is true
 data3 &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">200</span>, <span class="kw">Expm</span>(<span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(<span class="kw">rnorm</span>(<span class="dv">4</span>), E))) ## pointwise samples
@@ -299,15 +299,15 @@ data4a &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class=
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $null.distr</span>
 <span class="co">#&gt; [1] &quot;Standard normal distribution&quot;</span>
-<span class="kw">pdRankTests</span>(data4, <span class="dt">test =</span> <span class="st">&quot;bartels&quot;</span>)[<span class="dv">1</span>] ## null true (curve)
-<span class="co">#&gt; $test</span>
-<span class="co">#&gt; [1] &quot;Manifold Bartels-von Neumann&quot;</span>
-<span class="kw">pdRankTests</span>(data3a, <span class="dt">test =</span> <span class="st">&quot;bartels&quot;</span>)[<span class="dv">1</span>] ## null false (pointwise)
-<span class="co">#&gt; $test</span>
-<span class="co">#&gt; [1] &quot;Manifold Bartels-von Neumann&quot;</span>
-<span class="kw">pdRankTests</span>(data4a, <span class="dt">test =</span> <span class="st">&quot;bartels&quot;</span>)[<span class="dv">1</span>] ## null false (curve)
-<span class="co">#&gt; $test</span>
-<span class="co">#&gt; [1] &quot;Manifold Bartels-von Neumann&quot;</span></code></pre></div>
+<span class="kw">pdRankTests</span>(data4, <span class="dt">test =</span> <span class="st">&quot;bartels&quot;</span>)[<span class="dv">2</span>] ## null true (curve)
+<span class="co">#&gt; $p.value</span>
+<span class="co">#&gt; [1] 0.407387</span>
+<span class="kw">pdRankTests</span>(data3a, <span class="dt">test =</span> <span class="st">&quot;bartels&quot;</span>)[<span class="dv">2</span>] ## null false (pointwise)
+<span class="co">#&gt; $p.value</span>
+<span class="co">#&gt; [1] 0.0005847046</span>
+<span class="kw">pdRankTests</span>(data4a, <span class="dt">test =</span> <span class="st">&quot;bartels&quot;</span>)[<span class="dv">2</span>] ## null false (curve)
+<span class="co">#&gt; $p.value</span>
+<span class="co">#&gt; [1] 9.374569e-08</span></code></pre></div>
 </div>
 <div id="references" class="section level2 unnumbered">
 <h2>References</h2>

@@ -56,8 +56,8 @@ pdDepth(X = X2, method = "gdd") ## depth of each curve in the data cloud
 
 }
 \references{
-Chau, J., Ombao, H., and von Sachs, R. (2017b). \emph{Statistical data depth and rank-based
-tests for spectral density matrices}. Working paper.
+Chau, J., Ombao, H., and von Sachs, R. (2017b). \emph{Data depth and rank-based
+tests for covariance and spectral density matrices}. Available on ArXiv.
 }
 \seealso{
 \code{\link{pdDist}}, \code{\link{pdRankTests}}
