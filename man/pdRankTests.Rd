@@ -90,7 +90,7 @@ pdRankTests(array(c(pgram(Sigma), pgram(0.5 * Sigma)), dim = c(2,2,2^8)), test =
 }
 \references{
 Chau, J., Ombao, H., and von Sachs, R. (2017b). \emph{Data depth and rank-based
-tests for covariance and spectral density matrices}. Available on ArXiv.
+tests for covariance and spectral density matrices}. Available at \url{http://arxiv.org/abs/1706.08289}.
 
 Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
 }

@@ -31,4 +31,4 @@ References
 
 Chau, J., and R. von Sachs. 2017. “Positive Definite Multivariate Spectral Estimation: A Geometric Wavelet Approach.” <http://arxiv.org/abs/1701.03314>.
 
-Chau, J., H. Ombao, and R. von Sachs. 2017. “Data Depth and Rank-Based Tests for Covariance and Spectral Density Matrices.” *Available on ArXiv*.
+Chau, J., H. Ombao, and R. von Sachs. 2017. “Data Depth and Rank-Based Tests for Covariance and Spectral Density Matrices.” <http://arxiv.org/abs/1706.08289>.

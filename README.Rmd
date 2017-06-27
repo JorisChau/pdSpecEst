@@ -13,7 +13,7 @@ references:
   issued:
     year: 2017
 - id: COvS17
-  title: Data depth and rank-based tests for covariance and spectral density matrices
+  title: 'Data depth and rank-based tests for covariance and spectral density matrices'
   author:
   - family: Chau  
     given: J.
@@ -21,8 +21,8 @@ references:
     given: H.
   - family: von Sachs
     given: R.
+  URL: 'http://arxiv.org/abs/1706.08289'
   type: article-journal
-  container-title: Available on ArXiv
   issued:
     year: 2017
 ---
