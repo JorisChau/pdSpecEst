@@ -62,14 +62,13 @@ series based on the Hermitian PD periodogram matrices obtained via \code{\link{p
 }
 \examples{
 ## null hypothesis is true
-E <- pdSpecEst:::E_basis(2)
-data <- replicate(100, Expm(diag(2), pdSpecEst:::E_coeff_inv(rnorm(4), E)))
+data <- replicate(100, Expm(diag(2), pdSpecEst:::E_coeff_inv(rnorm(4))))
 pdRankTests(data, sample.sizes = c(50, 50), test = "rank.sum") ## homogeneity 2 samples
 pdRankTests(data, sample.sizes = rep(25, 4), test = "krusk.wall") ## homogeneity 4 samples
 pdRankTests(data, test = "bartels") ## randomness
 
 ## null hypothesis is false
-data1 <- array(c(data, replicate(50, Expm(diag(2), pdSpecEst:::E_coeff_inv(0.5 * rnorm(4), E)))),
+data1 <- array(c(data, replicate(50, Expm(diag(2), pdSpecEst:::E_coeff_inv(0.5 * rnorm(4))))),
                  dim = c(2,2,150))
 pdRankTests(data1, sample.sizes = c(100, 50), test = "rank.sum")
 pdRankTests(data1, sample.sizes = rep(50, 3), test = "krusk.wall")

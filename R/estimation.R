@@ -77,7 +77,6 @@ pdSpecEst <- function(P, lam = NULL, order = 5, return = "f", alpha = 0.75) {
     order <- 5
   }
   dim <- dim(P)[1]
-  E <- E_basis(dim)
 
   ## Find optimal threshold
   if (is.null(lam)) {
@@ -87,8 +86,8 @@ pdSpecEst <- function(P, lam = NULL, order = 5, return = "f", alpha = 0.75) {
     D.half <- list(odd = WavTransf(P.half$odd, order)$D, even = WavTransf(P.half$even, order)$D)
     d <- list(odd = list(), even = list())
     for (j in 1:(J - 2)) {
-      d$odd[[j]] <- sapply(1:2^j, function(k) E_coeff(D.half$odd[[j + 1]][, , k], E))
-      d$even[[j]] <- sapply(1:2^j, function(k) E_coeff(D.half$even[[j + 1]][, , k], E))
+      d$odd[[j]] <- sapply(1:2^j, function(k) E_coeff(D.half$odd[[j + 1]][, , k]))
+      d$even[[j]] <- sapply(1:2^j, function(k) E_coeff(D.half$even[[j + 1]][, , k]))
     }
 
     ## Normalize variances wavelet coefficients
@@ -121,9 +120,9 @@ pdSpecEst <- function(P, lam = NULL, order = 5, return = "f", alpha = 0.75) {
         d.lam$even[[j]][zero.even] <- 0
       }
       for (j in 1:(J - 2)) {
-        D.lam$odd[[j + 1]] <- sapply(1:2^j, function(k) E_coeff_inv(d.lam$odd[[j]][, k], E),
+        D.lam$odd[[j + 1]] <- sapply(1:2^j, function(k) E_coeff_inv(d.lam$odd[[j]][, k]),
                                       simplify = "array")
-        D.lam$even[[j + 1]] <- sapply(1:2^j, function(k) E_coeff_inv(d.lam$even[[j]][, k], E),
+        D.lam$even[[j + 1]] <- sapply(1:2^j, function(k) E_coeff_inv(d.lam$even[[j]][, k]),
                                        simplify = "array")
       }
       f.hat <- list(odd = InvWavTransf(D.lam$odd, order), even = InvWavTransf(D.lam$even, order))
@@ -152,7 +151,7 @@ pdSpecEst <- function(P, lam = NULL, order = 5, return = "f", alpha = 0.75) {
   D <- WavTransf(P, order)$D
   d <- list()
   for (j in 1:(J - 1)) {
-    d[[j]] <- sapply(1:2^j, function(k) E_coeff(D[[j + 1]][, , k], E))
+    d[[j]] <- sapply(1:2^j, function(k) E_coeff(D[[j + 1]][, , k]))
   }
 
   ## Normalize variances wavelet coefficients
@@ -180,7 +179,7 @@ pdSpecEst <- function(P, lam = NULL, order = 5, return = "f", alpha = 0.75) {
 
   ## Inverse transform denoised data
   for (j in 1:(J - 1)) {
-    D[[j + 1]] <- sapply(1:2^j, function(k) E_coeff_inv(d[[j]][, k], E), simplify = "array")
+    D[[j + 1]] <- sapply(1:2^j, function(k) E_coeff_inv(d[[j]][, k]), simplify = "array")
   }
 
   if (return == "f") {

@@ -12,6 +12,7 @@ E_basis <- function(d) {
     }
     E_ij
   }
+
   indices <- expand.grid(1:d, 1:d)
   return(mapply(E, indices$Var1, indices$Var2, SIMPLIFY = "array"))
 }

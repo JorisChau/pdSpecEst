@@ -9,12 +9,20 @@ Chol <- function(M) {
     .Call(pdSpecEst_Chol, M)
 }
 
-E_coeff <- function(H, E) {
-    .Call(pdSpecEst_E_coeff, H, E)
+E_coeff <- function(H) {
+    .Call(pdSpecEst_E_coeff, H)
 }
 
-E_coeff_inv <- function(coeff, E) {
-    .Call(pdSpecEst_E_coeff_inv, coeff, E)
+T_coeff <- function(H, y) {
+    .Call(pdSpecEst_T_coeff, H, y)
+}
+
+E_coeff_inv <- function(coeff) {
+    .Call(pdSpecEst_E_coeff_inv, coeff)
+}
+
+T_coeff_inv <- function(coeff, y) {
+    .Call(pdSpecEst_T_coeff_inv, coeff, y)
 }
 
 #' Exponential map

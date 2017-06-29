@@ -12,7 +12,7 @@
 
 <meta name="author" content="Joris Chau" />
 
-<meta name="date" content="2017-06-27" />
+<meta name="date" content="2017-06-29" />
 
 <title>Data depth and rank-based tests for HPD matrices</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Data depth and rank-based tests for HPD matrices</h1>
 <h4 class="author"><em>Joris Chau</em></h4>
-<h4 class="date"><em>2017-06-27</em></h4>
+<h4 class="date"><em>2017-06-29</em></h4>
 
 
 
@@ -87,16 +87,15 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">set.seed</span>(<span class="dv">100</span>)
 
 ## Pointwise random sample
-E &lt;-<span class="st"> </span>pdSpecEst:::<span class="kw">E_basis</span>(<span class="dv">2</span>) 
-X1 &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">50</span>, <span class="kw">Expm</span>(<span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(<span class="fl">0.5</span> *<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">4</span>), E))) 
+X1 &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">50</span>, <span class="kw">Expm</span>(<span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(<span class="fl">0.5</span> *<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">4</span>)))) 
 <span class="kw">str</span>(X1)
 <span class="co">#&gt;  cplx [1:2, 1:2, 1:50] 0.7794+0i -0.0314-0.0523i -0.0314+0.0523i ...</span>
 
 ## Curve random sample
-X2 &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">50</span>, <span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">5</span>, function(i) <span class="kw">Expm</span>(i *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(<span class="fl">0.5</span> *<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">4</span>), i *<span class="st"> </span>E)), <span class="dt">simplify =</span> <span class="st">&quot;array&quot;</span>))
+X2 &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">50</span>, <span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">5</span>, function(i) <span class="kw">Expm</span>(i *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">T_coeff_inv</span>(<span class="fl">0.5</span> *<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">4</span>), i *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>))), <span class="dt">simplify =</span> <span class="st">&quot;array&quot;</span>))
 <span class="kw">str</span>(X2)
 <span class="co">#&gt;  cplx [1:2, 1:2, 1:5, 1:50] 1.074+0i 0.352+0.147i 0.352-0.147i ...</span></code></pre></div>
-<p><strong>Remark:</strong> The internal function <code>pdSpecEst:::E_basis(2)</code> constructs an orthonormal basis of the tangent space at the identity element <code>diag(2)</code>, and the internal function <code>pdSpecEst:::E_coeff_inv()</code> converts (real-valued) basis components to tangent space elements using the constructed orthonormal basis. See <span class="citation">(Chau, Ombao, and von Sachs 2017)</span> for more details.</p>
+<p><strong>Remark:</strong> The internal functions <code>pdSpecEst:::E_coeff_inv()</code> and <code>pdSpecEst:::T_coeff_inv()</code> convert (real-valued) basis components to tangent space elements (Hermitian matrices) using an orthonormal basis of the tangent space as described in <span class="citation">(Chau, Ombao, and von Sachs 2017)</span>.</p>
 <p>With <code>pdDepth()</code>, we can compute the data depth of a single HPD matrix (resp. curve of HPD matrices) <code>y</code> with respect to a sample of HPD matrices (resp. sample of curves of HPD matrices) <code>X</code>. For more details and properties of the available manifold depth functions, see <span class="citation">(Chau, Ombao, and von Sachs 2017)</span>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Pointwise depth
 <span class="kw">pdDepth</span>(<span class="dt">y =</span> <span class="kw">diag</span>(<span class="dv">2</span>), <span class="dt">X =</span> X1, <span class="dt">method =</span> <span class="st">&quot;gdd&quot;</span>) ## geodesic distance depth
@@ -108,7 +107,7 @@ X2 &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="
 
 ## Integrated depth 
 <span class="kw">pdDepth</span>(<span class="dt">y =</span> <span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">5</span>, function(i) i *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>), <span class="dt">simplify =</span> <span class="st">&quot;array&quot;</span>), <span class="dt">X =</span> X2, <span class="dt">method =</span> <span class="st">&quot;gdd&quot;</span>) 
-<span class="co">#&gt; [1] 0.3774762</span>
+<span class="co">#&gt; [1] 0.751167</span>
 <span class="kw">pdDepth</span>(<span class="dt">y =</span> <span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">5</span>, function(i) i *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>), <span class="dt">simplify =</span> <span class="st">&quot;array&quot;</span>), <span class="dt">X =</span> X2, <span class="dt">method =</span> <span class="st">&quot;zonoid&quot;</span>) 
 <span class="co">#&gt; [1] 0.8631369</span>
 <span class="kw">pdDepth</span>(<span class="dt">y =</span> <span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">5</span>, function(i) i *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>), <span class="dt">simplify =</span> <span class="st">&quot;array&quot;</span>), <span class="dt">X =</span> X2, <span class="dt">method =</span> <span class="st">&quot;spatial&quot;</span>) 
@@ -125,14 +124,14 @@ X2 &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="
 <span class="co">#&gt; [50] 0.2719987</span>
 
 (dd2 &lt;-<span class="st"> </span><span class="kw">pdDepth</span>(<span class="dt">X =</span> X2, <span class="dt">method =</span> <span class="st">&quot;gdd&quot;</span>)) ## integrated geodesic distance depth
-<span class="co">#&gt;  [1] 0.2387878 0.2926181 0.1852479 0.2811600 0.2960353 0.2761073 0.2358667</span>
-<span class="co">#&gt;  [8] 0.2296089 0.1995055 0.2711189 0.2435366 0.2851794 0.2137893 0.2429176</span>
-<span class="co">#&gt; [15] 0.2732229 0.2384484 0.2345302 0.2895885 0.2619553 0.2374283 0.2428772</span>
-<span class="co">#&gt; [22] 0.2676137 0.2322570 0.2795240 0.2821797 0.2586843 0.2319678 0.2589361</span>
-<span class="co">#&gt; [29] 0.2281789 0.2424970 0.2614213 0.2817353 0.2169290 0.2359256 0.2159919</span>
-<span class="co">#&gt; [36] 0.2602266 0.2443895 0.2546861 0.2645071 0.2451921 0.3032832 0.3133502</span>
-<span class="co">#&gt; [43] 0.3063092 0.2028340 0.2518302 0.2058638 0.2419323 0.2849700 0.2874337</span>
-<span class="co">#&gt; [50] 0.2969904</span></code></pre></div>
+<span class="co">#&gt;  [1] 0.7001805 0.6885243 0.5746611 0.7066090 0.6931021 0.6423633 0.6738678</span>
+<span class="co">#&gt;  [8] 0.6197673 0.5654389 0.7123940 0.6469901 0.7158848 0.6487223 0.6243373</span>
+<span class="co">#&gt; [15] 0.7075508 0.6356606 0.6654029 0.7162644 0.6380360 0.7091247 0.6595957</span>
+<span class="co">#&gt; [22] 0.6520224 0.6627836 0.6932087 0.6783008 0.6798760 0.6490358 0.7024616</span>
+<span class="co">#&gt; [29] 0.6324775 0.6889687 0.6728189 0.6927310 0.6464986 0.6492694 0.6591718</span>
+<span class="co">#&gt; [36] 0.6874394 0.6743475 0.6365783 0.6644634 0.7112869 0.6935939 0.7361826</span>
+<span class="co">#&gt; [43] 0.7209363 0.6161036 0.6952725 0.6470956 0.6250286 0.7059682 0.7125312</span>
+<span class="co">#&gt; [50] 0.7113942</span></code></pre></div>
 <p>A center-to-outwards ordering of the individual objects is then obtained by computing the data depth induced ranks, with the most central observation having smallest rank and the most outlying observation having largest rank.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">(dd1.ranks &lt;-<span class="st"> </span><span class="kw">rank</span>(<span class="dv">1</span> -<span class="st"> </span>dd1)) ## pointwise depth ranks
 <span class="co">#&gt;  [1]  4  6  9  7 37 11 12 31  8 22 36 28 48 50 49 39 14 21 45 46 47 13 38</span>
@@ -140,9 +139,9 @@ X2 &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="
 <span class="co">#&gt; [47] 18 19 43 35</span>
 
 (dd2.ranks &lt;-<span class="st"> </span><span class="kw">rank</span>(<span class="dv">1</span> -<span class="st"> </span>dd2)) ## integrated depth ranks
-<span class="co">#&gt;  [1] 34  6 50 13  5 15 38 42 49 17 29  9 46 30 16 35 39  7 20 36 31 18 40</span>
-<span class="co">#&gt; [24] 14 11 24 41 23 43 32 21 12 44 37 45 22 28 25 19 27  3  1  2 48 26 47</span>
-<span class="co">#&gt; [47] 33 10  8  4</span>
+<span class="co">#&gt;  [1] 14 21 49 11 18 40 26 47 50  6 38  4 36 46 10 43 28  3 41  9 31 33 30</span>
+<span class="co">#&gt; [24] 17 24 23 35 13 44 20 27 19 39 34 32 22 25 42 29  8 16  1  2 48 15 37</span>
+<span class="co">#&gt; [47] 45 12  5  7</span>
 
 ## Explore sample X1
 <span class="kw">head</span>(<span class="kw">order</span>(dd1.ranks)) ## most central observations 
@@ -178,12 +177,12 @@ X1[ , , <span class="kw">which</span>(dd1.ranks ==<span class="st"> </span><span
 <p>Below, we construct several simulated examples for which (i) the null hypotheses listed above are satisfied, and (ii) the null hypotheses listed above are not satisfied. Analogous to the previous section, we generate pointwise random samples (resp. random samples of sequences) of <code>(2,2)</code>-dimensional HPD matrix-valued observations, with underlying geometric mean equal to the identity matrix (resp. sequence of scaled identity matrices).</p>
 <p>Let us first consider simulated examples of the manifold Wilcoxon rank-sum test (<code>&quot;rank.sum&quot;</code>) and manifold Kruskal-Wallis test (<code>&quot;krusk.wall&quot;</code>).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Generate data (null true)
-data1 &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(X1, <span class="kw">replicate</span>(<span class="dv">50</span>, <span class="kw">Expm</span>(<span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(<span class="fl">0.5</span> *<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">4</span>), E)))), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">100</span>)) ## pointwise sample
-data2 &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(X2, <span class="kw">replicate</span>(<span class="dv">50</span>, <span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">5</span>, function(i) <span class="kw">Expm</span>(i *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(<span class="fl">0.5</span> *<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">4</span>), i *<span class="st"> </span>E)), <span class="dt">simplify =</span> <span class="st">&quot;array&quot;</span>))), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">100</span>)) ## curve sample
+data1 &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(X1, <span class="kw">replicate</span>(<span class="dv">50</span>, <span class="kw">Expm</span>(<span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(<span class="fl">0.5</span> *<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">4</span>))))), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">100</span>)) ## pointwise sample
+data2 &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(X2, <span class="kw">replicate</span>(<span class="dv">50</span>, <span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">5</span>, function(i) <span class="kw">Expm</span>(i *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">T_coeff_inv</span>(<span class="fl">0.5</span> *<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">4</span>), i *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>))), <span class="dt">simplify =</span> <span class="st">&quot;array&quot;</span>))), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">100</span>)) ## curve sample
 
 ## Generate data (null false)
-data1a &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(X1, <span class="kw">replicate</span>(<span class="dv">50</span>, <span class="kw">Expm</span>(<span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(<span class="kw">rnorm</span>(<span class="dv">4</span>), E)))), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">100</span>)) ## pointwise scale change
-data2a &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(X2, <span class="kw">replicate</span>(<span class="dv">50</span>, <span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">5</span>, function(i) <span class="kw">Expm</span>(i *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(<span class="kw">rnorm</span>(<span class="dv">4</span>), i *<span class="st"> </span>E)), <span class="dt">simplify =</span> <span class="st">&quot;arra&quot;</span>))), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">100</span>)) ## curve scale change
+data1a &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(X1, <span class="kw">replicate</span>(<span class="dv">50</span>, <span class="kw">Expm</span>(<span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(<span class="kw">rnorm</span>(<span class="dv">4</span>))))), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">100</span>)) ## pointwise scale change
+data2a &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(X2, <span class="kw">replicate</span>(<span class="dv">50</span>, <span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">5</span>, function(i) <span class="kw">Expm</span>(i *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">T_coeff_inv</span>(<span class="kw">rnorm</span>(<span class="dv">4</span>), i *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>))), <span class="dt">simplify =</span> <span class="st">&quot;arra&quot;</span>))), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">100</span>)) ## curve scale change
 
 ## Rank-sum test
 <span class="kw">pdRankTests</span>(data1, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">50</span>), <span class="st">&quot;rank.sum&quot;</span>)[<span class="dv">1</span>:<span class="dv">4</span>] ## null true (pointwise)
@@ -200,13 +199,13 @@ data2a &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="
 <span class="co">#&gt; [1] &quot;Standard normal distribution&quot;</span>
 <span class="kw">pdRankTests</span>(data2, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">50</span>), <span class="st">&quot;rank.sum&quot;</span>)[<span class="dv">2</span>] ## null true (curve)
 <span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 0.7668985</span>
+<span class="co">#&gt; [1] 0.9834998</span>
 <span class="kw">pdRankTests</span>(data1a, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">50</span>), <span class="st">&quot;rank.sum&quot;</span>)[<span class="dv">2</span>] ## null false (pointwise)
 <span class="co">#&gt; $p.value</span>
 <span class="co">#&gt; [1] 6.958285e-11</span>
 <span class="kw">pdRankTests</span>(data2a, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">50</span>), <span class="st">&quot;rank.sum&quot;</span>)[<span class="dv">2</span>] ## null false (curve)
 <span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 1.585078e-17</span>
+<span class="co">#&gt; [1] 1.020181e-15</span>
 
 ## Kruskal-Wallis test
 <span class="kw">pdRankTests</span>(data1, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">25</span>, <span class="dv">25</span>), <span class="st">&quot;krusk.wall&quot;</span>)[<span class="dv">1</span>:<span class="dv">4</span>] ## null true (pointwise)
@@ -223,20 +222,19 @@ data2a &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="
 <span class="co">#&gt; [1] &quot;Chi-squared distribution (df = 2)&quot;</span>
 <span class="kw">pdRankTests</span>(data2, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">25</span>, <span class="dv">25</span>), <span class="st">&quot;krusk.wall&quot;</span>)[<span class="dv">2</span>] ## null true (curve)
 <span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 0.3711518</span>
+<span class="co">#&gt; [1] 0.1526552</span>
 <span class="kw">pdRankTests</span>(data1a, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">25</span>, <span class="dv">25</span>), <span class="st">&quot;krusk.wall&quot;</span>)[<span class="dv">2</span>] ## null false (pointwise)
 <span class="co">#&gt; $p.value</span>
 <span class="co">#&gt; [1] 5.495634e-10</span>
 <span class="kw">pdRankTests</span>(data2a, <span class="dt">sample.sizes =</span> <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">25</span>, <span class="dv">25</span>), <span class="st">&quot;krusk.wall&quot;</span>)[<span class="dv">2</span>] ## null false (curve)
 <span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 1.715428e-16</span></code></pre></div>
+<span class="co">#&gt; [1] 1.033775e-14</span></code></pre></div>
 <p>Second, let us consider several examples of the manifold Wilcoxon signed-rank test (<code>&quot;signed-rank&quot;</code>). We generate paired observations for independent trials (or subjects) by introducing trial-specific random effects, such that the paired observations in each trial share a trial-specific geometric mean. Note that for such data the manifold Wilcoxon rank-sum test is no longer valid due to the introduced sample dependence.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Trial-specific means
-mu &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">50</span>, <span class="kw">Expm</span>(<span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(<span class="fl">0.1</span> *<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">4</span>), E)))
-E_mu &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">apply</span>(mu, <span class="dv">3</span>, function(mu) pdSpecEst:::<span class="kw">T_basis</span>(E, mu)), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">50</span>))
+mu &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">50</span>, <span class="kw">Expm</span>(<span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(<span class="fl">0.1</span> *<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">4</span>))))
 
 ## Generate paired samples X,Y
-make_sample &lt;-<span class="st"> </span>function(null) <span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">50</span>, function(i) <span class="kw">Expm</span>(mu[, , i], pdSpecEst:::<span class="kw">E_coeff_inv</span>(<span class="kw">ifelse</span>(null, <span class="dv">1</span>, <span class="fl">0.5</span>) *<span class="st"> </span><span class="kw">rexp</span>(<span class="dv">4</span>) -<span class="st"> </span><span class="dv">1</span>, E_mu[, , , i])), <span class="dt">simplify =</span> <span class="st">&quot;array&quot;</span>) 
+make_sample &lt;-<span class="st"> </span>function(null) <span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">50</span>, function(i) <span class="kw">Expm</span>(mu[, , i], pdSpecEst:::<span class="kw">T_coeff_inv</span>(<span class="kw">ifelse</span>(null, <span class="dv">1</span>, <span class="fl">0.5</span>) *<span class="st"> </span><span class="kw">rexp</span>(<span class="dv">4</span>) -<span class="st"> </span><span class="dv">1</span>, mu[, , i])), <span class="dt">simplify =</span> <span class="st">&quot;array&quot;</span>) 
 
 X3 &lt;-<span class="st"> </span><span class="kw">make_sample</span>(<span class="dt">null =</span> T)
 Y3 &lt;-<span class="st"> </span><span class="kw">make_sample</span>(<span class="dt">null =</span> T) ## null true
@@ -248,18 +246,17 @@ Y3a &lt;-<span class="st"> </span><span class="kw">make_sample</span>(<span clas
 <span class="co">#&gt; [1] &quot;Manifold Wilcoxon signed-rank&quot;</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 0.2506631</span>
+<span class="co">#&gt; [1] 0.2025809</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $statistic</span>
 <span class="co">#&gt;   V </span>
-<span class="co">#&gt; 518 </span>
+<span class="co">#&gt; 505 </span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $null.distr</span>
 <span class="co">#&gt; [1] &quot;Wilcoxon signed rank test with continuity correction&quot;</span>
 <span class="kw">pdRankTests</span>(<span class="kw">array</span>(<span class="kw">c</span>(X3, Y3a), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">100</span>)), <span class="dt">test =</span> <span class="st">&quot;signed.rank&quot;</span>)[<span class="dv">2</span>] ## null false
 <span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 0.0001483959</span></code></pre></div>
-<p><strong>Remark:</strong> The internal function <code>pdSpecEst:::T_basis()</code> constructs an orthonormal basis of the tangent space attached to a specific point (HPD matrix) in the Riemannian manifold of HPD matrices as detailed in <span class="citation">(Chau, Ombao, and von Sachs 2017)</span>.</p>
+<span class="co">#&gt; [1] 0.001444632</span></code></pre></div>
 <p>The manifold signed-rank test also provides a valid procedure to test for equivalence of spectral matrices of two (independent) multivariate stationary time series based on the HPD periodogram matrices obtained via <code>pdPgram()</code> as illustrated below. In contrast to other available tests in the literature, this asymptotic test does not require consistent spectral estimators or resampling/bootstrapping of test statistics, and therefore remains computationally efficient for higher-dimensional spectral matrices or a large number of sampled Fourier frequencies.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Signed-rank test for equivalence of spectra
 ## ARMA(1,1) process: Example 11.4.1 in (Brockwell and Davis, 1991)
@@ -279,12 +276,12 @@ pgram &lt;-<span class="st"> </span>function(Sigma) <span class="kw">pdPgram</sp
 <span class="co">#&gt; [1] 5.058065e-14</span></code></pre></div>
 <p>To conclude, let us consider several examples of the manifold Bartels-von Neumman test (<code>&quot;bartels&quot;</code>). Below, we generate an independent sample with a gradual trend in the scale of the distribution, such that the null hypothesis of randomness breaks down.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Null is true
-data3 &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">200</span>, <span class="kw">Expm</span>(<span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(<span class="kw">rnorm</span>(<span class="dv">4</span>), E))) ## pointwise samples
-data4 &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">100</span>, <span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">5</span>, function(i) <span class="kw">Expm</span>(i *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(<span class="kw">rnorm</span>(<span class="dv">4</span>), i *<span class="st"> </span>E)), <span class="dt">simplify =</span> <span class="st">&quot;array&quot;</span>)) ## curve samples
+data3 &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">200</span>, <span class="kw">Expm</span>(<span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(<span class="kw">rnorm</span>(<span class="dv">4</span>)))) ## pointwise samples
+data4 &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">100</span>, <span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">5</span>, function(i) <span class="kw">Expm</span>(i *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">T_coeff_inv</span>(<span class="kw">rnorm</span>(<span class="dv">4</span>), i *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>))), <span class="dt">simplify =</span> <span class="st">&quot;array&quot;</span>)) ## curve samples
 
 ## Null is false
-data3a &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">200</span>, function(j) <span class="kw">Expm</span>(<span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(((<span class="dv">200</span> -<span class="st"> </span>j) /<span class="st"> </span><span class="dv">200</span> +<span class="st"> </span>j *<span class="st"> </span><span class="dv">2</span> /<span class="st"> </span><span class="dv">200</span>) *<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">4</span>), E)), <span class="dt">simplify =</span> <span class="st">&quot;array&quot;</span>) ## pointwise trend in scale
-data4a &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">100</span>, function(j) <span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">5</span>, function(i) <span class="kw">Expm</span>(i *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(((<span class="dv">100</span> -<span class="st"> </span>j) /<span class="st"> </span><span class="dv">100</span> +<span class="st"> </span>j *<span class="st"> </span><span class="dv">2</span> /<span class="st"> </span><span class="dv">100</span>) *<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">4</span>), i *<span class="st"> </span>E)), <span class="dt">simplify =</span> <span class="st">&quot;array&quot;</span>), <span class="dt">simplify =</span> <span class="st">&quot;array&quot;</span>) ## curve trend in scale
+data3a &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">200</span>, function(j) <span class="kw">Expm</span>(<span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">E_coeff_inv</span>(((<span class="dv">200</span> -<span class="st"> </span>j) /<span class="st"> </span><span class="dv">200</span> +<span class="st"> </span>j *<span class="st"> </span><span class="dv">2</span> /<span class="st"> </span><span class="dv">200</span>) *<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">4</span>))), <span class="dt">simplify =</span> <span class="st">&quot;array&quot;</span>) ## pointwise trend in scale
+data4a &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">100</span>, function(j) <span class="kw">sapply</span>(<span class="dv">1</span>:<span class="dv">5</span>, function(i) <span class="kw">Expm</span>(i *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>), pdSpecEst:::<span class="kw">T_coeff_inv</span>(((<span class="dv">100</span> -<span class="st"> </span>j) /<span class="st"> </span><span class="dv">100</span> +<span class="st"> </span>j *<span class="st"> </span><span class="dv">2</span> /<span class="st"> </span><span class="dv">100</span>) *<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">4</span>), i *<span class="st"> </span><span class="kw">diag</span>(<span class="dv">2</span>))), <span class="dt">simplify =</span> <span class="st">&quot;array&quot;</span>), <span class="dt">simplify =</span> <span class="st">&quot;array&quot;</span>) ## curve trend in scale
 
 ## Bartels-von Neumann test
 <span class="kw">pdRankTests</span>(data3, <span class="dt">test =</span> <span class="st">&quot;bartels&quot;</span>)[<span class="dv">1</span>:<span class="dv">4</span>] ## null true (pointwise)
@@ -301,13 +298,13 @@ data4a &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class=
 <span class="co">#&gt; [1] &quot;Standard normal distribution&quot;</span>
 <span class="kw">pdRankTests</span>(data4, <span class="dt">test =</span> <span class="st">&quot;bartels&quot;</span>)[<span class="dv">2</span>] ## null true (curve)
 <span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 0.407387</span>
+<span class="co">#&gt; [1] 0.260438</span>
 <span class="kw">pdRankTests</span>(data3a, <span class="dt">test =</span> <span class="st">&quot;bartels&quot;</span>)[<span class="dv">2</span>] ## null false (pointwise)
 <span class="co">#&gt; $p.value</span>
 <span class="co">#&gt; [1] 0.0005847046</span>
 <span class="kw">pdRankTests</span>(data4a, <span class="dt">test =</span> <span class="st">&quot;bartels&quot;</span>)[<span class="dv">2</span>] ## null false (curve)
 <span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 9.374569e-08</span></code></pre></div>
+<span class="co">#&gt; [1] 0.0001358793</span></code></pre></div>
 </div>
 <div id="references" class="section level2 unnumbered">
 <h2>References</h2>
