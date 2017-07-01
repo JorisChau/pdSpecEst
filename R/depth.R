@@ -5,7 +5,7 @@
 #' data depth of a sequence (curve) of Hermitian PD matrices with respect to a given data cloud of
 #' sequences (curves) of Hermitian PD matrices.
 #'
-#' Available pointwise or integrated manifold data depth functions for samples of Hermtian PD matrices are (i)
+#' Available pointwise or integrated manifold data depth functions for samples of Hermitian PD matrices are (i)
 #' manifold zonoid depth, (ii) geodesic distance depth and (iii) manifold spatial depth.
 #' The various data depth measures and their theoretical properties are described in
 #' (Chau, Ombao, and von Sachs, 2017b). If \code{y} is a \eqn{(d \times d)}-dimensional Hermitian PD matrix (i.e.

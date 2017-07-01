@@ -9,18 +9,18 @@
 #' matrices with pooled sample size \eqn{S}, the argument \code{data} is a \eqn{(d,d,n,S)}-dimensional array of sequences
 #' of Hermitian PD matrices, where the individual samples are combined along the fourth array dimension. The argument
 #' \code{sample.sizes} specifies the sizes of the individual samples so that \code{sum(sample.sizes)} is equal to \code{S}. \cr
-#' The available generalized rank-based testing procedures (specificied by the argument \code{test}) are:
+#' The available generalized rank-based testing procedures (specified by the argument \code{test}) are:
 #' \describe{
 #' \item{\code{"rank.sum"}}{Manifold Wilcoxon rank-sum test to test for homogeneity of distributions of two independent
 #' samples of Hermitian PD matrices or samples of sequences of Hermitian PD matrices. The usual univariate ranks are replaced by data depth
 #' induced ranks via \code{\link{pdDepth}}.}
-#' \item{\code{"krusk.wall"}}{Manifold Kruskall-Wallis test to test for homogeneity of distributions of more than two independent
+#' \item{\code{"krusk.wall"}}{Manifold Kruskal-Wallis test to test for homogeneity of distributions of more than two independent
 #' samples of Hermitian PD matrices or samples of sequences of Hermitian PD matrices. The usual univariate ranks are replaced by data depth
 #' induced ranks via \code{\link{pdDepth}}.}
 #' \item{\code{"signed.rank"}}{Manifold signed-rank test to test for homogeneity of distributions of independent paired or matched samples
 #' of Hermitian PD matrices. The manifold signed-rank test is \emph{not} based on data depth induced ranks, but on a specific difference score on the Riemannian
 #' manifold of Hermitian PD matrices.}
-#' \item{\code{"bartels"}}{Manifold Bartels-von Neumann test to test for randomness (i.e. exchangeability) within a single indepdendent sample of
+#' \item{\code{"bartels"}}{Manifold Bartels-von Neumann test to test for randomness (i.e. exchangeability) within a single independent sample of
 #' Hermitian PD matrices or a sample of sequences of Hermitian PD matrices. The usual univariate ranks are replaced by data depth induced
 #' ranks via \code{\link{pdDepth}}.}
 #' }

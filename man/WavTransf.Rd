@@ -11,17 +11,17 @@ WavTransf(P, order = 5, jmax)
 
 \item{order}{an odd integer between 1 and 9 corresponding to the order of the MI refinement scheme.}
 
-\item{jmax}{the maximum scale upto which the wavelet coefficients are computed. If \code{jmax} is not
+\item{jmax}{the maximum scale up to which the wavelet coefficients are computed. If \code{jmax} is not
 specified it is set equal to the maximum possible scale \code{jmax = J-1}.}
 }
 \value{
 The function returns a list with two components:
 \item{D }{a list of arrays, where each (\eqn{d, d, 2^j})-dimensional array contains the (\eqn{d \times d})-
-dimensional wavelet coefficents at the \eqn{2^j} different locations in the given wavelet scale. The first
+dimensional wavelet coefficients at the \eqn{2^j} different locations in the given wavelet scale. The first
 list element is a (\eqn{d, d, 2})-dimensional array containing the (\eqn{d \times d})-dimensional midpoints
 at the coarsest scale (\eqn{j = 1}) in the midpoint pyramid.}
 \item{M }{a list of arrays, where each (\eqn{d, d, 2^j})-dimensional array contains the (\eqn{d \times d})-
-dimensional midpoints at the \eqn{2^j} diffferent locations in the given midpoint scale. The first list
+dimensional midpoints at the \eqn{2^j} different locations in the given midpoint scale. The first list
 element is equivalent to the first list element in the \code{$D} component.}
 }
 \description{
