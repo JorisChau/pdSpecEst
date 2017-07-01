@@ -1,5 +1,5 @@
 ## ---- echo = FALSE-------------------------------------------------------
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 10, fig.height = 4, fig.align = "center", out.width = "600px")
 
 ## ------------------------------------------------------------------------
 library(pdSpecEst)
@@ -45,6 +45,25 @@ X1[ , , which(dd1.ranks == 50)] ## most outlying HPD matrix
 (mean.X1 <- KarchMean(X1)) 
 
 pdDepth(y = mean.X1, X = X1, method = "gdd")
+
+## ---- echo = FALSE-------------------------------------------------------
+# d <- round(exp(seq(from = log(2), to = log(64), length = 10)), digits = 0)
+# n <- round(exp(seq(from = log(100), to = log(2000), length = 10)), digits = 0)
+# par(mfrow = c(1,2), mgp = c(2,0.5,0), mar = c(4,3,2,2))
+# plot(range(d), range(pdSpecEst:::timings1, na.rm=T), type="n", log = "xy", main = "Increasing dimension d x d, (n = 500)", xlab = "d", ylab = "Time (ms)")
+# for(i in 1:3){
+#   lines(d, pdSpecEst:::timings1[i,,1], col = i, lty = i)
+#   points(d, pdSpecEst:::timings1[i,,1], col = i, pch = 15+i)
+# }
+# legend("bottomright", legend = c("gdd", "zonoid", "spatial"), lty = 1:3, pch = 16:18,
+#        col = 1:3, cex = 1, bty = "n", y.intersp = 1)
+# plot(range(n), range(pdSpecEst:::timings1, na.rm=T), type="n", log = "xy", main = "Increasing sample size n, (d = 6)", xlab = "n", ylab = "Time (ms)")
+# for(i in 1:3){
+#   lines(n, pdSpecEst:::timings1[i,,2], col = i, lty = i)
+#   points(n, pdSpecEst:::timings1[i,,2], col = i, pch = 15+i)
+# }
+# legend("bottomright", legend = c("gdd", "zonoid", "spatial"), lty = 1:3, pch = 16:18,
+#        col = 1:3, cex = 1, bty = "n", y.intersp = 1)
 
 ## ------------------------------------------------------------------------
 ## Generate data (null true)

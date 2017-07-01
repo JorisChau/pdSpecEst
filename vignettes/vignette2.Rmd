@@ -26,7 +26,7 @@ references:
 ---
 
 ```{r, echo = FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 10, fig.height = 4, fig.align = "center", out.width = "600px")
 ```
 ## Introduction 
 
@@ -56,7 +56,7 @@ X2 <- replicate(50, sapply(1:5, function(i) Expm(i * diag(2), pdSpecEst:::T_coef
 str(X2)
 ```
 
-**Remark:** The internal functions `pdSpecEst:::E_coeff_inv()` and `pdSpecEst:::T_coeff_inv()` convert (real-valued) basis components to tangent space elements (Hermitian matrices) using an orthonormal basis of the tangent space as described in [@COvS17].
+**Remark:** The internal functions `pdSpecEst:::E_coeff_inv()` and `pdSpecEst:::T_coeff_inv()` convert (real-valued) basis components to tangent space elements (Hermitian matrices) via an orthonormal basis of the tangent space as described in [@COvS17].
 
 With `pdDepth()`, we can compute the data depth of a single HPD matrix (resp. curve of HPD matrices) `y` with respect to a sample of HPD matrices (resp. sample of curves of HPD matrices) `X`. For more details and properties of the available manifold depth functions, see [@COvS17].
 
@@ -95,12 +95,36 @@ X1[ , , which(dd1.ranks == 50)] ## most outlying HPD matrix
 
 ```
 
-It is interesting to compare the most central HPD matrix above with the (approximate) empirical geometric mean of the observations obtained with `KarchMean()`. The empirical geometric mean is known to maximize the data depth for observations from a *centrally symmetric* distribution (as in this example). For more details, see [@COvS17].
+We can compare the most central HPD matrix above with the (approximate) empirical geometric mean of the observations obtained with `KarchMean()`. The empirical geometric mean is known to maximize the data depth for observations from a *centrally symmetric* distribution (as in this example). For more details, see [@COvS17].
 
 ```{r}
 (mean.X1 <- KarchMean(X1)) 
 
 pdDepth(y = mean.X1, X = X1, method = "gdd")
+```
+
+### Computation times
+The figure below displays average computation times in milliseconds (single core Intel Xeon E5-2650) of the depth of a single `(d, d)`-dimensional HPD matrix with respect to a sample of `(d, d)`-dimensional HPD matrices of size `n`. In the left-hand image, the sample size is fixed at `n = 500`, and in the right-hand image the dimension is fixed at `d = 6`. (The computation times are based on the median computation time of 100 depth calculations for 50 random samples). The manifold zonoid depth can only be calculated if `isTRUE(d^2 < n)` and for this reason there are some missing values in the left-hand image.<br>
+<br>
+
+```{r, echo = FALSE}
+d <- round(exp(seq(from = log(2), to = log(64), length = 10)), digits = 0)
+n <- round(exp(seq(from = log(100), to = log(2000), length = 10)), digits = 0)
+par(mfrow = c(1,2), mgp = c(2,0.5,0), mar = c(4,3,2,2))
+plot(range(d), range(pdSpecEst:::depth_time, na.rm=T), type="n", log = "xy", main = "Increasing dimension d x d, (n = 500)", xlab = "d", ylab = "Time (ms)")
+for(i in 1:3){
+  lines(d, pdSpecEst:::depth_time[i,,1], col = i, lty = i)
+  points(d, pdSpecEst:::depth_time[i,,1], col = i, pch = 15+i)
+}
+legend("bottomright", legend = c("gdd", "zonoid", "spatial"), lty = 1:3, pch = 16:18,
+       col = 1:3, cex = 1, bty = "n", y.intersp = 1)
+plot(range(n), range(pdSpecEst:::depth_time, na.rm=T), type="n", log = "xy", main = "Increasing sample size n, (d = 6)", xlab = "n", ylab = "Time (ms)")
+for(i in 1:3){
+  lines(n, pdSpecEst:::depth_time[i,,2], col = i, lty = i)
+  points(n, pdSpecEst:::depth_time[i,,2], col = i, pch = 15+i)
+}
+legend("bottomright", legend = c("gdd", "zonoid", "spatial"), lty = 1:3, pch = 16:18,
+       col = 1:3, cex = 1, bty = "n", y.intersp = 1)
 ```
 
 ## Rank-based tests for HPD matrices with `pdRankTests()`
@@ -114,7 +138,7 @@ The null hypotheses of the available rank-based hypothesis tests in `pdRankTests
  
 Below, we construct several simulated examples for which (i) the null hypotheses listed above are satisfied, and (ii) the null hypotheses listed above are not satisfied. Analogous to the previous section, we generate pointwise random samples (resp. random samples of sequences) of `(2,2)`-dimensional HPD matrix-valued observations, with underlying geometric mean equal to the identity matrix (resp. sequence of scaled identity matrices). 
 
-Let us first consider simulated examples of the manifold Wilcoxon rank-sum test (`"rank.sum"`) and manifold Kruskal-Wallis test (`"krusk.wall"`).
+Let's first consider simulated examples of the manifold Wilcoxon rank-sum test (`"rank.sum"`) and manifold Kruskal-Wallis test (`"krusk.wall"`).
 
 ```{r}
 ## Generate data (null true)
@@ -138,7 +162,7 @@ pdRankTests(data1a, sample.sizes = c(50, 25, 25), "krusk.wall")[2] ## null false
 pdRankTests(data2a, sample.sizes = c(50, 25, 25), "krusk.wall")[2] ## null false (curve)
 ```
 
-Second, let us consider several examples of the manifold Wilcoxon signed-rank test (`"signed-rank"`). We generate paired observations for independent trials (or subjects) by introducing trial-specific random effects, such that the paired observations in each trial share a trial-specific geometric mean. Note that for such data the manifold Wilcoxon rank-sum test is no longer valid due to the introduced sample dependence.
+To apply the manifold Wilcoxon signed-rank test (`"signed-rank"`), we generate paired observations for independent trials (or subjects) by introducing trial-specific random effects, such that the paired observations in each trial share a trial-specific geometric mean. Note that for such data the manifold Wilcoxon rank-sum test is no longer valid due to the introduced sample dependence.
 
 ```{r}
 ## Trial-specific means
@@ -157,7 +181,7 @@ pdRankTests(array(c(X3, Y3a), dim = c(2, 2, 100)), test = "signed.rank")[2] ## n
 
 ``` 
 
-The manifold signed-rank test also provides a valid procedure to test for equivalence of spectral matrices of two (independent) multivariate stationary time series based on the HPD periodogram matrices obtained via `pdPgram()` as illustrated below. In contrast to other available tests in the literature, this asymptotic test does not require consistent spectral estimators or resampling/bootstrapping of test statistics, and therefore remains computationally efficient for higher-dimensional spectral matrices or a large number of sampled Fourier frequencies.
+The manifold signed-rank test also provides a valid procedure to test for equivalence of spectral matrices of two (independent) multivariate stationary time series based on the HPD periodogram matrices obtained via `pdPgram()`. In contrast to other available tests in the literature, this asymptotic test does not require consistent spectral estimators or resampling/bootstrapping of test statistics, and therefore remains computationally efficient for higher-dimensional spectral matrices or a large number of sampled Fourier frequencies.
 
 ```{r}
 ## Signed-rank test for equivalence of spectra
@@ -174,7 +198,7 @@ pdRankTests(array(c(pgram(Sigma), pgram(Sigma)), dim = c(2, 2, 2^8)), test = "si
 pdRankTests(array(c(pgram(Sigma), pgram(0.5 * Sigma)), dim = c(2, 2, 2^8)), test = "signed.rank")[2]
 ```
 
-To conclude, let us consider several examples of the manifold Bartels-von Neumman test (`"bartels"`). Below, we generate an independent sample with a gradual trend in the scale of the distribution, such that the null hypothesis of randomness breaks down.
+To apply the manifold Bartels-von Neumman test (`"bartels"`), we generate an independent non-identically distributed sample with a trend in the scale of the distribution across observations, such that the null hypothesis of randomness breaks down.
 
 ```{r}
 ## Null is true
@@ -190,6 +214,87 @@ pdRankTests(data3, test = "bartels")[1:4] ## null true (pointwise)
 pdRankTests(data4, test = "bartels")[2] ## null true (curve)
 pdRankTests(data3a, test = "bartels")[2] ## null false (pointwise)
 pdRankTests(data4a, test = "bartels")[2] ## null false (curve)
+```
+
+### Computation times
+The figures below display average computation times in milliseconds (single core, Intel Xeon E5-2650) of the rank-based hypothesis tests in terms of the dimension of the matrix-valued data and the size of the samples considered in the tests.
+
+**Manifold Wilcoxon rank-sum test**
+The figure below displays average computation times of the manifold Wilcoxon rank-sum test for two equal-sized samples of `(d,d)`-dimensional HPD matrices of size `n`, with depth-induced ranks based on the geodesic distance depth (`gdd`), manifold zonoid depth (`zonoid`) and manifold spatial depth (`spatial`) respectively.<br>
+<br>
+```{r, echo = FALSE}
+d <- round(exp(seq(from = log(2), to = log(32), length = 5)), digits = 0)
+n <- round(exp(seq(from = log(50), to = log(500), length = 5)), digits = 0)
+par(mfrow = c(1,2), mgp = c(2,0.5,0), mar = c(4,3,2,2))
+plot(range(d), range(pdSpecEst:::rs_time[1:3,,], na.rm=T), type="n", log = "xy", main = "Increasing dimension d x d, (n = 100)", xlab = "d", ylab = "Time (ms)")
+for(i in 1:3){
+  lines(d, pdSpecEst:::rs_time[i,,1], col = i, lty = i)
+  points(d, pdSpecEst:::rs_time[i,,1], col = i, pch = 15+i)
+}
+legend("bottomright", legend = c("gdd", "zonoid", "spatial"), lty = 1:3, pch = 16:18, col = 1:3, cex = 1, bty = "n", y.intersp = 1)
+plot(range(n), range(pdSpecEst:::rs_time[1:3,,], na.rm=T), type="n", log = "xy", main = "Increasing sample size n, (d = 4)", xlab = "n", ylab = "Time (ms)")
+for(i in 1:3){
+  lines(n, pdSpecEst:::rs_time[i,,2], col = i, lty = i)
+  points(n, pdSpecEst:::rs_time[i,,2], col = i, pch = 15+i)
+}
+legend("bottomright", legend = c("gdd", "zonoid", "spatial"), lty = 1:3, pch = 16:18, col = 1:3, cex = 1, bty = "n", y.intersp = 1)
+```
+<br>
+**Manifold Kruskal-Wallis test**
+The figure below displays average computation times of the manifold Kruskal-Wallis test for three equal-sized samples of `(d,d)`-dimensional HPD matrices of size `n`, with depth-induced ranks based on the geodesic distance depth (`gdd`), manifold zonoid depth (`zonoid`) and manifold spatial depth (`spatial`) respectively.<br>
+<br>
+```{r, echo = FALSE}
+d <- round(exp(seq(from = log(2), to = log(32), length = 5)), digits = 0)
+n <- round(exp(seq(from = log(25), to = log(250), length = 5)), digits = 0)
+par(mfrow = c(1,2), mgp = c(2,0.5,0), mar = c(4,3,2,2))
+plot(range(d), range(pdSpecEst:::kw_time[1:3,,], na.rm=T), type="n", log = "xy", main = "Increasing dimension d x d, (n = 50)", xlab = "d", ylab = "Time (ms)")
+for(i in 1:3){
+  lines(d, pdSpecEst:::kw_time[i,,1], col = i, lty = i)
+  points(d, pdSpecEst:::kw_time[i,,1], col = i, pch = 15+i)
+}
+legend("bottomright", legend = c("gdd", "zonoid", "spatial"), lty = 1:3, pch = 16:18, col = 1:3, cex = 1, bty = "n", y.intersp = 1)
+plot(range(n), range(pdSpecEst:::kw_time[1:3,,], na.rm=T), type="n", log = "xy", main = "Increasing sample size n, (d = 4)", xlab = "n", ylab = "Time (ms)")
+for(i in 1:3){
+  lines(n, pdSpecEst:::kw_time[i,,2], col = i, lty = i)
+  points(n, pdSpecEst:::kw_time[i,,2], col = i, pch = 15+i)
+}
+legend("bottomright", legend = c("gdd", "zonoid", "spatial"), lty = 1:3, pch = 16:18, col = 1:3, cex = 1, bty = "n", y.intersp = 1)
+```
+<br>
+**Manifold Bartels-von Neumann test**
+The figure below displays average computation times of the manifold Bartels-von Neumann test for a single sample of size `n` of `(d,d)`-dimensional HPD matrices, with depth-induced ranks based on the geodesic distance depth (`gdd`), manifold zonoid depth (`zonoid`) and manifold spatial depth (`spatial`) respectively.<br>
+<br>
+```{r, echo = FALSE}
+d <- round(exp(seq(from = log(2), to = log(32), length = 5)), digits = 0)
+n <- round(exp(seq(from = log(50), to = log(500), length = 5)), digits = 0)
+par(mfrow = c(1,2), mgp = c(2,0.5,0), mar = c(4,3,2,2))
+plot(range(d), range(pdSpecEst:::bart_time, na.rm=T), type="n", log = "xy", main = "Increasing dimension d x d, (n = 200)", xlab = "d", ylab = "Time (ms)")
+for(i in 1:3){
+  lines(d, pdSpecEst:::bart_time[i,,1], col = i, lty = i)
+  points(d, pdSpecEst:::bart_time[i,,1], col = i, pch = 15+i)
+}
+legend("bottomright", legend = c("gdd", "zonoid", "spatial"), lty = 1:3, pch = 16:18, col = 1:3, cex = 1, bty = "n", y.intersp = 1)
+plot(range(n), range(pdSpecEst:::bart_time, na.rm=T), type="n", log = "xy", main = "Increasing sample size n, (d = 4)", xlab = "n", ylab = "Time (ms)")
+for(i in 1:3){
+  lines(n, pdSpecEst:::bart_time[i,,2], col = i, lty = i)
+  points(n, pdSpecEst:::bart_time[i,,2], col = i, pch = 15+i)
+}
+legend("bottomright", legend = c("gdd", "zonoid", "spatial"), lty = 1:3, pch = 16:18, col = 1:3, cex = 1, bty = "n", y.intersp = 1)
+```
+<br>
+**Manifold Wilcoxon signed-rank test**
+The figure below displays average computation times of the manifold Wilcoxon signed-rank test for two equal-sized samples of size `n` of `(d,d)`-dimensional HPD matrices. This test is not based on data depth but on a specific manifold difference score. <br>
+<br>
+```{r, echo = FALSE}
+d <- round(exp(seq(from = log(2), to = log(128), length = 10)), digits = 0)
+n <- round(exp(seq(from = log(50), to = log(500), length = 10)), digits = 0)
+par(mfrow = c(1,2), mgp = c(2,0.5,0), mar = c(4,3,2,2))
+plot(range(d), range(pdSpecEst:::sr_time, na.rm=T), type="n", log = "xy", main = "Increasing dimension d x d, (n = 100)", xlab = "d", ylab = "Time (ms)")
+  lines(d, pdSpecEst:::sr_time[,1], col = 1, lty = 1)
+  points(d, pdSpecEst:::sr_time[,1], col = 1, pch = 16)
+plot(range(n), range(pdSpecEst:::sr_time, na.rm=T), type="n", log = "xy", main = "Increasing sample size n, (d = 6)", xlab = "n", ylab = "Time (ms)")
+  lines(n, pdSpecEst:::sr_time[,2], col = 2, lty = 2)
+  points(n, pdSpecEst:::sr_time[,2], col = 2, pch = 17)
 ```
 
 ## References
