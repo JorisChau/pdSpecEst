@@ -26,7 +26,7 @@ The function returns a list with four components:
 spectral estimate at the \code{m} different frequencies. If \code{!(return == 'f')}, the inverse wavelet transform
 of the thresholded wavelet coefficients is not computed and \code{f} is set equal to \code{NULL}.}
 \item{D }{a list of arrays, each (\eqn{d, d, 2^j})-dimensional array contains the thresholded
-(\eqn{d \times d})-dimensional wavelet coefficents at the \eqn{2^j} different locations in the given wavelet scale
+(\eqn{d \times d})-dimensional wavelet coefficients at the \eqn{2^j} different locations in the given wavelet scale
 \eqn{j}. The first list element contains the midpoints at the coarsest scale in the
 midpoint pyramid \eqn{j=1}, see (Chau and von Sachs, 2017) for more details.}
 \item{lam }{the hard threshold used to threshold the components of the wavelet coefficients.}
