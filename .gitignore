@@ -2,6 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+.RDataTmp
 inst/doc
 data/eeg.rda
 data/eeg_full.rda
