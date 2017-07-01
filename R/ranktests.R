@@ -8,8 +8,8 @@
 #' combined along the third array dimension. For samples of sequences of \eqn{(d \times d)}-dimensional Hermitian PD
 #' matrices with pooled sample size \eqn{S}, the argument \code{data} is a \eqn{(d,d,n,S)}-dimensional array of sequences
 #' of Hermitian PD matrices, where the individual samples are combined along the fourth array dimension. The argument
-#' \code{sample.sizes} specifies the sizes of the individual samples so that \code{sum(sample.sizes) == S}. \cr
-#' The available generalized rank-based testing procedures, specificied by the argument \code{test}, are:
+#' \code{sample.sizes} specifies the sizes of the individual samples so that \code{sum(sample.sizes)} is equal to \code{S}. \cr
+#' The available generalized rank-based testing procedures (specificied by the argument \code{test}) are:
 #' \describe{
 #' \item{\code{"rank.sum"}}{Manifold Wilcoxon rank-sum test to test for homogeneity of distributions of two independent
 #' samples of Hermitian PD matrices or samples of sequences of Hermitian PD matrices. The usual univariate ranks are replaced by data depth
@@ -17,7 +17,7 @@
 #' \item{\code{"krusk.wall"}}{Manifold Kruskall-Wallis test to test for homogeneity of distributions of more than two independent
 #' samples of Hermitian PD matrices or samples of sequences of Hermitian PD matrices. The usual univariate ranks are replaced by data depth
 #' induced ranks via \code{\link{pdDepth}}.}
-#' \item{\code{"signed-rank"}}{Manifold signed-rank test to test for homogeneity of distributions of independent paired or matched samples
+#' \item{\code{"signed.rank"}}{Manifold signed-rank test to test for homogeneity of distributions of independent paired or matched samples
 #' of Hermitian PD matrices. The manifold signed-rank test is \emph{not} based on data depth induced ranks, but on a specific difference score on the Riemannian
 #' manifold of Hermitian PD matrices.}
 #' \item{\code{"bartels"}}{Manifold Bartels-von Neumann test to test for randomness (i.e. exchangeability) within a single indepdendent sample of
@@ -25,25 +25,25 @@
 #' ranks via \code{\link{pdDepth}}.}
 #' }
 #'
-#' @note the manifold signed-rank test also provides a valid test for equivalence of spectral matrices of two multivariate stationary time
+#' @note The manifold signed-rank test also provides a valid test for equivalence of spectral matrices of two multivariate stationary time
 #' series based on the Hermitian PD periodogram matrices obtained via \code{\link{pdPgram}}, see (Chau, Ombao, and von Sachs, 2017b) for the details.
 #'
 #' @param data either a \eqn{(d,d,S)}-dimensional array corresponding to an array of pooled individual samples of Hermitian PD matrices, or a
 #' \eqn{(d,d,n,S)}-dimensional array corresponding to an array of pooled individual samples of sequences of Hermitian PD matrices.
-#' @param sample.sizes a numeric vector corresponding to the individual sample sizes in the argument \code{data}, such that \code{sum(sample.sizes) == S}.
-#' Not required for tests \code{"signed-rank"} and \code{"bartels"}, as the sample sizes are automatically determined from \code{data}.
+#' @param sample.sizes a numeric vector corresponding to the individual sample sizes in the argument \code{data}, such that \code{sum(sample.sizes)} is
+#' equal to \code{S}. Not required for tests \code{"signed-rank"} and \code{"bartels"}, as the sample sizes are automatically determined from \code{data}.
 #' @param test rank-based hypothesis testing procedure, one of \code{"rank.sum"}, \code{"krusk.wall"}, \code{"signed.rank"}, \code{"bartels"} explained
 #' in the Details section below.
 #' @param depth data depth measure used in the rank-based tests, one of \code{"gdd"}, \code{"zonoid"}, or \code{"spatial"} corresponding to the
-#' geodesic distance depth, manifold zonoid depth and manifold spatial depth respectively. Defaults to \code{"gdd"} and is not required for test
+#' geodesic distance depth, manifold zonoid depth and manifold spatial depth respectively. Defaults to \code{"gdd"}. Not required for test
 #' \code{"signed.rank"}.
 #'
-#' @return The function returns a list with three components:
+#' @return The function returns a list with five components:
 #' \item{test }{name of the rank-based test}
 #' \item{p.value }{p-value of the test}
 #' \item{statistic }{computed test statistic}
-#' \item{null.distr }{the distribution of the test statistic under the null hypothesis}
-#' \item{depth.values }{computed data depth values if available}
+#' \item{null.distr }{distribution of the test statistic under the null hypothesis}
+#' \item{depth.values }{computed data depth values (if available)}
 #'
 #' @examples
 #' ## null hypothesis is true
