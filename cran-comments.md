@@ -22,9 +22,9 @@ Possibly mis-spelled words in DESCRIPTION:
 **Ubuntu 16.04 (local) and Ubuntu 12.04 (travis-ci) note:**
 
 * checking installed package size ... NOTE
-  installed size is  7.2Mb
+  installed size is  8.2Mb
   sub-directories of 1Mb or more:
-    libs   6.9Mb
+    libs  7.8Mb
       
 My understanding is that the inflation of the libs subdirectory is due to the use of `Rcpp` and `RcppArmadillo`. 
 
