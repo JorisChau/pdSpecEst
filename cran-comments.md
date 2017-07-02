@@ -1,3 +1,10 @@
+## Resubmission
+This is a resubmission. In this version I have: 
+
+* changed all C++ calls 'std::sqrt(x)' to 'std::sqrt((double)x)' removing the ERROR `call of overloaded ‘std::sqrt(int)’ is ambiguous` on Solarix-x86. 
+
+* removed link to `shapes::distcov` in .Rd file (`pdDist.Rd`) so that the `shapes` package no longer needs to be imported. This removes the NOTE on Linux-fedora.
+
 ## Test environments
 
 * local windows 7 install, R 3.3.1, pass
