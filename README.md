@@ -3,8 +3,8 @@
 The `pdSpecEst` package
 =======================
 
-<!-- [![CRAN version](http://www.r-pkg.org/badges/version/pdSpecEst)](https://cran.r-project.org/package=pdSpecEst) -->
-<!-- [![Travis-CI Build Status](https://travis-ci.org/JorisChau/pdSpecEst.svg?branch=master)](https://travis-ci.org/JorisChau/pdSpecEst) -->
+[![CRAN version](http://www.r-pkg.org/badges/version/pdSpecEst)](https://cran.r-project.org/package=pdSpecEst) [![Travis-CI Build Status](https://travis-ci.org/JorisChau/pdSpecEst.svg?branch=master)](https://travis-ci.org/JorisChau/pdSpecEst)
+
 This package provides data analysis tools for samples of symmetric or Hermitian positive definite matrices, such as collections of (non-degenerate) covariance matrices or spectral density matrices.
 
 The tools in this package can be used to perform:
