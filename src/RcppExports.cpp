@@ -31,29 +31,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// E_coeff
-arma::vec E_coeff(arma::cx_mat H);
-RcppExport SEXP pdSpecEst_E_coeff(SEXP HSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cx_mat >::type H(HSEXP);
-    rcpp_result_gen = Rcpp::wrap(E_coeff(H));
-    return rcpp_result_gen;
-END_RCPP
-}
-// T_coeff
-arma::vec T_coeff(arma::cx_mat H, arma::cx_mat y);
-RcppExport SEXP pdSpecEst_T_coeff(SEXP HSEXP, SEXP ySEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cx_mat >::type H(HSEXP);
-    Rcpp::traits::input_parameter< arma::cx_mat >::type y(ySEXP);
-    rcpp_result_gen = Rcpp::wrap(T_coeff(H, y));
-    return rcpp_result_gen;
-END_RCPP
-}
 // E_coeff_inv
 arma::cx_mat E_coeff_inv(arma::vec coeff);
 RcppExport SEXP pdSpecEst_E_coeff_inv(SEXP coeffSEXP) {
@@ -74,6 +51,29 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::vec >::type coeff(coeffSEXP);
     Rcpp::traits::input_parameter< arma::cx_mat >::type y(ySEXP);
     rcpp_result_gen = Rcpp::wrap(T_coeff_inv(coeff, y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// E_coeff
+arma::vec E_coeff(arma::cx_mat H);
+RcppExport SEXP pdSpecEst_E_coeff(SEXP HSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cx_mat >::type H(HSEXP);
+    rcpp_result_gen = Rcpp::wrap(E_coeff(H));
+    return rcpp_result_gen;
+END_RCPP
+}
+// T_coeff
+arma::vec T_coeff(arma::cx_mat H, arma::cx_mat y);
+RcppExport SEXP pdSpecEst_T_coeff(SEXP HSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cx_mat >::type H(HSEXP);
+    Rcpp::traits::input_parameter< arma::cx_mat >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(T_coeff(H, y));
     return rcpp_result_gen;
 END_RCPP
 }
