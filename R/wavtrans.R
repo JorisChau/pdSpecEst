@@ -73,14 +73,18 @@ WavTransf <- function(P, order = 5, jmax) {
     jmax <- J - 1
   }
 
+  tM <- list()
   ## Compute wavelet transform
   for (j in 1:jmax) {
     tm1 <- Impute_man(M[[j]], (order - 1)/2, Nw)
-    iSqrt_tm1 <- sapply(1:2^j, function(l) iSqrt(tm1[, , l]), simplify = "array")
-    D[[j + 1]] <- sapply(1:2^j, function(l) Logm(diag(d), (iSqrt_tm1[, , l] %*%
-                                                             M[[j + 1]][, , 2 * l]) %*% iSqrt_tm1[, , l]), simplify = "array")
+    # iSqrt_tm1 <- sapply(1:2^j, function(l) iSqrt(tm1[, , l]), simplify = "array")
+    # D[[j + 1]] <- sapply(1:2^j, function(l) 2^(-j/2) * Logm(diag(d), (iSqrt_tm1[, , l] %*%
+                                      # M[[j + 1]][, , 2 * l]) %*% iSqrt_tm1[, , l]), simplify = "array")
+    D[[j+1]] <- sapply(1:2^j, function(l) 2^(-j/2) * (Logm(M[[j]][,,l], tm1[,,l]) - Logm(M[[j]][,,l], M[[j+1]][,,2*l])), simplify="array")
+    # D[[j+1]] <- sapply(1:2^j, function(l) 2^(-j/2)*Logm(tm1[, , l], M[[j + 1]][, , 2 * l]), simplify = "array")
+    tM[[j]] <- tm1
     names(D)[j + 1] <- paste0("D.scale", j)
   }
 
-  return(list(D = D, M = M))
+  return(list(D = D, M = M, tM = tM))
 }

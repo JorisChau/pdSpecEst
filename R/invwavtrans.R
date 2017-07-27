@@ -50,8 +50,9 @@ InvWavTransf <- function(D, order = 5) {
     m2 <- array(dim = c(d, d, 2^(j + 1)))
     reconstr <- function(i) {
       if (any(c(D[[j + 1]][, , i]) != 0)) {
-        Sqrt_tm1 <- Sqrt(tm1[, , i])
-        m2_even <- (Sqrt_tm1 %*% Expm(diag(d), D[[j + 1]][, , i])) %*% Sqrt_tm1
+        # Sqrt_tm1 <- Sqrt(tm1[, , i])
+        # m2_even <- (Sqrt_tm1 %*% Expm(diag(d), D[[j + 1]][, , i])) %*% Sqrt_tm1
+        m2_even <- Expm(tm1[, , i], D[[j + 1]][, , i])
       } else {
         m2_even <- tm1[, , i]
       }
