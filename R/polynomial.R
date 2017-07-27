@@ -1,5 +1,6 @@
-## Generate intrinsic HPD polynomials
-
+#' Generate intrinsic HPD polynomials
+#'
+#' @export
 pdPolynomial <- function(p0, v0, delta.t=0.01, steps = 100) {
 
   d <- dim(p0)[1]
