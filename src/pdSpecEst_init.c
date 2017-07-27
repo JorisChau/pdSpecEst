@@ -21,7 +21,6 @@ SEXP pdSpecEst_Sqrt(SEXP MSEXP);
 SEXP pdSpecEst_iSqrt(SEXP MSEXP);
 SEXP pdSpecEst_NormF(SEXP MSEXP);
 SEXP pdSpecEst_Chol(SEXP MSEXP);
-void R_init_pdSpecEst(DllInfo *dll);
 
 R_CallMethodDef callMethods[]  = {
   {"pdSpecEst_ARMA", (DL_FUNC) &pdSpecEst_ARMA, 4},
@@ -40,7 +39,6 @@ R_CallMethodDef callMethods[]  = {
   {"pdSpecEst_iSqrt", (DL_FUNC) &pdSpecEst_iSqrt, 1},
   {"pdSpecEst_NormF", (DL_FUNC) &pdSpecEst_NormF, 1},
   {"pdSpecEst_Chol", (DL_FUNC) &pdSpecEst_Chol, 1},
-  {"R_init_pdSpecEst", (DL_FUNC) &R_init_pdSpecEst, 1},
   {NULL, NULL, 0}
 };
 
