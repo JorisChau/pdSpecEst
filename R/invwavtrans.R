@@ -50,9 +50,9 @@ InvWavTransf <- function(D, order = 5) {
     m2 <- array(dim = c(d, d, 2^(j + 1)))
     reconstr <- function(i) {
       if (any(c(D[[j + 1]][, , i]) != 0)) {
-        # Sqrt_tm1 <- Sqrt(tm1[, , i])
-        # m2_even <- (Sqrt_tm1 %*% Expm(diag(d), D[[j + 1]][, , i])) %*% Sqrt_tm1
-        m2_even <- Expm(tm1[, , i], D[[j + 1]][, , i])
+        Sqrt_tm1 <- Sqrt(tm1[, , i])
+        m2_even <- (Sqrt_tm1 %*% Expm(diag(d), 2^(j/2) * D[[j + 1]][, , i])) %*% Sqrt_tm1
+        # m2_even <- Expm(tm1[, , i], D[[j + 1]][, , i])
       } else {
         m2_even <- tm1[, , i]
       }
@@ -64,3 +64,45 @@ InvWavTransf <- function(D, order = 5) {
   }
   return(m1)
 }
+
+#' 2D Inverse AI wavelet transform
+#'
+#'
+#' @export
+InvWavTransf2D <- function(D, M0, order = c(3,3)) {
+
+  # @importFrom tcltk tkProgressBar
+
+  d <- dim(D[[1]])[1]
+  J <- length(D)
+  m1 <- M0
+  # pb <- tkProgressBar(max = 100)
+
+  for (j in 0:(J - 1)) {
+
+    tm1 <- Impute2D(m1, (order - 1) / 2)
+    m2 <- array(dim = c(d, d, 2^(j + 1), 2^(j + 1)))
+
+    reconstr <- function(i1, i2) {
+      if (any(c(D[[j + 1]][, , i1, i2]) != 0)) {
+        Sqrt_tm1 <- Sqrt(tm1[, , i1, i2])
+        m2_i <- (Sqrt_tm1 %*% Expm(diag(d), 2^(j / 2) * D[[j + 1]][, , i1, i2])) %*% Sqrt_tm1
+      } else {
+        m2_i <- tm1[, , i1, i2]
+      }
+      return(m2_i)
+    }
+
+    grid_j <- expand.grid(1:2^(j + 1), 1:2^(j + 1))
+    m2 <- array(c(mapply(function(i1, i2) reconstr(i1, i2), grid_j$Var1, grid_j$Var2, SIMPLIFY = "array")),
+                    dim = c(d, d, 2^(j + 1), 2^(j + 1)))
+    m1 <- m2
+    # setTkProgressBar(pb, value = round(sum(4^(0:j)) / sum(4^(0:(J - 1))) * 100), label =
+          # paste0("Computed up to scale ", j + 1, ", (", round(sum(4^(0:j))/sum(4^(0:(J - 1))) * 100),"% done)"))
+  }
+  # close(pb)
+
+  return(m1)
+
+}
+

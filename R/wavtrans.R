@@ -77,10 +77,10 @@ WavTransf <- function(P, order = 5, jmax) {
   ## Compute wavelet transform
   for (j in 1:jmax) {
     tm1 <- Impute_man(M[[j]], (order - 1)/2, Nw)
-    # iSqrt_tm1 <- sapply(1:2^j, function(l) iSqrt(tm1[, , l]), simplify = "array")
-    # D[[j + 1]] <- sapply(1:2^j, function(l) 2^(-j/2) * Logm(diag(d), (iSqrt_tm1[, , l] %*%
-                                      # M[[j + 1]][, , 2 * l]) %*% iSqrt_tm1[, , l]), simplify = "array")
-    D[[j+1]] <- sapply(1:2^j, function(l) 2^(-j/2) * (Logm(M[[j]][,,l], tm1[,,l]) - Logm(M[[j]][,,l], M[[j+1]][,,2*l])), simplify="array")
+    iSqrt_tm1 <- sapply(1:2^j, function(l) iSqrt(tm1[, , l]), simplify = "array")
+    D[[j + 1]] <- sapply(1:2^j, function(l) 2^(-j/2) * Logm(diag(d), (iSqrt_tm1[, , l] %*%
+                                      M[[j + 1]][, , 2 * l]) %*% iSqrt_tm1[, , l]), simplify = "array")
+    # D[[j+1]] <- sapply(1:2^j, function(l) 2^(-j/2) * (Logm(M[[j]][,,l], tm1[,,l]) - Logm(M[[j]][,,l], M[[j+1]][,,2*l])), simplify="array")
     # D[[j+1]] <- sapply(1:2^j, function(l) 2^(-j/2)*Logm(tm1[, , l], M[[j + 1]][, , 2 * l]), simplify = "array")
     tM[[j]] <- tm1
     names(D)[j + 1] <- paste0("D.scale", j)
@@ -88,3 +88,62 @@ WavTransf <- function(P, order = 5, jmax) {
 
   return(list(D = D, M = M, tM = tM))
 }
+
+#' 2D Forward AI wavelet transform
+#'
+#' @export
+WavTransf2D <- function(P, order = c(3,3), jmax) {
+
+  # @importFrom tcltk tkProgressBar
+
+  ## Set variables
+  J <- log2(dim(P)[3])
+  if (!isTRUE(all.equal(as.integer(J), J))) {
+    stop(paste0("Input length is non-dyadic, please change length ", dim(P)[3],
+                " to dyadic number."))
+  }
+  d <- dim(P)[1]
+  M <- list()
+  for (j in J:0) {
+    if (j == J) {
+      Mper <- unname(P)
+    } else{
+      l <- t(sapply(1:2^j, function(i) c(1,2)+2*(i-1)))
+      grid <- expand.grid(1:2^j, 1:2^j)
+      Mper <- array(c(mapply(function(i1,i2) KarchMean(array(c(Mper[,,l[i1,], l[i2,]]), dim=c(d,d,4))),
+                             grid$Var1, grid$Var2, SIMPLIFY = "array")), dim = c(d,d,2^j, 2^j))
+    }
+    M[[j+1]] <- Mper
+  }
+  names(M) <- paste0("M.scale", 0:J)
+
+  D <- list()
+  if (missing(jmax)) {
+    jmax <- J - 1
+  }
+  if (jmax > J - 1) {
+    warning(paste0("jmax cannot exceed maximum scale j=", J - 1))
+    jmax <- J - 1
+  }
+
+  tM <- list()
+  ## Compute 2D wavelet transform
+  # pb <- tkProgressBar(max = 100)
+  for (j in 0:jmax) {
+    tm1 <- Impute2D(M[[j + 1]], (order - 1) / 2)
+    grid <- expand.grid(1:2^(j + 1), 1:2^(j + 1))
+    iSqrt_tm1 <- mapply(function(i1, i2) iSqrt(tm1[, , i1, i2]), grid$Var1, grid$Var2, SIMPLIFY = "array")
+    D[[j+1]] <- array(c(mapply(function(i1, i2) 2^(-j / 2) * Logm(diag(d), (iSqrt_tm1[, ,  i1 + (i2 - 1) * 2^(j + 1)] %*%
+                          M[[j + 2]][, , i1, i2]) %*% iSqrt_tm1[, , i1 + (i2 - 1) * 2^(j + 1)]),
+                              grid$Var1, grid$Var2, SIMPLIFY = "array")), dim = c(d, d, 2^(j + 1), 2^(j + 1)))
+    tM[[j+1]] <- tm1
+    names(D)[j + 1] <- paste0("D.scale", j + 1)
+
+    # setTkProgressBar(pb, value=round(sum(4^(0:j))/sum(4^(0:jmax))*100),
+                         # label=paste0("Computed up to scale ", j + 1, ", (", round(sum(4^(0:j))/sum(4^(0:jmax))*100),"% done)"))
+  }
+  # close(pb)
+
+  return(list(M = M, D = D, tM = tM))
+}
+

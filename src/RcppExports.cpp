@@ -6,6 +6,32 @@
 
 using namespace Rcpp;
 
+// ARMA
+arma::mat ARMA(arma::cube Phi, arma::cube Theta, arma::mat Z, int len);
+RcppExport SEXP pdSpecEst_ARMA(SEXP PhiSEXP, SEXP ThetaSEXP, SEXP ZSEXP, SEXP lenSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cube >::type Phi(PhiSEXP);
+    Rcpp::traits::input_parameter< arma::cube >::type Theta(ThetaSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< int >::type len(lenSEXP);
+    rcpp_result_gen = Rcpp::wrap(ARMA(Phi, Theta, Z, len));
+    return rcpp_result_gen;
+END_RCPP
+}
+// kMean
+arma::cx_mat kMean(arma::cx_mat M, arma::vec mu);
+RcppExport SEXP pdSpecEst_kMean(SEXP MSEXP, SEXP muSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cx_mat >::type M(MSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type mu(muSEXP);
+    rcpp_result_gen = Rcpp::wrap(kMean(M, mu));
+    return rcpp_result_gen;
+END_RCPP
+}
 // Mid
 arma::cx_mat Mid(arma::cx_mat A, arma::cx_mat B);
 RcppExport SEXP pdSpecEst_Mid(SEXP ASEXP, SEXP BSEXP) {
@@ -166,32 +192,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::vec >::type coeff(coeffSEXP);
     Rcpp::traits::input_parameter< arma::cx_mat >::type y(ySEXP);
     rcpp_result_gen = Rcpp::wrap(T_coeff_inv(coeff, y));
-    return rcpp_result_gen;
-END_RCPP
-}
-// ARMA
-arma::mat ARMA(arma::cube Phi, arma::cube Theta, arma::mat Z, int len);
-RcppExport SEXP pdSpecEst_ARMA(SEXP PhiSEXP, SEXP ThetaSEXP, SEXP ZSEXP, SEXP lenSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cube >::type Phi(PhiSEXP);
-    Rcpp::traits::input_parameter< arma::cube >::type Theta(ThetaSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Z(ZSEXP);
-    Rcpp::traits::input_parameter< int >::type len(lenSEXP);
-    rcpp_result_gen = Rcpp::wrap(ARMA(Phi, Theta, Z, len));
-    return rcpp_result_gen;
-END_RCPP
-}
-// kMean
-arma::cx_mat kMean(arma::cx_mat M, arma::vec mu);
-RcppExport SEXP pdSpecEst_kMean(SEXP MSEXP, SEXP muSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cx_mat >::type M(MSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type mu(muSEXP);
-    rcpp_result_gen = Rcpp::wrap(kMean(M, mu));
     return rcpp_result_gen;
 END_RCPP
 }

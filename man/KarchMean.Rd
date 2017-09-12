@@ -4,7 +4,7 @@
 \alias{KarchMean}
 \title{Approximate weighted Karcher mean}
 \usage{
-KarchMean(M, w)
+KarchMean(M, w, tol = NULL)
 }
 \arguments{
 \item{M}{a \eqn{(d,d,S)}-dimensional array of Hermitian PD matrices.}
