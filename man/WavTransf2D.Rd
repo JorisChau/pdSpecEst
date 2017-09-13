@@ -4,7 +4,7 @@
 \alias{WavTransf2D}
 \title{2D Forward AI wavelet transform}
 \usage{
-WavTransf2D(P, order = c(3, 3), jmax)
+WavTransf2D(P, order = c(3, 3), jmax, cores = NULL)
 }
 \description{
 2D Forward AI wavelet transform

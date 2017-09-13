@@ -67,16 +67,13 @@ InvWavTransf <- function(D, order = 5) {
 
 #' 2D Inverse AI wavelet transform
 #'
-#'
 #' @export
 InvWavTransf2D <- function(D, M0, order = c(3,3)) {
-
-  # @importFrom tcltk tkProgressBar
 
   d <- dim(D[[1]])[1]
   J <- length(D)
   m1 <- M0
-  # pb <- tkProgressBar(max = 100)
+  pb <- tcltk::tkProgressBar(max = 100)
 
   for (j in 0:(J - 1)) {
 
@@ -97,10 +94,10 @@ InvWavTransf2D <- function(D, M0, order = c(3,3)) {
     m2 <- array(c(mapply(function(i1, i2) reconstr(i1, i2), grid_j$Var1, grid_j$Var2, SIMPLIFY = "array")),
                     dim = c(d, d, 2^(j + 1), 2^(j + 1)))
     m1 <- m2
-    # setTkProgressBar(pb, value = round(sum(4^(0:j)) / sum(4^(0:(J - 1))) * 100), label =
-          # paste0("Computed up to scale ", j + 1, ", (", round(sum(4^(0:j))/sum(4^(0:(J - 1))) * 100),"% done)"))
+    tcltk::setTkProgressBar(pb, value = round(j/jmax * 100), label =
+          paste0("Computed up to scale ", j + 1, ", (", round(sum(4^(0:j))/sum(4^(0:(J - 1))) * 100),"% done)"))
   }
-  # close(pb)
+  close(pb)
 
   return(m1)
 

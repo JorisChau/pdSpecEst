@@ -92,10 +92,10 @@ WavTransf <- function(P, order = 5, jmax) {
 
 #' 2D Forward AI wavelet transform
 #'
+#' @importFrom foreach "%dopar%"
+#'
 #' @export
-WavTransf2D <- function(P, order = c(3,3), jmax) {
-
-  # @importFrom tcltk tkProgressBar
+WavTransf2D <- function(P, order = c(3,3), jmax, cores = NULL) {
 
   ## Set variables
   J <- log2(dim(P)[3])
@@ -129,9 +129,13 @@ WavTransf2D <- function(P, order = c(3,3), jmax) {
 
   tM <- list()
   ## Compute 2D wavelet transform
-  # pb <- tkProgressBar(max = 100)
+  pb <- tcltk::tkProgressBar(max = 100)
   for (j in 0:jmax) {
-    tm1 <- Impute2D(M[[j + 1]], (order - 1) / 2)
+    if(is.null(cores)){
+      tm1 <- Impute2D(M[[j + 1]], (order - 1) / 2)
+    } else{
+      tm1 <- Impute2D_multicore(M[[j + 1]], (order - 1) / 2, cores)
+    }
     grid <- expand.grid(1:2^(j + 1), 1:2^(j + 1))
     iSqrt_tm1 <- mapply(function(i1, i2) iSqrt(tm1[, , i1, i2]), grid$Var1, grid$Var2, SIMPLIFY = "array")
     D[[j+1]] <- array(c(mapply(function(i1, i2) 2^(-j / 2) * Logm(diag(d), (iSqrt_tm1[, ,  i1 + (i2 - 1) * 2^(j + 1)] %*%
@@ -140,10 +144,10 @@ WavTransf2D <- function(P, order = c(3,3), jmax) {
     tM[[j+1]] <- tm1
     names(D)[j + 1] <- paste0("D.scale", j + 1)
 
-    # setTkProgressBar(pb, value=round(sum(4^(0:j))/sum(4^(0:jmax))*100),
-                         # label=paste0("Computed up to scale ", j + 1, ", (", round(sum(4^(0:j))/sum(4^(0:jmax))*100),"% done)"))
+    tcltk::setTkProgressBar(pb, value=round(j/jmax*100),
+                         label=paste0("Computed up to scale ", j + 1, ", (", round(sum(4^(0:j))/sum(4^(0:jmax))*100),"% done)"))
   }
-  # close(pb)
+  close(pb)
 
   return(list(M = M, D = D, tM = tM))
 }
