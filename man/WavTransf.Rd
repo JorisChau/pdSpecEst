@@ -2,7 +2,7 @@
 % Please edit documentation in R/wavtrans.R
 \name{WavTransf}
 \alias{WavTransf}
-\title{Forward MI wavelet transform}
+\title{Forward AI wavelet transform}
 \usage{
 WavTransf(P, order = 5, jmax)
 }
@@ -25,7 +25,7 @@ dimensional midpoints at the \eqn{2^j} different locations in the given midpoint
 element is equivalent to the first list element in the \code{$D} component.}
 }
 \description{
-\code{WavTransf} computes the forward \emph{midpoint-interpolation} (MI) wavelet transform of a
+\code{WavTransf} computes the forward \emph{average-interpolation} (AI) wavelet transform of a
 curve of length \eqn{m} of (\eqn{d \times d})-dimensional Hermitian PD matrices as described in
 (Chau and von Sachs, 2017).
 }

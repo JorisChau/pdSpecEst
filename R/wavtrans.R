@@ -1,6 +1,6 @@
-#' Forward MI wavelet transform
+#' Forward AI wavelet transform
 #'
-#' \code{WavTransf} computes the forward \emph{midpoint-interpolation} (MI) wavelet transform of a
+#' \code{WavTransf} computes the forward \emph{average-interpolation} (AI) wavelet transform of a
 #' curve of length \eqn{m} of (\eqn{d \times d})-dimensional Hermitian PD matrices as described in
 #' (Chau and von Sachs, 2017).
 #'
@@ -51,21 +51,19 @@ WavTransf <- function(P, order = 5, jmax) {
   }
   d <- dim(P)[1]
   M <- list()
-  for (j in J:1) {
+  for (j in J:0) {
     if (j == J) {
       Mper <- unname(P)
     } else {
-      Mper <- sapply(1:(dim(Mper)[3]/2), function(i) Mid(Mper[, , 2 * i - 1], Mper[, , 2 * i]),
+      Mper <- sapply(1:2^j, function(i) Mid(Mper[, , 2 * i - 1], Mper[, , 2 * i]),
                      simplify = "array")
     }
-    M[[j]] <- array(Mper[, , 1:2^j], dim = c(d, d, 2^j))
+    M[[j + 1]] <- array(Mper, dim = c(d, d, 2^j))
   }
-  names(M) <- paste0("M.scale", 1:J)
-  D <- list(M.scale1 = M[[1]])
-  Nw <- list(N1 = 1, N3 = c(-1, 8, 1)/8, N5 = c(3, -22, 128, 22, -3)/128,
-             N7 = c(-5, 44, -201, 1024, 201, -44, 5)/1024,
-             N9 = c(35, -370, 1898, -6922, 32768, 6922, -1898, 370, -35)/32768)
+  names(M) <- paste0("M.scale", 0:J)
 
+  D <- list()
+  tM <- list()
   if (missing(jmax)) {
     jmax <- J - 1
   }
@@ -74,17 +72,14 @@ WavTransf <- function(P, order = 5, jmax) {
     jmax <- J - 1
   }
 
-  tM <- list()
   ## Compute wavelet transform
-  for (j in 1:jmax) {
-    tm1 <- Impute_man(M[[j]], (order - 1)/2, Nw)
-    iSqrt_tm1 <- sapply(1:2^j, function(l) iSqrt(tm1[, , l]), simplify = "array")
-    D[[j + 1]] <- sapply(1:2^j, function(l) 2^(-j/2) * Logm(diag(d), (iSqrt_tm1[, , l] %*%
-                                      M[[j + 1]][, , 2 * l]) %*% iSqrt_tm1[, , l]), simplify = "array")
-    # D[[j+1]] <- sapply(1:2^j, function(l) 2^(-j/2) * (Logm(M[[j]][,,l], tm1[,,l]) - Logm(M[[j]][,,l], M[[j+1]][,,2*l])), simplify="array")
-    # D[[j+1]] <- sapply(1:2^j, function(l) 2^(-j/2)*Logm(tm1[, , l], M[[j + 1]][, , 2 * l]), simplify = "array")
-    tM[[j]] <- tm1
-    names(D)[j + 1] <- paste0("D.scale", j)
+  for (j in 0:jmax) {
+    tm1 <- Impute1D(M[[j + 1]], D = (order - 1) / 2, method = ifelse(order <= 9, "weights", "neville"))
+    iSqrt_tm1 <- sapply(1:2^(j + 1), function(l) iSqrt(tm1[, , l]), simplify = "array")
+    D[[j + 1]] <- sapply(1:2^(j + 1), function(l) 2^(-j/2) * Logm(diag(d), (iSqrt_tm1[, , l] %*%
+                                            M[[j + 2]][, , l]) %*% iSqrt_tm1[, , l]), simplify = "array")
+    tM[[j + 1]] <- tm1
+    names(D)[j + 1] <- paste0("D.scale", j + 1)
   }
 
   return(list(D = D, M = M, tM = tM))
@@ -98,27 +93,50 @@ WavTransf <- function(P, order = 5, jmax) {
 WavTransf2D <- function(P, order = c(3,3), jmax, cores = NULL) {
 
   ## Set variables
-  J <- log2(dim(P)[3])
-  if (!isTRUE(all.equal(as.integer(J), J))) {
-    stop(paste0("Input length is non-dyadic, please change length ", dim(P)[3],
-                " to dyadic number."))
+  J1 <- log2(dim(P)[3])
+  J2 <- log2(dim(P)[4])
+  J <- max(J1, J2)
+  J0_2D <- abs(J1 - J2)
+  if (!isTRUE(all.equal(as.integer(J1), J1) & all.equal(as.integer(J2), J2))) {
+    stop(paste0("Input length is non-dyadic, please change length ", dim(P)[3], " or ",
+                dim(P)[4], " to dyadic number."))
   }
   d <- dim(P)[1]
   M <- list()
+  Mper_2D <- function(Mper, j1, j2) {
+    l1 <- t(sapply(1:2^j1, function(i) c(1, 2) + 2 * (i - 1)))
+    l2 <- t(sapply(1:2^j2, function(i) c(1, 2) + 2 * (i - 1)))
+    grid <- expand.grid(1:2^j1, 1:2^j2)
+    Mper_new <- array(c(mapply(function(i1, i2) KarchMean(array(c(Mper[,,l1[i1,],l2[i2,]]), dim = c(d,d,4))),
+                               grid$Var1, grid$Var2, SIMPLIFY = "array")), dim = c(d, d, 2^j1, 2^j2))
+    return(Mper_new)
+  }
+
+  grid_j <- cbind((J1:0)[1:(J + 1)], (J2:0)[1:(J + 1)])
+
+  M <- list()
   for (j in J:0) {
-    if (j == J) {
+    if(j == J){
       Mper <- unname(P)
-    } else{
-      l <- t(sapply(1:2^j, function(i) c(1,2)+2*(i-1)))
-      grid <- expand.grid(1:2^j, 1:2^j)
-      Mper <- array(c(mapply(function(i1,i2) KarchMean(array(c(Mper[,,l[i1,], l[i2,]]), dim=c(d,d,4))),
-                             grid$Var1, grid$Var2, SIMPLIFY = "array")), dim = c(d,d,2^j, 2^j))
+    } else if(j >= J0_2D) {
+      Mper <- Mper_2D(Mper, grid_j[J + 1 - j, 1], grid_j[J + 1 - j, 2])
+    } else {
+      if(is.na(grid_j[J + 1 - j, 1])) {
+        j2 <- grid_j[J + 1 - j, 2]
+        Mper <- array(c(sapply(1:2^j2, function(i) Mid(Mper[, , , 2 * i - 1],
+                                                       Mper[, , , 2 * i]))), dim = c(d, d, 1, 2^j2))
+      } else if(is.na(grid_j[J + 1 - j, 2])) {
+        j1 <- grid_j[J + 1 - j, 1]
+        Mper <- array(c(sapply(1:2^j1, function(i) Mid(Mper[, , 2 * i - 1, ],
+                                                       Mper[, , 2 * i, ]))), dim = c(d, d, 2^j1, 1))
+      }
     }
-    M[[j+1]] <- Mper
+    M[[j + 1]] <- Mper
   }
   names(M) <- paste0("M.scale", 0:J)
 
   D <- list()
+  tM <- list()
   if (missing(jmax)) {
     jmax <- J - 1
   }
@@ -127,28 +145,44 @@ WavTransf2D <- function(P, order = c(3,3), jmax, cores = NULL) {
     jmax <- J - 1
   }
 
-  tM <- list()
   ## Compute 2D wavelet transform
   pb <- tcltk::tkProgressBar(max = 100)
   for (j in 0:jmax) {
-    if(is.null(cores)){
-      tm1 <- Impute2D(M[[j + 1]], (order - 1) / 2)
+
+    if(is.na(grid_j[J + 1 - j, 1])) {
+      tm1 <- array(Impute1D(array(M[[j + 1]][, , 1, ], dim = c(d, d, 2^j)),
+                            (order[2] - 1) / 2), dim = c(d, d, 1, 2^(j + 1)))
+      iSqrt_tm1 <- sapply(1:2^(j + 1), function(i) iSqrt(tm1[, , 1, i]), simplify = "array")
+      D[[j + 1]] <- array(c(sapply(1:2^(j + 1), function(i) ifelse(any(dim(M[[min(length(M), j + 2)]]) == 1),
+                            1/(J0_2D - j) * 2^(-j/2), 2^(-j)) * Logm(diag(d), (iSqrt_tm1[, , i] %*% M[[j + 2]][, , 1, i]) %*%
+                            iSqrt_tm1[, , i]))), dim = c(d, d, 1, 2^(j + 1)))
+    } else if(is.na(grid_j[J + 1 - j, 2])) {
+      tm1 <- array(Impute1D(array(M[[j + 1]][, , , 1], dim = c(d, d, 2^j)),
+                            (order[1] - 1) / 2), dim = c(d, d, 2^(j + 1), 1))
+      iSqrt_tm1 <- sapply(1:2^(j + 1), function(i) iSqrt(tm1[, , i, 1]), simplify = "array")
+      D[[j + 1]] <- array(c(sapply(1:2^(j + 1), function(i) ifelse(any(dim(M[[min(length(M), j + 2)]]) == 1),
+                            1/(J0_2D - j) * 2^(-j/2), 2^(-j)) * Logm(diag(d), (iSqrt_tm1[, , i] %*% M[[j + 2]][, , i, 1]) %*%
+                            iSqrt_tm1[, , i]))), dim = c(d, d, 2^(j + 1), 1))
     } else{
-      tm1 <- Impute2D_multicore(M[[j + 1]], (order - 1) / 2, cores)
+      if(is.null(cores)){
+        tm1 <- Impute2D(M[[j + 1]], (order - 1) / 2)
+      } else{
+        tm1 <- Impute2D_multicore(M[[j + 1]], (order - 1) / 2, cores)
+      }
+      grid <- expand.grid(1:dim(tm1)[3], 1:dim(tm1)[4])
+      iSqrt_tm1 <- array(c(mapply(function(i1, i2) iSqrt(tm1[, , i1, i2]), grid$Var1, grid$Var2, SIMPLIFY = "array")),
+                         dim = c(d, d, dim(tm1)[3], dim(tm1)[4]))
+      D[[j + 1]] <- array(c(mapply(function(i1, i2) 2^(-j) * Logm(diag(d), (iSqrt_tm1[, , i1, i2] %*%
+                            M[[j + 2]][, , i1, i2]) %*% iSqrt_tm1[, , i1, i2]),
+                            grid$Var1, grid$Var2, SIMPLIFY = "array")), dim = c(d, d, dim(tm1)[3], dim(tm1)[4]))
     }
-    grid <- expand.grid(1:2^(j + 1), 1:2^(j + 1))
-    iSqrt_tm1 <- mapply(function(i1, i2) iSqrt(tm1[, , i1, i2]), grid$Var1, grid$Var2, SIMPLIFY = "array")
-    D[[j+1]] <- array(c(mapply(function(i1, i2) 2^(-j / 2) * Logm(diag(d), (iSqrt_tm1[, ,  i1 + (i2 - 1) * 2^(j + 1)] %*%
-                          M[[j + 2]][, , i1, i2]) %*% iSqrt_tm1[, , i1 + (i2 - 1) * 2^(j + 1)]),
-                              grid$Var1, grid$Var2, SIMPLIFY = "array")), dim = c(d, d, 2^(j + 1), 2^(j + 1)))
-    tM[[j+1]] <- tm1
+    tM[[j + 1]] <- tm1
     names(D)[j + 1] <- paste0("D.scale", j + 1)
 
-    tcltk::setTkProgressBar(pb, value=round(j/jmax*100),
-                         label=paste0("Computed up to scale ", j + 1, ", (", round(sum(4^(0:j))/sum(4^(0:jmax))*100),"% done)"))
+    tcltk::setTkProgressBar(pb, value=round(j/jmax*100), label=paste0("Computed up to scale ",
+                                      j + 1, ", (", round(sum(4^(0:j))/sum(4^(0:jmax))*100),"% done)"))
   }
   close(pb)
 
   return(list(M = M, D = D, tM = tM))
 }
-

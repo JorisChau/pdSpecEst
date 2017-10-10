@@ -25,24 +25,28 @@
 #' @export
 KarchMean <- function(M, w, tol = NULL) {
 
-  if (missing(w)) {
+  if (missing(w) & dim(M)[3] > 1) {
     w <- rep(1/dim(M)[3], dim(M)[3])
   }
 
-  Mean <- kMean(do.call(rbind, lapply(1:dim(M)[3], function(s) M[, , s])), w)
+  if(dim(M)[3] == 1){
+    Mean <- M[, , 1]
+  } else{
+    Mean <- kMean(do.call(rbind, lapply(1:dim(M)[3], function(s) M[, , s])), w)
 
-  if (!is.null(tol)){
-    Mean_new <- Mean
-    i <- 0
-    while((pdDist(Mean_new, Mean) > tol) & (i < 5E3)){
+    if (!is.null(tol)){
+      Mean_new <- Mean
+      i <- 0
+      while((pdDist(Mean_new, Mean) > tol) & (i < 5E3)){
         Mean <- Mean_new
         Mean_new <- Expm(Mean, apply(sapply(1:dim(M)[3], function(i) w[i] *
-                              Logm(Mean, M[,,i]), simplify = "array"), c(1, 2), sum))
+                                              Logm(Mean, M[,,i]), simplify = "array"), c(1, 2), sum))
         i <- i+1
+      }
+      Mean <- Mean_new
     }
-    Mean <- Mean_new
-  }
 
+  }
   return(Mean)
 }
 

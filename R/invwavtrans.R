@@ -33,7 +33,7 @@
 #' @references Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
 #'
 #' @export
-InvWavTransf <- function(D, order = 5) {
+InvWavTransf <- function(D, M0, order = 5) {
 
   if (!(order %in% c(1, 3, 5, 7, 9))) {
     warning("Refinement order should be an odd integer between 1 and 9, by default set to 5")
@@ -41,26 +41,19 @@ InvWavTransf <- function(D, order = 5) {
   }
   d <- nrow(D[[1]][, , 1])
   J <- length(D)
-  Nw <- list(N1 = 1, N3 = c(-1, 8, 1)/8, N5 = c(3, -22, 128, 22, -3)/128,
-             N7 = c(-5, 44, -201, 1024, 201, -44, 5)/1024,
-             N9 = c(35, -370, 1898, -6922, 32768, 6922, -1898, 370, -35)/32768)
-  m1 <- D[[1]]
-  for (j in 1:(J - 1)) {
-    tm1 <- Impute_man(m1, (order - 1)/2, Nw)
-    m2 <- array(dim = c(d, d, 2^(j + 1)))
+  m1 <- M0
+  for (j in 0:(J - 1)) {
+    tm1 <- Impute1D(m1, (order - 1)/2)
     reconstr <- function(i) {
       if (any(c(D[[j + 1]][, , i]) != 0)) {
         Sqrt_tm1 <- Sqrt(tm1[, , i])
-        m2_even <- (Sqrt_tm1 %*% Expm(diag(d), 2^(j/2) * D[[j + 1]][, , i])) %*% Sqrt_tm1
-        # m2_even <- Expm(tm1[, , i], D[[j + 1]][, , i])
+        m1_i <- (Sqrt_tm1 %*% Expm(diag(d), 2^(j/2) * D[[j + 1]][, , i])) %*% Sqrt_tm1
       } else {
-        m2_even <- tm1[, , i]
+        m1_i <- tm1[, , i]
       }
-      return(m2_even)
+      return(m1_i)
     }
-    m2[, , c(F, T)] <- sapply(1:2^j, reconstr, simplify = "array")
-    m2[, , c(T, F)] <- sapply(1:2^j, function(i) solveMid(m2[, , 2 * i], m1[, , i]), simplify = "array")
-    m1 <- m2
+    m1 <- sapply(1:2^(j + 1), reconstr, simplify = "array")
   }
   return(m1)
 }
@@ -68,33 +61,60 @@ InvWavTransf <- function(D, order = 5) {
 #' 2D Inverse AI wavelet transform
 #'
 #' @export
-InvWavTransf2D <- function(D, M0, order = c(3,3)) {
+InvWavTransf2D <- function(D, M0, order = c(3,3), jmax, cores = NULL) {
 
+  ## Set variables
   d <- dim(D[[1]])[1]
-  J <- length(D)
+  if(missing(jmax)){
+    J <- length(D)
+  } else{
+    J <- jmax
+  }
   m1 <- M0
-  pb <- tcltk::tkProgressBar(max = 100)
+  J0_2D <- sum(sapply(1:length(D), function(j) any(dim(D[[j]]) == 1)))
 
+  pb <- tcltk::tkProgressBar(max = 100)
   for (j in 0:(J - 1)) {
 
-    tm1 <- Impute2D(m1, (order - 1) / 2)
-    m2 <- array(dim = c(d, d, 2^(j + 1), 2^(j + 1)))
-
-    reconstr <- function(i1, i2) {
-      if (any(c(D[[j + 1]][, , i1, i2]) != 0)) {
-        Sqrt_tm1 <- Sqrt(tm1[, , i1, i2])
-        m2_i <- (Sqrt_tm1 %*% Expm(diag(d), 2^(j / 2) * D[[j + 1]][, , i1, i2])) %*% Sqrt_tm1
-      } else {
-        m2_i <- tm1[, , i1, i2]
+    if(dim(D[[j + 1]])[3] == 1){
+      tm1 <- array(Impute1D(array(m1[, , 1, ], dim = c(d, d, 2^j)),
+                            (order[2] - 1) / 2), dim = c(d, d, 1, 2^(j + 1)))
+    } else if (dim(D[[j + 1]])[4] == 1){
+      tm1 <- array(Impute1D(array(m1[, , , 1], dim = c(d, d, 2^j)),
+                            (order[1] - 1) / 2), dim = c(d, d, 2^(j + 1), 1))
+    } else{
+      if(is.null(cores)){
+        tm1 <- Impute2D(m1, (order - 1) / 2)
+      } else{
+        tm1 <- Impute2D_multicore(m1, (order - 1) / 2, cores)
       }
-      return(m2_i)
     }
 
-    grid_j <- expand.grid(1:2^(j + 1), 1:2^(j + 1))
-    m2 <- array(c(mapply(function(i1, i2) reconstr(i1, i2), grid_j$Var1, grid_j$Var2, SIMPLIFY = "array")),
-                    dim = c(d, d, 2^(j + 1), 2^(j + 1)))
-    m1 <- m2
-    tcltk::setTkProgressBar(pb, value = round(j/jmax * 100), label =
+    reconstr <- function(i1, i2) {
+      if((j + 1) <= length(D)){
+        if (any(c(D[[j + 1]][, , i1, i2]) != 0)) {
+          Sqrt_tm1 <- Sqrt(tm1[, , i1, i2])
+          m1_i <- (Sqrt_tm1 %*% Expm(diag(d), ifelse(any(dim(D[[j + 1]]) == 1),
+                      (J0_2D - j) * 2^(j/2), 2^j) * D[[j + 1]][, , i1, i2])) %*% Sqrt_tm1
+        } else {
+          m1_i <- tm1[, , i1, i2]
+        }
+      } else {
+        m1_i <- tm1[, , i1, i2]
+      }
+      return(m1_i)
+    }
+
+    if((j + 1) <= length(D)){
+      grid_j <- expand.grid(1:dim(D[[j + 1]])[3], 1:dim(D[[j + 1]])[4])
+    } else{
+      grid_j <- expand.grid(1:(dim(D[[length(D)]])[3] * 2^((j + 1) - length(D))),
+                            1:(dim(D[[length(D)]])[4] * 2^((j + 1) - length(D))))
+    }
+    m1 <- array(c(mapply(function(i1, i2) reconstr(i1, i2), grid_j$Var1, grid_j$Var2, SIMPLIFY = "array")),
+                    dim = c(d, d, attributes(grid_j)$out.attrs$dim[1], attributes(grid_j)$out.attrs$dim[2]))
+
+    tcltk::setTkProgressBar(pb, value = round(j/(J-1) * 100), label =
           paste0("Computed up to scale ", j + 1, ", (", round(sum(4^(0:j))/sum(4^(0:(J - 1))) * 100),"% done)"))
   }
   close(pb)

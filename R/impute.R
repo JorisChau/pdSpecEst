@@ -1,9 +1,9 @@
-Impute_man <- function(M_j0, D, Nw) {
+Impute_man <- function(M_j0, D) {
+  .Deprecated("pdSpecEst:::Impute1D")
   d <- dim(M_j0)[1]
   j0 <- log(dim(M_j0)[3], 2)
-  tM_j1 <- array(dim = c(d, d, 2^j0))
-  # P0 <- M_j0[, , 2^(j0 - 1)]
-  # M_j0.log <- sapply(1:2^j0, function(i) Logm(P0, M_j0[, , i]), simplify = "array")
+  tM_j1 <- array(dim = c(d, d, 2^(j0+1)))
+
   if (D == 0) {
     for (i in 1:2^(j0 - 1)) {
       P0 <- M_j0[, , 2 * i - 1]
@@ -27,25 +27,93 @@ Impute_man <- function(M_j0, D, Nw) {
   return(tM_j1)
 }
 
-Impute2D <- function(M_j0, D){
+Impute1D <- function(M_j0, D, method) {
 
   j0 <- log(dim(M_j0)[3], 2)
   d <- dim(M_j0)[1]
+  tM_j1 <- array(dim = c(d, d, 2^(j0 + 1)))
+  N <- 2 * D + 1
 
-  if(identical(j0, 0)){
+  if(missing(method)){
+    method <- ifelse(N <= 9, "weights", "neville")
+  }
+
+  if(identical(D, 0) | identical(j0, 0)) {
+
+    for(k in 1:2^j0){
+      tM_j1[, , 2 * k - 1] <- tM_j1[, , 2 * k ] <- M_j0[, , k]
+    }
+
+  } else {
+
+    for(k in 1:2^j0){
+
+      ## Predict with available weights
+      nbrs <- (if((k - D) < 1) 1:N else if((k + D) >= 2^j0) (2^j0 - N + 1):2^j0 else (k - D):(k + D))
+      M <- M_j0[, , nbrs]
+
+      if(method == "weights"){
+
+        l <- (if((k - D) < 1) 2 * k else if((k + D) >= 2^j0) 2 * (N - (2^j0 - k)) else N + 1)
+        w <- W_1D[[D + 1]][l, ]
+
+        Mean_new <- M_j0[, , k]
+        Mean <- diag(d)
+        m <- 0
+        while((pdDist(Mean_new, Mean) > 1E-8) & (m < 10)){
+          Mean <- Mean_new
+          Mean_new <- Expm(Mean, apply(sapply(1:dim(M)[3], function(i) w[i] *
+                                                Logm(Mean, M[,,i]), simplify = "array"), c(1, 2), sum))
+          m <- m+1
+        }
+
+        tM_j1[, , 2 * k] <- Mean_new
+        tM_j1[, , 2 * k - 1] <- (M_j0[, , k] %*% solve(tM_j1[, , 2 * k])) %*% M_j0[, , k]
+
+      } else if(method == "neville"){
+
+        M.bar <- sapply(1:N, function(i) KarchMean(array(c(M[, , 1:i]), dim = c(d, d, i))), simplify = "array")
+
+        if((k - D) < 1){
+          ## At the left boundary
+          tM_j1[, , 2 * k] <- Expm(M.bar[, , k], -(2 * k - 1) * Logm(M.bar[, , k],
+                                                                     pdNeville(P = M.bar, ti = 1:N, grid = k - 0.5)))
+        } else if ((k + D) >= 2^j0){
+          ## At the right boundary
+          k1 <- N - (2^j0 - k)
+          tM_j1[, , 2 * k] <- Expm(M.bar[, , k1], -(2 * k1 - 1) * Logm(M.bar[, , k1],
+                                                                       pdNeville(P = M.bar, ti = 1:N, grid = k1 - 0.5)))
+        } else{
+          ## Away from the boundary
+          tM_j1[, , 2 * k] <- Expm(M.bar[, , D + 1], -N * Logm(M.bar[, , D + 1], pdNeville(P = M.bar, ti = 1:N, grid = D + 0.5)))
+        }
+        tM_j1[, , 2 * k - 1] <- (M_j0[, , k] %*% solve(tM_j1[, , 2 * k])) %*% M_j0[, , k]
+      }
+    }
+  }
+  return(tM_j1)
+}
+
+Impute2D <- function(M_j0, D){
+
+  j01 <- log(dim(M_j0)[3], 2)
+  j02 <- log(dim(M_j0)[4], 2)
+  d <- dim(M_j0)[1]
+
+  if(identical(j01, 0) & identical(j02, 0)){
 
     tM_j1 <- array(M_j0[, , 1, 1], dim = c(d, d, 2, 2))
 
   } else {
 
-    tM_j1 <- array(dim = c(d, d, 2^(j0 + 1), 2^(j0 + 1)))
-    grid_k <- expand.grid(1:2^j0, 1:2^j0)
+    tM_j1 <- array(dim = c(d, d, 2^(j01 + 1), 2^(j02 + 1)))
+    grid_k <- expand.grid(1:2^j01, 1:2^j02)
 
     for(i in 1:nrow(grid_k)){
 
       D_k <- c(min(grid_k[i, 1] - 1, D[1]), min(grid_k[i, 2] - 1, D[2]))
-      nbrs <- list(x = max(grid_k[i, 1] - D[1], 1):min(grid_k[i, 1] + D[1], 2^j0),
-                   y = max(grid_k[i, 2] - D[2], 1):min(grid_k[i, 2] + D[2], 2^j0))
+      nbrs <- list(x = max(grid_k[i, 1] - D[1], 1):min(grid_k[i, 1] + D[1], 2^j01),
+                   y = max(grid_k[i, 2] - D[2], 1):min(grid_k[i, 2] + D[2], 2^j02))
       N_k <- 2 * D_k + 1
 
       if((length(nbrs$x) == 2 * D[1] + 1) & (length(nbrs$y) == 2 * D[2] + 1) & all(D <= 4)){
@@ -54,7 +122,7 @@ Impute2D <- function(M_j0, D){
         ## Predict with available weights
         pred2D <- function(l1, l2){
           M <- array(c(M_j0[, , nbrs$x, nbrs$y]), dim = c(d, d, length(nbrs$x) * length(nbrs$y)))
-          w <- c(pdSpecEst:::W_2D[[5 * D_k[2] + (D_k[1] + 1)]][l1, l2, , ])
+          w <- c(W_2D[[5 * D_k[2] + (D_k[1] + 1)]][l1, l2, , ])
           Mean_new <- M_j0[, , grid_k[i, 1], grid_k[i, 2]]
           Mean <- diag(d)
           m <- 0
@@ -76,7 +144,7 @@ Impute2D <- function(M_j0, D){
         ## Predict with Neville's algorithm
         grid_l <- expand.grid(nbrs$x, nbrs$y)
         M.bar <- array(c(mapply(function(i1,i2) KarchMean(array(c(M_j0[, , grid_l[1, 1]:i1, grid_l[1, 2]:i2]),
-                                dim = c(d, d, length(grid_l[1, 1]:i1) * length(grid_l[1, 2]:i2)))), grid_l$Var1,
+                                                                dim = c(d, d, length(grid_l[1, 1]:i1) * length(grid_l[1, 2]:i2)))), grid_l$Var1,
                                 grid_l$Var2, SIMPLIFY="array")), dim = c(d, d, length(nbrs$x), length(nbrs$y)))
         M.bar_pred <- pdNeville2D(P = M.bar, ti = nbrs, grid = list(x = grid_k[i, 1] - 1 + c(0, 0.5, 1),
                                                                     y = grid_k[i, 2] - 1 + c(0, 0.5, 1)))
@@ -86,32 +154,32 @@ Impute2D <- function(M_j0, D){
         M.bar_min0 <- KarchMean(array(c(M.bar_pred[, , 2, 3], C0), dim=c(d, d, 2)),
                                 w = c((N_k[1] * (N_k[2] + 1)) / ((N_k[1] + 1) * (N_k[2] + 1) - 1), N_k[2] / ((N_k[1] + 1) * (N_k[2] + 1) - 1)))
         tM_j1[, , 2 * grid_k[i, 1], 2 * grid_k[i, 2]] <- KarchMean(array(c(M.bar[, , which(nbrs$x == grid_k[i, 1]),
-                                which(nbrs$y == grid_k[i, 2])], M.bar_min0), dim = c(d, d, 2)),
-                                w = c((N_k[1] + 1) * N_k[2] + N_k[1] + 1, -((N_k[1] + 1) * N_k[2] + N_k[1])))
+                                                                                 which(nbrs$y == grid_k[i, 2])], M.bar_min0), dim = c(d, d, 2)),
+                                                                   w = c((N_k[1] + 1) * N_k[2] + N_k[1] + 1, -((N_k[1] + 1) * N_k[2] + N_k[1])))
 
         ## Predict M_{j+1,2k_1,2k_2+1}
         C1 <- KarchMean(array(c(M.bar_pred[, , 1, 3], M.bar_pred[, , 1, 2]), dim = c(d, d, 2)), w = c(N_k[2] + 1, -N_k[2]))
         M.bar_min1 <- KarchMean(array(c(M.bar_pred[, , 3, 2], C1), dim=c(d, d, 2)),
                                 w = c((N_k[1] + 1) * N_k[2] / ((N_k[1] + 1) * (N_k[2] + 1) - 2), (N_k[1] - 1) / ((N_k[1] + 1) * (N_k[2] + 1) - 2)))
         M.block1 <- KarchMean(array(c(M.bar[, , which(nbrs$x == grid_k[i, 1]), which(nbrs$y == grid_k[i, 2])], M.bar_min1),
-                                dim = c(d, d, 2)), w = c(((N_k[1] + 1) * (N_k[2] + 1) - 2) / 2 + 1, -((N_k[1] + 1) * (N_k[2] + 1) - 2) / 2))
+                                    dim = c(d, d, 2)), w = c(((N_k[1] + 1) * (N_k[2] + 1) - 2) / 2 + 1, -((N_k[1] + 1) * (N_k[2] + 1) - 2) / 2))
         tM_j1[, , 2 * grid_k[i, 1] - 1, 2 * grid_k[i, 2]] <- KarchMean(array(c(M.block1,
-                                tM_j1[, , 2 * grid_k[i, 1], 2 * grid_k[i, 2]]), dim = c(d, d, 2)), w = c(2, -1))
+                                                                               tM_j1[, , 2 * grid_k[i, 1], 2 * grid_k[i, 2]]), dim = c(d, d, 2)), w = c(2, -1))
 
         ## Predict M_{j+1,2k_1+1,2k_2}
         C2 <- KarchMean(array(c(M.bar_pred[, , 3, 1], M.bar_pred[, , 2, 1]), dim = c(d, d, 2)), w = c(N_k[1] + 1, -N_k[1]))
         M.bar_min2 <- KarchMean(array(c(M.bar_pred[, , 2, 3], C2), dim = c(d, d, 2)),
                                 w = c((N_k[2] + 1) * N_k[1] / ((N_k[2] + 1) * (N_k[1] + 1) - 2), (N_k[2] - 1) / ((N_k[2] + 1) * (N_k[1] + 1) - 2)))
         M.block2 <- KarchMean(array(c(M.bar[, , which(nbrs$x == grid_k[i, 1]), which(nbrs$y == grid_k[i, 2])], M.bar_min2),
-                                dim = c(d, d, 2)), w = c(((N_k[1] + 1) * (N_k[2] + 1) - 2) / 2 + 1, -((N_k[1] + 1) * (N_k[2] + 1) - 2) / 2))
+                                    dim = c(d, d, 2)), w = c(((N_k[1] + 1) * (N_k[2] + 1) - 2) / 2 + 1, -((N_k[1] + 1) * (N_k[2] + 1) - 2) / 2))
         tM_j1[, , 2 * grid_k[i, 1], 2 * grid_k[i, 2] - 1] <- KarchMean(array(c(M.block2,
-                                tM_j1[, , 2 * grid_k[i, 1], 2 * grid_k[i, 2]]), dim = c(d, d, 2)), w = c(2, -1))
+                                                                               tM_j1[, , 2 * grid_k[i, 1], 2 * grid_k[i, 2]]), dim = c(d, d, 2)), w = c(2, -1))
 
         ## Predict M_{j+1,2k_1,2k_2}
         tM_j1[, , 2 * grid_k[i, 1] - 1, 2 * grid_k[i, 2] - 1] <- Expm(M_j0[, , grid_k[i, 1], grid_k[i, 2]],
-                                -(Logm(M_j0[, , grid_k[i, 1], grid_k[i, 2]], tM_j1[, , 2 * grid_k[i, 1], 2 * grid_k[i, 2] - 1]) +
-                                  Logm(M_j0[, , grid_k[i, 1], grid_k[i, 2]], tM_j1[, , 2 * grid_k[i, 1] - 1, 2 * grid_k[i, 2]]) +
-                                  Logm(M_j0[, , grid_k[i, 1], grid_k[i, 2]], tM_j1[, , 2 * grid_k[i, 1], 2 * grid_k[i, 2]])))
+                                                                      -(Logm(M_j0[, , grid_k[i, 1], grid_k[i, 2]], tM_j1[, , 2 * grid_k[i, 1], 2 * grid_k[i, 2] - 1]) +
+                                                                          Logm(M_j0[, , grid_k[i, 1], grid_k[i, 2]], tM_j1[, , 2 * grid_k[i, 1] - 1, 2 * grid_k[i, 2]]) +
+                                                                          Logm(M_j0[, , grid_k[i, 1], grid_k[i, 2]], tM_j1[, , 2 * grid_k[i, 1], 2 * grid_k[i, 2]])))
       }
     }
   }
@@ -119,19 +187,20 @@ Impute2D <- function(M_j0, D){
   return(tM_j1)
 }
 
-Impute2D_multicore <- function(M_j0, D, cores = 1){
+Impute2D_multicore <- function(M_j0, D, cores){
 
-  j0 <- log(dim(M_j0)[3], 2)
+  j01 <- log(dim(M_j0)[3], 2)
+  j02 <- log(dim(M_j0)[4], 2)
   d <- dim(M_j0)[1]
 
-  if(identical(j0, 0)){
+  if(identical(j01, 0) & identical(j02, 0)){
 
     tM_j1 <- array(M_j0[, , 1, 1], dim = c(d, d, 2, 2))
 
   } else {
 
-    tM_j1 <- array(dim = c(d, d, 2^(j0 + 1), 2^(j0 + 1)))
-    grid_k <- expand.grid(1:2^j0, 1:2^j0)
+    tM_j1 <- array(dim = c(d, d, 2^(j01 + 1), 2^(j02 + 1)))
+    grid_k <- expand.grid(1:2^j01, 1:2^j02)
 
     cl <- parallel::makeCluster(cores)
     doParallel::registerDoParallel(cl)
@@ -139,8 +208,8 @@ Impute2D_multicore <- function(M_j0, D, cores = 1){
     tM1_par <- foreach::foreach(i=1:nrow(grid_k), .packages = "pdSpecEst") %dopar% {
 
       D_k <- c(min(grid_k[i, 1] - 1, D[1]), min(grid_k[i, 2] - 1, D[2]))
-      nbrs <- list(x = max(grid_k[i, 1] - D[1], 1):min(grid_k[i, 1] + D[1], 2^j0),
-                   y = max(grid_k[i, 2] - D[2], 1):min(grid_k[i, 2] + D[2], 2^j0))
+      nbrs <- list(x = max(grid_k[i, 1] - D[1], 1):min(grid_k[i, 1] + D[1], 2^j01),
+                   y = max(grid_k[i, 2] - D[2], 1):min(grid_k[i, 2] + D[2], 2^j02))
       N_k <- 2 * D_k + 1
 
       if((length(nbrs$x) == 2 * D[1] + 1) & (length(nbrs$y) == 2 * D[2] + 1) & all(D <= 4)){
@@ -181,8 +250,8 @@ Impute2D_multicore <- function(M_j0, D, cores = 1){
         M.bar_min0 <- KarchMean(array(c(M.bar_pred[, , 2, 3], C0), dim=c(d, d, 2)),
                                 w = c((N_k[1] * (N_k[2] + 1)) / ((N_k[1] + 1) * (N_k[2] + 1) - 1), N_k[2] / ((N_k[1] + 1) * (N_k[2] + 1) - 1)))
         tM1[, , 2, 2] <- KarchMean(array(c(M.bar[, , which(nbrs$x == grid_k[i, 1]),
-                                which(nbrs$y == grid_k[i, 2])], M.bar_min0), dim = c(d, d, 2)),
-                                w = c((N_k[1] + 1) * N_k[2] + N_k[1] + 1, -((N_k[1] + 1) * N_k[2] + N_k[1])))
+                                                 which(nbrs$y == grid_k[i, 2])], M.bar_min0), dim = c(d, d, 2)),
+                                   w = c((N_k[1] + 1) * N_k[2] + N_k[1] + 1, -((N_k[1] + 1) * N_k[2] + N_k[1])))
 
         ## Predict M_{j+1,2k_1,2k_2+1}
         C1 <- KarchMean(array(c(M.bar_pred[, , 1, 3], M.bar_pred[, , 1, 2]), dim = c(d, d, 2)), w = c(N_k[2] + 1, -N_k[2]))
@@ -202,7 +271,7 @@ Impute2D_multicore <- function(M_j0, D, cores = 1){
 
         ## Predict M_{j+1,2k_1,2k_2}
         tM1[, , 1, 1] <- Expm(M_j0[, , grid_k[i, 1], grid_k[i, 2]],
-                                -(Logm(M_j0[, , grid_k[i, 1], grid_k[i, 2]], tM1[, , 2, 1]) +
+                              -(Logm(M_j0[, , grid_k[i, 1], grid_k[i, 2]], tM1[, , 2, 1]) +
                                   Logm(M_j0[, , grid_k[i, 1], grid_k[i, 2]], tM1[, , 1, 2]) +
                                   Logm(M_j0[, , grid_k[i, 1], grid_k[i, 2]], tM1[, , 2, 2])))
       }

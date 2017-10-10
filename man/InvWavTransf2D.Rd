@@ -4,7 +4,7 @@
 \alias{InvWavTransf2D}
 \title{2D Inverse AI wavelet transform}
 \usage{
-InvWavTransf2D(D, M0, order = c(3, 3))
+InvWavTransf2D(D, M0, order = c(3, 3), jmax, cores = NULL)
 }
 \description{
 2D Inverse AI wavelet transform
