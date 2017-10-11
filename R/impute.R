@@ -32,6 +32,7 @@ Impute1D <- function(M_j0, D, method) {
   j0 <- log(dim(M_j0)[3], 2)
   d <- dim(M_j0)[1]
   tM_j1 <- array(dim = c(d, d, 2^(j0 + 1)))
+  D <- ifelse((2 * D + 1) > 2^j0, floor((2^j0 - 1) / 2), D)
   N <- 2 * D + 1
 
   if(missing(method)){
