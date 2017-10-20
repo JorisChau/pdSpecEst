@@ -76,13 +76,71 @@ rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
   if (!is.null(freq)) {
     f.nu <- function(nu) {
       PhiB <- diag(d) - Phi[, , 1] * exp(complex(imaginary = -nu)) - Phi[, , 2] *
-                                                                      exp(complex(imaginary = -2 * nu))
+        exp(complex(imaginary = -2 * nu))
       ThetaB <- diag(d) + Theta[, , 1] * exp(complex(imaginary = -nu)) + Theta[, , 2] *
-                                                                      exp(complex(imaginary = -2 * nu))
+        exp(complex(imaginary = -2 * nu))
       return((((solve(PhiB) %*% ThetaB) %*% Sigma) %*% t(Conj(ThetaB))) %*% t(solve(Conj(PhiB))))
     }
     f <- sapply(freq, function(freq) 1/(2 * pi) * f.nu(freq), simplify = "array")
   }
   return(list(X = X, f = f))
 }
+
+#' Test functions
+#'
+#' @export
+rExamples <- function(n, example = c("heaviSine", "bumps"), ...){
+
+  example <- match.arg(example, c("heaviSine", "bumps"))
+  if(n %% 2 != 0){
+    warning("'n' is odd and cannot be divided by 2, instead 'n' is replaced by 'n + 1'")
+    n <- n + 1
+  }
+  dots <- list(...)
+
+  B <- dots$B
+  if (is.null(B)){
+    B <- 3
+  }
+  method <- dots$method
+  if (is.null(method)) {
+    method <- "multitaper"
+  }
+  bias.corr <- dots$bias.corr
+  if (is.null(bias.corr)) {
+    bias.corr <- T
+  }
+
+  x <- seq(0, 1, length.out = n / 2)
+
+  if(example == "heaviSine"){
+    P0 <- sapply(x, function(t) E_coeff_inv(sin(HeaviSine[2, ] * pi * t + HeaviSine[1, ])), simplify = "array")
+    P1 <- sapply(x, function(t) E_coeff_inv(sin(HeaviSine[4, ] * pi * t + HeaviSine[3, ])), simplify = "array")
+    P <- sapply(1:(n/2), function(i) (if(i <= n / 4) Expm(diag(2, 3), P0[, , i]) else 3 * Expm(diag(2, 3), P1[, , i])),
+                simplify = "array")
+  } else if(example == "bumps"){
+    P0 <- sapply(x, function(t)  (1 - 0.4 * t) * E_coeff_inv(sqrt(t * (1 - t) + 1) *
+                                  sin(pi/(0.4 * t + 0.1)) * (1 + Bumps)), simplify = "array")
+    P <- sapply(1:(n/2), function(i) Expm(diag(3), P0[,,i]), simplify = "array")
+  }
+
+  P.sqrt <- sapply(1:(n/2), function(i) Sqrt(P[,,i]), simplify = "array")
+
+  ## Generate time series via Cramer
+  chi <- matrix(nrow = 3, ncol = n)
+  chi[, 1:(n/2 - 1)] <- replicate(n/2 - 1, complex(3, rnorm(3, sd = sqrt(1/2)), rnorm(3, sd = sqrt(1/2))))
+  chi[, c(n/2, n)] <- replicate(2, rnorm(3))
+  chi[, (n/2 + 1):(n - 1)] <- Conj(chi[, 1:(n/2 - 1)])
+
+  P.sqrt1 <- array(c(P.sqrt, Conj(P.sqrt[, , (n/2):1])), dim = c(3, 3, n))
+  ts <- sqrt(2 * pi) / sqrt(n) * mvfft(t(sapply(1:n, function(i) P.sqrt1[, , i] %*% chi[, i])), inverse = T)
+
+  ## Compute pre-smoothed periodogram
+  per <- pdPgram(ts, B = B, method = method, bias.corr = bias.corr)
+
+  return(list(f = P, freq = per$freq, per = per$P, ts = ts))
+
+}
+
+
 

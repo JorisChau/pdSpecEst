@@ -62,20 +62,90 @@ pdPgram <- function(X, B, method = c("multitaper", "bartlett"), bias.corr = T) {
   if (missing(B)) {
     B <- d
   }
+  pgram <- function(Y){
+    dft <- 1/sqrt(nrow(Y)) * mvfft(Y)
+    return(sapply(1:floor(nrow(Y)/2), function(i) dft[i, ] %*% t(Conj(dft[i, ])), simplify = "array"))
+  }
+
   if (method == "bartlett") {
-    Per <- sapply(1:B, function(b) 1/(2 * pi) * astsa::mvspec(X[floor(n/B) * (b - 1) + 1:floor(n/B), ],
-                                                             plot = F)$fxx, simplify = "array")
+    Per <- sapply(1:B, function(b) 1/(2 * pi) * pgram(X[floor(n/B) * (b - 1) + 1:floor(n/B), ]), simplify = "array")
   } else if (method == "multitaper") {
     h <- multitaper::dpss(n, B, 1, returnEigenvalues = F)$v * sqrt(n)
-    Per <- sapply(1:B, function(k) 1/(2 * pi) * astsa::mvspec(h[, k] * X, plot = F)$fxx, simplify = "array")
+    Per <- sapply(1:B, function(k) 1/(2 * pi) * pgram(h[, k] * X), simplify = "array")
   }
   if(bias.corr){
     P <- B * exp(-1/d * sum(digamma(B - (d - 1:d)))) * apply(Per, c(1, 2, 3), mean)
   } else{
     P <- apply(Per, c(1, 2, 3), mean)
   }
-  freq <- pi * (1:dim(P)[3])/dim(P)[3]
+  freq <- pi * (0:(dim(P)[3]-1))/dim(P)[3]
 
   return(list(freq = freq, P = P))
 }
 
+#' Tapered HPD time-varying periodogram matrix
+#'
+#' @export
+pdPgram2D <- function(X, B, method = c("DPSS", "Hermite"), bias.corr = F, time, freq){
+
+  d <- ncol(X)
+  if(missing(method)) {
+    method <- "DPSS"
+  }
+  method <- match.arg(method, c("DPSS", "Hermite"))
+  if (missing(B)) {
+    B <- d
+  }
+  n <- nrow(X)
+  L <- length(time)
+  x <- head(seq(0, 1, len = n + 1), -1)
+  bias.corr <- ifelse(bias.corr, B * exp(-1/d * sum(digamma(B - (d - 1:d)))), 1)
+
+  ## Periodogram matrix pointwise in time
+  Per_t <- function(Y){
+    dft <- 1/sqrt(nrow(Y)) * mvfft(Y)
+    return(sapply(ceiling(freq * nrow(Y)), function(i) dft[i, ] %*% t(Conj(dft[i, ])), simplify = "array"))
+  }
+
+  if(method == "Hermite"){
+
+    ## Hermite functions
+    Hermite <- function(k, t){
+      # if(!all.equal(k, as.integer(k)) | (k < 0)){
+      #   stop(paste0("The Hermite order k = ", k, " is not a non-negative integer!"))
+      # }
+      Herm_poly <- function(ti){
+        H <- numeric(k + 1)
+        for(i in 0:k){
+          if(identical(i, as.integer(0))){
+            H[i + 1] <- 1
+          } else if(identical(i, as.integer(1))){
+            H[i + 1] <- 2 * ti
+          } else{
+            H[i + 1] <- 2 * ti * H[i] - 2 * (i - 1) * H[i - 1]
+          }
+        }
+        H[k + 1]
+      }
+      sapply(t, function(ti) exp(-ti^2 / 2) * Herm_poly(ti) / sqrt(sqrt(pi) * 2^k * factorial(k)))
+    }
+
+    ## Time-varying periodogram matrix
+    Per <- sapply(time, function(ti) bias.corr * apply(sapply(0:(B - 1), function(b) 1/(2 * pi) *
+                          Per_t(Hermite(b, (n^0.2 * L * (x - ti))[(round(ti * n)  - floor(n / (2 * L) - 1)):
+                          (round(ti * n) + floor(n / (2 * L)))]) * X[(round(ti * n)  - floor(n / (2 * L) - 1)):
+                          (round(ti * n) + floor(n / (2 * L))),]), simplify = "array"),
+                          c(1, 2, 3), mean), simplify = "array")
+  } else if(method == "DPSS") {
+
+    h <- multitaper::dpss(2 * floor(n / (2 * L)), B, 1, returnEigenvalues = F)$v * sqrt(2 * floor(n / (2 * L)))
+
+    ## Sliding DPSS multitaper
+    Per <- sapply(time, function(ti) bias.corr * apply(sapply(1:B, function(b) 1/(2 * pi) *
+                  Per_t(h[, b] * X[(round(ti * n)  - floor(n / (2 * L) - 1)):(round(ti * n) + floor(n / (2 * L))),]),
+                  simplify = "array"), c(1, 2, 3), mean), simplify = "array")
+  }
+
+  return(list(P = aperm(Per, c(1, 2, 4, 3)), time = time, freq = freq))
+
+}

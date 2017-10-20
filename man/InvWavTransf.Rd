@@ -4,7 +4,8 @@
 \alias{InvWavTransf}
 \title{Inverse MI wavelet transform}
 \usage{
-InvWavTransf(D, M0, order = 5)
+InvWavTransf(D, M0, order = 5, jmax, periodic = T, metric = "Riemannian",
+  ...)
 }
 \arguments{
 \item{D}{a list of arrays containing coarse-scale midpoints and Hermitian matrix-valued wavelet

@@ -64,12 +64,13 @@
 #' @importFrom stats mad
 #' @export
 pdSpecEst <- function(P, lam = NULL, order = 5, return = "f", alpha = 0.75) {
+  .Deprecated("pdSpecEst1D")
 
   ## Define variables
   J <- log2(dim(P)[3])
   if (!isTRUE(all.equal(as.integer(J), J))) {
     warning(paste0("Input length is non-dyadic, please change length ", dim(P)[3],
-                 " to dyadic number."))
+                   " to dyadic number."))
   }
   stopifnot(isTRUE(all.equal(as.integer(J), J)))
   if (!(order %in% c(1, 3, 5, 7, 9))) {
@@ -121,22 +122,22 @@ pdSpecEst <- function(P, lam = NULL, order = 5, return = "f", alpha = 0.75) {
       }
       for (j in 1:(J - 2)) {
         D.lam$odd[[j + 1]] <- sapply(1:2^j, function(k) E_coeff_inv(d.lam$odd[[j]][, k]),
-                                      simplify = "array")
+                                     simplify = "array")
         D.lam$even[[j + 1]] <- sapply(1:2^j, function(k) E_coeff_inv(d.lam$even[[j]][, k]),
-                                       simplify = "array")
+                                      simplify = "array")
       }
       f.hat <- list(odd = InvWavTransf(D.lam$odd, order), even = InvWavTransf(D.lam$even, order))
 
       ## Predicted points
       f.t.even <- sapply(1:(2^(J - 1) - 1), function(k) Mid(f.hat$odd[, , k], f.hat$odd[, , k + 1]),
-                          simplify = "array")
+                         simplify = "array")
       f.t.even <- array(c(f.t.even, f.hat$odd[, , 2^(J - 1)]), dim = c(dim, dim, 2^(J - 1)))
       f.t.odd <- sapply(1:(2^(J - 1) - 1), function(k) Mid(f.hat$even[, , k], f.hat$even[, , k + 1]),
-                         simplify = "array")
+                        simplify = "array")
       f.t.odd <- array(c(f.hat$even[, , 1], f.t.odd), dim = c(dim, dim, 2^(J - 1)))
 
       return(sum(sapply(1:2^(J - 1), function(k) RiemmDist(f.t.even[, , k], P.half$even[, , k])^2 +
-                                                  RiemmDist(f.t.odd[, , k], P.half$odd[, , k])^2)))
+                          RiemmDist(f.t.odd[, , k], P.half$odd[, , k])^2)))
     }
 
     ## Golden section search
@@ -172,7 +173,7 @@ pdSpecEst <- function(P, lam = NULL, order = 5, return = "f", alpha = 0.75) {
   ## Threshold coefficients
   for (j in 3:(J - 1)) {
     zero <- sapply(1:2^j, function(k) (abs(d.new[[j]][, k]) < lam.cv) |
-                                       (d[[j - 1]][, ceiling(k/2)] == 0))
+                     (d[[j - 1]][, ceiling(k/2)] == 0))
     d.new[[j]][zero] <- 0
     d[[j]][zero] <- 0
   }
@@ -188,4 +189,178 @@ pdSpecEst <- function(P, lam = NULL, order = 5, return = "f", alpha = 0.75) {
     f <- NULL
   }
   return(list(f = f, D = D, lam = lam.cv, components = list(thresholded = d.new, not_thresholded = d1)))
+}
+
+#' Tree-structured wavelet-thresholded 2D spectral estimator
+#'
+#' @export
+pdCART <- function(D, tree = T, lam = NA, alpha = 1, periodic = T) {
+
+  J <- length(D)
+  d <- dim(D[[1]])[1]
+  N <- dim(D[[1]])[3]
+  L <- (N - 1) / 2
+  L_b <- ceiling(L/2)
+  is_2D <- ifelse(length(dim(D[[1]])) == 4, T, F)
+  D_trace_full <- if(is_2D){
+    lapply(2:J, function(j) apply(D[[j]], c(3, 4), function(A) Re(sum(diag(A)))))
+  } else {
+    lapply(2:J, function(j) apply(D[[j]], 3, function(A) Re(sum(diag(A)))))
+  }
+  D_trace <- lapply(1:(J-1), function(j) D_trace_full[[j]][L_b + 1:2^j])
+  s_e <- mad(c(D_trace[[J-1]]))
+  if(is.na(lam)){
+    lam <- alpha * s_e * sqrt(2 * log(length(unlist(D_trace))))
+    # lam <- alpha * s_e
+  }
+
+  if(tree){
+
+    ## Dyadic CART
+    w <- D_trace
+    # w[[1]] <- (if(is_2D) array(T, dim = dim(D_trace[[1]])) else rep(T, length(D_trace[[1]])))
+    for(j in (J-1):1){
+      if(j == (J-1)){
+        w[[j]] <- ifelse(abs(D_trace[[j]]) > lam, T, F)
+        R <- pmin(D_trace[[j]]^2, lam^2)
+        V <- D_trace[[j]]^2
+      } else{
+        if(is_2D){
+          dims <- dim(D_trace[[j]])
+          if(dims[1] > 1){
+            l1 <- t(sapply(1:dims[1], function(i) c(1, 2) + 2 * (i - 1)))
+          } else {
+            l1 <- matrix(1, ncol = 1, nrow = 1)
+          }
+          if(dims[2] > 1){
+            l2 <- t(sapply(1:dims[2], function(i) c(1, 2) + 2 * (i - 1)))
+          } else {
+            l2 <- matrix(1, ncol = 1, nrow = 1)
+          }
+          grid <- expand.grid(1:dims[1], 1:dims[2])
+          V <- array(c(mapply(function(i1, i2) sum(V[l1[i1, ], l2[i2, ]]), grid$Var1, grid$Var2)),
+                     dim = dims) + D_trace[[j]]^2
+          R <- array(c(mapply(function(i1, i2) sum(R[l1[i1, ], l2[i2, ]]), grid$Var1, grid$Var2)),
+                     dim = dims) + lam^2
+        } else {
+          dims <- length(D_trace[[j]])
+          V <- sapply(1:dims, function(i) V[2 * i - 1] + V[2 * i]) + D_trace[[j]]^2
+          R <- sapply(1:dims, function(i) R[2 * i - 1] + R[2 * i]) + lam^2
+        }
+        w[[j]] <- ifelse(R < V, T, F)
+        R <- pmin(V, R)
+      }
+    }
+  } else{
+    w <- lapply(1:(J - 1), function(j) abs(D_trace[[j]]) > lam)
+  }
+
+  D_w <- D
+  for(j in 2:J){
+    if(is_2D){ ## NEEDS TO BE UPDATED!
+      dims <- dim(w[[j]])
+      roots <- matrix(rep(matrix(rep(t(w[[j - 1]]), each = ifelse(dims[2] == 1, 1, 2)), byrow = T,
+                                 ncol = ncol(w[[j]])), each = ifelse(dims[1] == 1, 1, 2)), nrow = nrow(w[[j]]))
+      w[[j]] <- w[[j]] & roots
+      D0 <- array(D_w[[j]], dim = c(d, d, dim(D_w[[j]])[3] * dim(D_w[[j]])[4]))
+      D0[, , !(w[[j]])] <- 0
+      D_w[[j]] <- array(D0, dim = c(d, d, dim(D_w[[j]])[3], dim(D_w[[j]])[4]))
+    } else {
+      w[[j - 1]] <- (if(tree) w[[j - 1]] & rep((if(j == 2) T else w[[j - 2]]), each = 2) else w[[j - 1]])
+      zeros <- !(c(abs(D_trace_full[[j - 1]][1:L_b]) > lam, w[[j - 1]], abs(D_trace_full[[j - 1]][2^(j - 1) + L_b + 1:L_b]) > lam))
+      D_w[[j]][, , zeros] <- 0
+    }
+  }
+  return(list(w = w, D_w = D_w))
+}
+
+#' Automatic tree-structured wavelet regression for curves of HPD matrices
+#'
+#' @export
+pdSpecEst1D <- function(P, order = 5, policy = c("universal", "cv"), metric = "Riemannian", periodic = T,
+                        alpha = 1, return = "f", ...) {
+
+  ## Set variables
+  dots = list(...)
+  tol = (if(is.null(dots$tol)) 0.01 else dots$tol)
+  alpha.range = (if(is.null(dots$alpha.range)) c(0.5, 2) else dots$alpha.range)
+  tree = (if(is.null(dots$tree)) T else dots$tree)
+
+  policy = match.arg(policy, c("universal", "cv"))
+  metric = match.arg(metric, c("Riemannian", "logEuclidean", "Cholesky", "rootEuclidean", "Euclidean"))
+  periodic = isTRUE(periodic)
+  J = log2(dim(P)[3])
+  jmax.cv = (if(is.null(dots$jmax.cv)) J - 3 else dots$jmax.cv)
+  jmax = (if(is.null(dots$jmax)) J - 1 else dots$jmax)
+  d = dim(P)[1]
+  B = (if(is.null(dots$B)) d else dots$B)
+
+  # Manifold bias-correction
+  P = (if(metric == "Riemannian" | metric == "logEuclidean") {
+          B * exp(-1/d * sum(digamma(B - (d - 1:d)))) * P } else P)
+
+  if(policy == "cv"){
+
+    ## Two-fold cross-validation (Nason, 1996)
+    Pmid <- (if(metric == "logEuclidean") {
+      sapply(1:2^J, function(i) Logm(diag(d), P[, , i]), simplify = "array")
+    } else if(metric == "Cholesky") {
+      sapply(1:2^J, function(i) t(Conj(Chol(P[, , i]))), simplify = "array")
+    } else if(metric == "rootEuclidean"){
+      sapply(1:2^J, function(i) Sqrt(P[, , i]), simplify = "array")
+    } else P)
+
+    for (j in J:(jmax.cv + 1)) {
+      Pmid <- sapply(1:(dim(Pmid)[3]/2), function(i) (if(metric == "Riemannian"){
+                  Mid(Pmid[, , 2 * i - 1], Pmid[, , 2 * i]) } else { 0.5 * (Pmid[, , 2 * i - 1] +
+                  Pmid[, , 2 * i]) }), simplify = "array")
+    }
+
+    P1 <- list(odd = Pmid[, , c(T, F)], even = Pmid[, , c(F, T)])
+
+    if(metric == "Riemannian"){
+    for(m in c(1,2)){
+      P1[[m]] <- sapply(1:2^(jmax.cv - 1), function(i) Logm(diag(d), P1[[m]][, , i]), simplify = "array")
+      }
+    }
+
+    coeff.odd <- WavTransf(P1$odd, order, periodic = periodic, metric = "Euclidean")
+    coeff.even <- WavTransf(P1$even, order, periodic = periodic, metric = "Euclidean")
+
+    cv <- function(alpha){
+
+      D <- list(odd = pdCART(coeff.odd$D, tree = F, alpha = alpha, periodic = periodic)$D_w,
+                even = pdCART(coeff.even$D, tree = F, alpha = alpha, periodic = periodic)$D_w)
+
+      f.hat <- list(odd = InvWavTransf(D$odd, coeff.odd$M[[1]], order,
+                                       periodic = periodic, metric = "Euclidean", return_val = "tangent"),
+                    even = InvWavTransf(D$even, coeff.even$M[[1]], order,
+                                        periodic = periodic, metric = "Euclidean", return_val = "tangent"))
+      ## Predicted points
+      f.pred <- list(even = array(c(sapply(1:(2^(jmax.cv - 1) - 1), function(k) 0.5 * (f.hat$odd[, , k] + f.hat$odd[, , k + 1]),
+                                  simplify = "array"), f.hat$odd[, , 2^(jmax.cv - 1)]), dim = c(d, d, 2^(jmax.cv - 1))),
+                     odd = array(c(f.hat$even[, , 1], sapply(1:(2^(jmax.cv - 1) - 1), function(k) 0.5 * (f.hat$even[, , k] +
+                                 f.hat$even[, , k + 1]), simplify = "array")), dim = c(d, d, 2^(jmax.cv - 1))))
+
+      return(mean(sapply(1:2^(jmax.cv - 1), function(k) NormF(f.pred$even[, , k] - P1$even[, , k])^2 +
+                                                      NormF(f.pred$odd[, , k] - P1$odd[, , k])^2)))
+    }
+
+    ## Find minimum and rescale twice number of data points
+    alpha.opt <- gss(alpha.range, cv, tol)
+
+  } else {
+    alpha.opt <- alpha
+  }
+
+  ## Threshold full data using 'alpha.opt'
+  coeff <- (if(policy == "cv"){
+              WavTransf(P, order, jmax = jmax.cv - 1, periodic = periodic, metric = metric)
+            } else  WavTransf(P, order, jmax = jmax, periodic = periodic, metric = metric))
+  coeff.opt <- pdCART(coeff$D, alpha = alpha.opt, tree = tree, periodic = periodic)
+  f <- (if(return == "f"){
+    InvWavTransf(coeff.opt$D_w, coeff$M[[1]], order, jmax = J, periodic = periodic, metric = metric)
+  } else NULL)
+
+  return(list(f = f, D = coeff.opt$D_w, tree.weights = coeff.opt$w, alpha.opt = alpha.opt))
 }

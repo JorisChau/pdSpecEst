@@ -2,11 +2,11 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 ARMA <- function(Phi, Theta, Z, len) {
-    .Call(pdSpecEst_ARMA, Phi, Theta, Z, len)
+    .Call(`_pdSpecEst_ARMA`, Phi, Theta, Z, len)
 }
 
 kMean <- function(M, mu) {
-    .Call(pdSpecEst_kMean, M, mu)
+    .Call(`_pdSpecEst_kMean`, M, mu)
 }
 
 #' Geodesic midpoint between HPD-matrices
@@ -28,31 +28,31 @@ kMean <- function(M, mu) {
 #'
 #' @export
 Mid <- function(A, B) {
-    .Call(pdSpecEst_Mid, A, B)
+    .Call(`_pdSpecEst_Mid`, A, B)
 }
 
 solveMid <- function(B, C) {
-    .Call(pdSpecEst_solveMid, B, C)
+    .Call(`_pdSpecEst_solveMid`, B, C)
 }
 
 Sqrt <- function(M) {
-    .Call(pdSpecEst_Sqrt, M)
+    .Call(`_pdSpecEst_Sqrt`, M)
 }
 
 iSqrt <- function(M) {
-    .Call(pdSpecEst_iSqrt, M)
+    .Call(`_pdSpecEst_iSqrt`, M)
 }
 
 NormF <- function(M) {
-    .Call(pdSpecEst_NormF, M)
+    .Call(`_pdSpecEst_NormF`, M)
 }
 
 Chol <- function(M) {
-    .Call(pdSpecEst_Chol, M)
+    .Call(`_pdSpecEst_Chol`, M)
 }
 
 RiemmDist <- function(A, B) {
-    .Call(pdSpecEst_RiemmDist, A, B)
+    .Call(`_pdSpecEst_RiemmDist`, A, B)
 }
 
 #' Exponential map
@@ -80,7 +80,7 @@ RiemmDist <- function(A, B) {
 #'
 #' @export
 Expm <- function(P, H) {
-    .Call(pdSpecEst_Expm, P, H)
+    .Call(`_pdSpecEst_Expm`, P, H)
 }
 
 #' Logarithmic map
@@ -107,26 +107,26 @@ Expm <- function(P, H) {
 #'
 #' @export
 Logm <- function(P, Q) {
-    .Call(pdSpecEst_Logm, P, Q)
+    .Call(`_pdSpecEst_Logm`, P, Q)
 }
 
 ParTrans <- function(P, V, W) {
-    .Call(pdSpecEst_ParTrans, P, V, W)
+    .Call(`_pdSpecEst_ParTrans`, P, V, W)
 }
 
 E_coeff <- function(H) {
-    .Call(pdSpecEst_E_coeff, H)
+    .Call(`_pdSpecEst_E_coeff`, H)
 }
 
 T_coeff <- function(H, y) {
-    .Call(pdSpecEst_T_coeff, H, y)
+    .Call(`_pdSpecEst_T_coeff`, H, y)
 }
 
 E_coeff_inv <- function(coeff) {
-    .Call(pdSpecEst_E_coeff_inv, coeff)
+    .Call(`_pdSpecEst_E_coeff_inv`, coeff)
 }
 
 T_coeff_inv <- function(coeff, y) {
-    .Call(pdSpecEst_T_coeff_inv, coeff, y)
+    .Call(`_pdSpecEst_T_coeff_inv`, coeff, y)
 }
 

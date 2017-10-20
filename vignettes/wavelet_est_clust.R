@@ -37,7 +37,7 @@ pgram <- pdPgram(ts.sim$X)
 str(pgram)
 
 ## ------------------------------------------------------------------------
-f.hat <- pdSpecEst(pgram$P)
+f.hat <- pdSpecEst1D(pgram$P, policy = "universal")
 str(f.hat)
 
 ## ---- echo=FALSE, fig.show='hold', fig.cap='Figure: True (left) and estimated (right) spectral matrices in the frequency domain.', out.width='35%'----
@@ -65,5 +65,5 @@ Phi1 <- array(c(0.5, 0, 0, 0.1, 0, 0, 0, -0.9), dim = c(d, d, 2))
 Phi2 <- array(c(0.5, 0, 0, 0.3, 0, 0, 0, -0.9), dim = c(d, d, 2))
 pgram <- function(Phi) pdPgram(rARMA(2^10, d, Phi, Theta, Sigma)$X)$P
 P <- array(c(replicate(5, pgram(Phi1)), replicate(5, pgram(Phi2))), dim=c(d, d, 2^8, 10))
-pdSpecClust(P, K = 2, lam = 3)
+# pdSpecClust(P, K = 2, lam = 3) ## NEEDS TO BE UPDATED!
 

@@ -91,7 +91,7 @@ str(pgram)
 `pdSpecEst()` computes the HPD wavelet-denoised spectral estimator by thresholding the wavelet coefficients of an initial noisy HPD spectral estimator in the manifold wavelet domain. The components of the wavelet coefficients are thresholded based on the hard (keep-or-kill) threshold `lam`. If `lam` is unspecified, the threshold is determined data-adaptively by a twofold cross-validation procedure. 
 
 ```{r}
-f.hat <- pdSpecEst(pgram$P)
+f.hat <- pdSpecEst1D(pgram$P, policy = "universal")
 str(f.hat)
 ```
 
@@ -127,7 +127,7 @@ Phi1 <- array(c(0.5, 0, 0, 0.1, 0, 0, 0, -0.9), dim = c(d, d, 2))
 Phi2 <- array(c(0.5, 0, 0, 0.3, 0, 0, 0, -0.9), dim = c(d, d, 2))
 pgram <- function(Phi) pdPgram(rARMA(2^10, d, Phi, Theta, Sigma)$X)$P
 P <- array(c(replicate(5, pgram(Phi1)), replicate(5, pgram(Phi2))), dim=c(d, d, 2^8, 10))
-pdSpecClust(P, K = 2, lam = 3)
+# pdSpecClust(P, K = 2, lam = 3) ## NEEDS TO BE UPDATED!
 ```
 
 ## Shiny app

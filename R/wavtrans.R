@@ -37,7 +37,7 @@
 #' @references Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
 #'
 #' @export
-WavTransf <- function(P, order = 5, jmax) {
+WavTransf <- function(P, order = 5, jmax, periodic = T, metric = "Riemannian") {
 
   ## Set variables
   J <- log2(dim(P)[3])
@@ -45,20 +45,56 @@ WavTransf <- function(P, order = 5, jmax) {
     stop(paste0("Input length is non-dyadic, please change length ", dim(P)[3],
                 " to dyadic number."))
   }
-  if (!(order %in% c(1, 3, 5, 7, 9))) {
-    warning("Refinement order should be an odd integer between 1 and 9, by default set to 5")
+  if (!isTRUE(order %% 2 == 1)) {
+    warning("Refinement order should be an odd integer, by default set to 5")
     order <- 5
   }
+  metric <- match.arg(metric, c("Riemannian", "logEuclidean", "Cholesky", "rootEuclidean", "Euclidean"))
+  if (isTRUE(order > 9) & !isTRUE(metric == "Riemannian")) {
+    warning(paste0(metric ," metric: refinement order should be an odd integer <= 9, by default set to 5"))
+    order <- 5
+  }
+
   d <- dim(P)[1]
+  L <- (order - 1) / 2
+  L_round <- 2 * ceiling(L / 2)
+
+  P <- (if(metric == "logEuclidean"){
+    sapply(1:2^J, function(i) Logm(diag(d), P[, , i]), simplify = "array")
+  } else if(metric == "Cholesky"){
+    sapply(1:2^J, function(i) t(Conj(Chol(P[, , i]))), simplify = "array")
+  } else if(metric == "rootEuclidean"){
+    sapply(1:2^J, function(i) Sqrt(P[, , i]), simplify = "array")
+  } else P)
+
+  if(periodic & (order > 1)){
+    P_per <- array(if(L %% 2 == 0) {
+      c(rep(c(P, P[, , c(2^J, 2^J:2)]), times = L), P)
+    } else {
+      c(P[, , c(2^J, 2^J:2)], rep(c(P, P[, , c(2^J, 2^J:2)]), times = L))
+    }, dim = c(d, d, (2 * L + 1) * 2^J))
+  } else{
+    P_per <- P
+  }
+
   M <- list()
   for (j in J:0) {
     if (j == J) {
-      Mper <- unname(P)
+      Mper <- P_per
     } else {
-      Mper <- sapply(1:2^j, function(i) Mid(Mper[, , 2 * i - 1], Mper[, , 2 * i]),
-                     simplify = "array")
+      if(!(metric == "Riemannian")){
+        Mper <- sapply(1:(dim(Mper)[3]/2), function(i) 0.5 * (Mper[, , 2 * i - 1] +  Mper[, , 2 * i]),
+                       simplify = "array")
+      } else {
+        Mper <- sapply(1:(dim(Mper)[3]/2), function(i) Mid(Mper[, , 2 * i - 1], Mper[, , 2 * i]),
+                       simplify = "array")
+      }
     }
-    M[[j + 1]] <- array(Mper, dim = c(d, d, 2^j))
+    M[[j + 1]] <- if(periodic & (j > 0)){
+      Mper[, , L * (2^j) - L_round + 1:(2^j + 2 * L_round)]
+    } else{
+      Mper
+    }
   }
   names(M) <- paste0("M.scale", 0:J)
 
@@ -74,23 +110,28 @@ WavTransf <- function(P, order = 5, jmax) {
 
   ## Compute wavelet transform
   for (j in 0:jmax) {
-    tm1 <- Impute1D(M[[j + 1]], D = (order - 1) / 2, method = ifelse(order <= 9, "weights", "neville"))
-    iSqrt_tm1 <- sapply(1:2^(j + 1), function(l) iSqrt(tm1[, , l]), simplify = "array")
-    D[[j + 1]] <- sapply(1:2^(j + 1), function(l) 2^(-j/2) * Logm(diag(d), (iSqrt_tm1[, , l] %*%
-                                            M[[j + 2]][, , l]) %*% iSqrt_tm1[, , l]), simplify = "array")
-    tM[[j + 1]] <- tm1
+    tm1 <- Impute1D(M[[j + 1]], L, ifelse(order <= 9, "weights", "neville"), inverse = F, metric = metric)
+    tM[[j + 1]] <- tm1[, , L_round / 2 + ifelse(j > 0 | L %% 2 == 0, 0, -1) + 1:(2^j + L_round)]
+    if(!(metric == "Riemannian")){
+      D[[j + 1]] <- sapply(1:dim(tM[[j + 1]])[3], function(l) 2^(-j/2) * (M[[j + 2]][, , 2 * l] - tM[[j + 1]][, , l]),
+                           simplify = "array")
+    } else{
+      iSqrt_tm1 <- sapply(1:dim(tM[[j + 1]])[3], function(l) iSqrt(tM[[j + 1]][, , l]), simplify = "array")
+      D[[j + 1]] <- sapply(1:dim(tM[[j + 1]])[3], function(l) 2^(-j/2) * Logm(diag(d), (iSqrt_tm1[, , l] %*%
+                                                                                          M[[j + 2]][, , 2 * l]) %*% iSqrt_tm1[, , l]), simplify = "array")
+    }
     names(D)[j + 1] <- paste0("D.scale", j + 1)
   }
 
-  return(list(D = D, M = M, tM = tM))
+  return(list(D = D, M = M[1:J], tM = tM))
 }
 
 #' 2D Forward AI wavelet transform
 #'
-#' @importFrom foreach "%dopar%"
-#'
 #' @export
 WavTransf2D <- function(P, order = c(3,3), jmax, cores = NULL) {
+
+  # #' @importFrom foreach "%dopar%"
 
   ## Set variables
   J1 <- log2(dim(P)[3])
@@ -146,7 +187,7 @@ WavTransf2D <- function(P, order = c(3,3), jmax, cores = NULL) {
   }
 
   ## Compute 2D wavelet transform
-  pb <- tcltk::tkProgressBar(max = 100)
+  # pb <- tcltk::tkProgressBar(max = 100)
   for (j in 0:jmax) {
 
     if(is.na(grid_j[J + 1 - j, 1])) {
@@ -154,35 +195,35 @@ WavTransf2D <- function(P, order = c(3,3), jmax, cores = NULL) {
                             (order[2] - 1) / 2), dim = c(d, d, 1, 2^(j + 1)))
       iSqrt_tm1 <- sapply(1:2^(j + 1), function(i) iSqrt(tm1[, , 1, i]), simplify = "array")
       D[[j + 1]] <- array(c(sapply(1:2^(j + 1), function(i) ifelse(any(dim(M[[min(length(M), j + 2)]]) == 1),
-                            1/(J0_2D - j) * 2^(-j/2), 2^(-j)) * Logm(diag(d), (iSqrt_tm1[, , i] %*% M[[j + 2]][, , 1, i]) %*%
-                            iSqrt_tm1[, , i]))), dim = c(d, d, 1, 2^(j + 1)))
+                                                                   1/(J0_2D - j) * 2^(-j/2), 2^(-j)) * Logm(diag(d), (iSqrt_tm1[, , i] %*% M[[j + 2]][, , 1, i]) %*%
+                                                                                                              iSqrt_tm1[, , i]))), dim = c(d, d, 1, 2^(j + 1)))
     } else if(is.na(grid_j[J + 1 - j, 2])) {
       tm1 <- array(Impute1D(array(M[[j + 1]][, , , 1], dim = c(d, d, 2^j)),
                             (order[1] - 1) / 2), dim = c(d, d, 2^(j + 1), 1))
       iSqrt_tm1 <- sapply(1:2^(j + 1), function(i) iSqrt(tm1[, , i, 1]), simplify = "array")
       D[[j + 1]] <- array(c(sapply(1:2^(j + 1), function(i) ifelse(any(dim(M[[min(length(M), j + 2)]]) == 1),
-                            1/(J0_2D - j) * 2^(-j/2), 2^(-j)) * Logm(diag(d), (iSqrt_tm1[, , i] %*% M[[j + 2]][, , i, 1]) %*%
-                            iSqrt_tm1[, , i]))), dim = c(d, d, 2^(j + 1), 1))
+                                                                   1/(J0_2D - j) * 2^(-j/2), 2^(-j)) * Logm(diag(d), (iSqrt_tm1[, , i] %*% M[[j + 2]][, , i, 1]) %*%
+                                                                                                              iSqrt_tm1[, , i]))), dim = c(d, d, 2^(j + 1), 1))
     } else{
-      if(is.null(cores)){
+      # if(is.null(cores)){
         tm1 <- Impute2D(M[[j + 1]], (order - 1) / 2)
-      } else{
-        tm1 <- Impute2D_multicore(M[[j + 1]], (order - 1) / 2, cores)
-      }
+      # } else{
+      #   tm1 <- Impute2D_multicore(M[[j + 1]], (order - 1) / 2, cores)
+      # }
       grid <- expand.grid(1:dim(tm1)[3], 1:dim(tm1)[4])
       iSqrt_tm1 <- array(c(mapply(function(i1, i2) iSqrt(tm1[, , i1, i2]), grid$Var1, grid$Var2, SIMPLIFY = "array")),
                          dim = c(d, d, dim(tm1)[3], dim(tm1)[4]))
       D[[j + 1]] <- array(c(mapply(function(i1, i2) 2^(-j) * Logm(diag(d), (iSqrt_tm1[, , i1, i2] %*%
-                            M[[j + 2]][, , i1, i2]) %*% iSqrt_tm1[, , i1, i2]),
-                            grid$Var1, grid$Var2, SIMPLIFY = "array")), dim = c(d, d, dim(tm1)[3], dim(tm1)[4]))
+                                                                              M[[j + 2]][, , i1, i2]) %*% iSqrt_tm1[, , i1, i2]),
+                                   grid$Var1, grid$Var2, SIMPLIFY = "array")), dim = c(d, d, dim(tm1)[3], dim(tm1)[4]))
     }
     tM[[j + 1]] <- tm1
     names(D)[j + 1] <- paste0("D.scale", j + 1)
 
-    tcltk::setTkProgressBar(pb, value=round(j/jmax*100), label=paste0("Computed up to scale ",
-                                      j + 1, ", (", round(sum(4^(0:j))/sum(4^(0:jmax))*100),"% done)"))
+    # tcltk::setTkProgressBar(pb, value=round(j/jmax*100), label=paste0("Computed up to scale ",
+                                                                      # j + 1, ", (", round(sum(4^(0:j))/sum(4^(0:jmax))*100),"% done)"))
   }
-  close(pb)
+  # close(pb)
 
   return(list(M = M, D = D, tM = tM))
 }
