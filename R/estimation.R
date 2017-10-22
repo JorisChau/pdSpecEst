@@ -291,7 +291,7 @@ pdSpecEst1D <- function(P, order = 5, policy = c("universal", "cv"), metric = "R
   periodic = isTRUE(periodic)
   J = log2(dim(P)[3])
   jmax.cv = (if(is.null(dots$jmax.cv)) J - 3 else dots$jmax.cv)
-  jmax = (if(is.null(dots$jmax)) J - 1 else dots$jmax)
+  jmax = (if(is.null(dots$jmax)) J - 3 else dots$jmax)
   d = dim(P)[1]
   B = (if(is.null(dots$B)) d else dots$B)
 
@@ -356,7 +356,7 @@ pdSpecEst1D <- function(P, order = 5, policy = c("universal", "cv"), metric = "R
   ## Threshold full data using 'alpha.opt'
   coeff <- (if(policy == "cv"){
               WavTransf(P, order, jmax = jmax.cv - 1, periodic = periodic, metric = metric)
-            } else  WavTransf(P, order, jmax = jmax, periodic = periodic, metric = metric))
+            } else  WavTransf(P, order, jmax = jmax - 1, periodic = periodic, metric = metric))
   coeff.opt <- pdCART(coeff$D, alpha = alpha.opt, tree = tree, periodic = periodic)
   f <- (if(return == "f"){
     InvWavTransf(coeff.opt$D_w, coeff$M[[1]], order, jmax = J, periodic = periodic, metric = metric)

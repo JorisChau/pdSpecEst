@@ -4,8 +4,8 @@
 \alias{pdSplineReg}
 \title{HPD cubic smoothing spline regression}
 \usage{
-pdSplineReg(P, f.hat0, lam, initial_step = 1, max.iter = 100, eps = 0.001,
-  ...)
+pdSplineReg(P, f.hat0, lam, K, initial_step = 1, max.iter = 100,
+  eps = 0.001, ...)
 }
 \description{
 HPD cubic smoothing spline regression
