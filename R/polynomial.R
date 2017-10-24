@@ -22,18 +22,14 @@ pdPolynomial <- function(p0, v0, delta.t=0.01, steps = 100) {
 
 #' HPD cubic smoothing spline regression
 #'
+#'
 #' @export
 pdSplineReg <- function(P, f.hat0, lam, K, initial_step = 1, max.iter = 100, eps = 1E-3, ...) {
 
   dots <- list(...)
-  tau <- dots$tau
-  if (is.null(tau)) {
-    tau <- 0.5
-  }
-  sigma <- dots$sigma
-  if (is.null(sigma)) {
-    sigma <- 0.5
-  }
+  tau = (if(is.null(dots$tau)) 0.5 else dots$tau)
+  sigma = (if(is.null(dots$sigma)) 0.5 else dots$sigma)
+  max.iter_a = (if(is.null(dots$max.iter_a)) 100 else dots$max.iter_a)
 
   d <- dim(P)[1]
   n <- dim(P)[3]
@@ -91,9 +87,9 @@ pdSplineReg <- function(P, f.hat0, lam, K, initial_step = 1, max.iter = 100, eps
   }
 
   E <- function(gamma){
-    gamma.isqrt <- sapply(1:K, function(k) iSqrt(gamma[, , k]), simplify = "array")
+    gamma.isqrt <- sapply(1:K, function(k) pdSpecEst:::iSqrt(gamma[, , k]), simplify = "array")
     return((0.5 * sum(sapply(1:n, function(i) pdDist(P[,,i], gamma[,,which.min(abs(K.seq - i))])^2)) +
-              delta.t^3 * lam / 2 * sum(sapply(2:(K-1), function(k) NormF(ast(gamma.isqrt[, , k],
+              delta.t^3 * lam / 2 * sum(sapply(2:(K-1), function(k) pdSpecEst:::NormF(ast(gamma.isqrt[, , k],
                 Logm(gamma[, , k], gamma[, , k + 1]) + Logm(gamma[, , k], gamma[, , k - 1])))^2))))
   }
 
@@ -101,12 +97,14 @@ pdSplineReg <- function(P, f.hat0, lam, K, initial_step = 1, max.iter = 100, eps
     alpha <- initial_step
     t <- mean(sapply(1:K, function(k) sigma * pdSpecEst:::NormF(ast(pdSpecEst:::iSqrt(gamma[,,k]), p[,,k]))^2))
     E1 <- NULL
-    while(is.null(E1) | isTRUE((E0 - E1) < (alpha * t))){
+    iter_a <- 0
+    while(isTRUE(iter_a < max.iter_a) & isTRUE(is.null(E1) | isTRUE((E0 - E1) < (alpha * t)))){
       E1 <- tryCatch({ E(sapply(1:dim(p)[3], function(i) Expm(gamma[, , i], alpha * p[, , i]),
                  simplify = "array")) }, error = function(e) return(NULL))
       alpha <- tau * alpha
+      iter_a <- iter_a + 1
     }
-    return(alpha)
+    return(c(alpha, iter_a))
   }
 
   p <- -grad_E(f.hat0[, , K.seq])
@@ -117,17 +115,21 @@ pdSplineReg <- function(P, f.hat0, lam, K, initial_step = 1, max.iter = 100, eps
 
   while(isTRUE(abs(cost_diff) > eps) & isTRUE(cost_diff < 0) & isTRUE(iter < max.iter)){
     alpha <- backtrack(p, gamma_0, tail(cost, 1))
-    gamma_1 <- sapply(1:K, function(k) Expm(gamma_0[, , k], alpha * p[, , k]),
+    if(alpha[2] == max.iter_a){
+      message("Backtracking line search not converging, increase 'max.iter_a' or choose smaller 'initial_step'")
+      break
+    }
+    gamma_1 <- sapply(1:K, function(k) Expm(gamma_0[, , k], alpha[1] * p[, , k]),
                       simplify = "array")
     grad_1 <- grad_E(gamma_1)
-    beta_1 <- sapply(1:K, function(k) pdSpecEst:::NormF(grad_1[, , k])^2/pdSpecEst:::NormF(p[, , k])^2)
+    beta_1 <- sapply(1:K, function(k) NormF(grad_1[, , k])^2/NormF(p[, , k])^2)
     p <- -grad_1 + array(rep(beta_1, each = d^2), dim = c(d, d, K)) * p
     cost <- c(cost, E(gamma_1))
     cost_diff <- tail(cost, 1) - tail(cost, 2)[1]
     gamma_0 <- gamma_1
     iter <- iter + 1
     if(iter == max.iter){
-      message("Reached maximum number of iterations")
+      message("Reached maximum number of iterations in gradient descent")
     }
   }
 

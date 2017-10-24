@@ -4,7 +4,7 @@
 \alias{rExamples}
 \title{Test functions}
 \usage{
-rExamples(n, example = c("heaviSine", "bumps"), ...)
+rExamples(n, example = c("heaviSine", "bumps", "sine1", "sine2"), ...)
 }
 \description{
 Test functions

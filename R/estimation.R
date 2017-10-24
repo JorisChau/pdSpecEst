@@ -362,5 +362,5 @@ pdSpecEst1D <- function(P, order = 5, policy = c("universal", "cv"), metric = "R
     InvWavTransf(coeff.opt$D_w, coeff$M[[1]], order, jmax = J, periodic = periodic, metric = metric)
   } else NULL)
 
-  return(list(f = f, D = coeff.opt$D_w, tree.weights = coeff.opt$w, alpha.opt = alpha.opt))
+  return(list(f = f, D = coeff.opt$D_w, M0 = coeff$M[[1]], tree.weights = coeff.opt$w, alpha.opt = alpha.opt))
 }

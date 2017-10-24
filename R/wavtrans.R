@@ -36,8 +36,10 @@
 #' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
 #' @references Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
 #'
+#' @importFrom utils txtProgressBar
+#'
 #' @export
-WavTransf <- function(P, order = 5, jmax, periodic = T, metric = "Riemannian") {
+WavTransf <- function(P, order = 5, jmax, periodic = T, metric = "Riemannian", progress = F) {
 
   ## Set variables
   J <- log2(dim(P)[3])
@@ -109,6 +111,9 @@ WavTransf <- function(P, order = 5, jmax, periodic = T, metric = "Riemannian") {
   }
 
   ## Compute wavelet transform
+  if(progress){
+    pb <- utils::txtProgressBar(1, 100, style = 3)
+  }
   for (j in 0:jmax) {
     tm1 <- Impute1D(M[[j + 1]], L, ifelse(order <= 9, "weights", "neville"), inverse = F, metric = metric)
     tM[[j + 1]] <- tm1[, , L_round / 2 + ifelse(j > 0 | L %% 2 == 0, 0, -1) + 1:(2^j + L_round)]
@@ -121,7 +126,9 @@ WavTransf <- function(P, order = 5, jmax, periodic = T, metric = "Riemannian") {
                                                                                           M[[j + 2]][, , 2 * l]) %*% iSqrt_tm1[, , l]), simplify = "array")
     }
     names(D)[j + 1] <- paste0("D.scale", j + 1)
+    if(progress) utils::setTxtProgressBar(pb, round(100 * (j + 1) / (jmax + 1)))
   }
+  if(progress) close(pb)
 
   return(list(D = D, M = M[1:J], tM = tM))
 }

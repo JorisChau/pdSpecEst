@@ -48,7 +48,6 @@
 #' ts.plot(ts.sim$X) # plot generated time series traces
 #' pgram <- pdPgram(ts.sim$X)
 #'
-#' @importFrom astsa mvspec
 #' @importFrom multitaper dpss
 #' @export
 pdPgram <- function(X, B, method = c("multitaper", "bartlett"), bias.corr = T) {

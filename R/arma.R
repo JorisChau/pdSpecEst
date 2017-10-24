@@ -89,9 +89,9 @@ rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
 #' Test functions
 #'
 #' @export
-rExamples <- function(n, example = c("heaviSine", "bumps"), ...){
+rExamples <- function(n, example = c("heaviSine", "bumps", "sine1", "sine2"), ...){
 
-  example <- match.arg(example, c("heaviSine", "bumps"))
+  example <- match.arg(example, c("heaviSine", "bumps", "sine1", "sine2"))
   if(n %% 2 != 0){
     warning("'n' is odd and cannot be divided by 2, instead 'n' is replaced by 'n + 1'")
     n <- n + 1
@@ -108,19 +108,24 @@ rExamples <- function(n, example = c("heaviSine", "bumps"), ...){
   }
   bias.corr <- dots$bias.corr
   if (is.null(bias.corr)) {
-    bias.corr <- T
+    bias.corr <- F
   }
 
   x <- seq(0, 1, length.out = n / 2)
 
-  if(example == "heaviSine"){
+  if(example %in% c("heaviSine", "sine1", "sine2")){
     P0 <- sapply(x, function(t) E_coeff_inv(sin(HeaviSine[2, ] * pi * t + HeaviSine[1, ])), simplify = "array")
     P1 <- sapply(x, function(t) E_coeff_inv(sin(HeaviSine[4, ] * pi * t + HeaviSine[3, ])), simplify = "array")
-    P <- sapply(1:(n/2), function(i) (if(i <= n / 4) Expm(diag(2, 3), P0[, , i]) else 3 * Expm(diag(2, 3), P1[, , i])),
-                simplify = "array")
+    P <- (if(example == "heaviSine"){
+      sapply(1:(n/2), function(i) (if(i <= n / 4) Expm(diag(2, 3), P0[, , i]) else 3 * Expm(diag(2, 3), P1[, , i])),
+             simplify = "array")
+    } else{
+      sapply(1:(n/2), function(i) Expm(diag(2, 3), (if(example == "sine1") P0[, , i] else P1[, , i])),
+             simplify = "array")
+    })
   } else if(example == "bumps"){
     P0 <- sapply(x, function(t)  (1 - 0.4 * t) * E_coeff_inv(sqrt(t * (1 - t) + 1) *
-                                  sin(pi/(0.4 * t + 0.1)) * (1 + Bumps)), simplify = "array")
+                                                               sin(pi/(0.4 * t + 0.1)) * (1 + Bumps)), simplify = "array")
     P <- sapply(1:(n/2), function(i) Expm(diag(3), P0[,,i]), simplify = "array")
   }
 

@@ -4,7 +4,8 @@
 \alias{WavTransf}
 \title{Forward AI wavelet transform}
 \usage{
-WavTransf(P, order = 5, jmax, periodic = T, metric = "Riemannian")
+WavTransf(P, order = 5, jmax, periodic = T, metric = "Riemannian",
+  progress = F)
 }
 \arguments{
 \item{P}{a (\eqn{d,d,m})-dimensional array of Hermitian PD matrices, with \eqn{m = 2^J} for some \eqn{J > 0}.}

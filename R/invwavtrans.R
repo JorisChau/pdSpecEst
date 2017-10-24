@@ -36,10 +36,9 @@
 InvWavTransf <- function(D, M0, order = 5, jmax, periodic = T, metric = "Riemannian", ...) {
 
   dots <- list(...)
-  return_val <- dots$return_val
-  if (is.null(return_val)) {
-    return_val <- "manifold"
-  }
+  return_val <- (if(is.null(dots$return_val)) "manifold" else dots$return_val)
+  progress <- (if(is.null(dots$progressbar)) T else F)
+
   if (!(order %% 2 == 1)) {
     warning("Refinement order should be an odd integer, by default set to 5")
     order <- 5
@@ -60,6 +59,9 @@ InvWavTransf <- function(D, M0, order = 5, jmax, periodic = T, metric = "Riemann
   }
   m1 <- M0
 
+  if(progress){
+    pb <- utils::txtProgressBar(1, 100, style = 3)
+  }
   for (j in 0:(J - 1)) {
     tm1 <- Impute1D(m1, L, method = ifelse(order <= 9, "weights", "neville"), metric = metric)
     tm1 <- tm1[, , ifelse(j > 0, L_round, 2 * floor(L / 2)) + 1:(2^(j + 1) + 2 * L_round)]
@@ -95,7 +97,10 @@ InvWavTransf <- function(D, M0, order = 5, jmax, periodic = T, metric = "Riemann
           ifelse((j > 0) | (L %% 2  == 0), 0, -1)] - m2[, , 2 * i], simplify = "array")
     }
     m1 <- m2
+
+    if(progress) utils::setTxtProgressBar(pb, round(100 * (j + 1) / J))
   }
+  if(progress) close(pb)
 
   if(return_val == "manifold"){
     m1 <- (if(metric == "logEuclidean"){
