@@ -1,4 +1,4 @@
-Impute_man <- function(M_j0, D) {
+Impute_man <- function(M_j0, D, Nw) {
   .Deprecated("pdSpecEst:::Impute1D")
   d <- dim(M_j0)[1]
   j0 <- log(dim(M_j0)[3], 2)

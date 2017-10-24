@@ -49,6 +49,10 @@
 #' pgram <- pdPgram(ts.sim$X)
 #'
 #' @importFrom multitaper dpss
+#' @importFrom stats mvfft
+#' @importFrom stats quantile
+#' @importFrom utils head
+#'
 #' @export
 pdPgram <- function(X, B, method = c("multitaper", "bartlett"), bias.corr = T) {
 

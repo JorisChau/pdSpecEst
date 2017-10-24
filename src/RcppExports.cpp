@@ -6,6 +6,32 @@
 
 using namespace Rcpp;
 
+// ARMA
+arma::mat ARMA(arma::cube Phi, arma::cube Theta, arma::mat Z, int len);
+RcppExport SEXP _pdSpecEst_ARMA(SEXP PhiSEXP, SEXP ThetaSEXP, SEXP ZSEXP, SEXP lenSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cube >::type Phi(PhiSEXP);
+    Rcpp::traits::input_parameter< arma::cube >::type Theta(ThetaSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< int >::type len(lenSEXP);
+    rcpp_result_gen = Rcpp::wrap(ARMA(Phi, Theta, Z, len));
+    return rcpp_result_gen;
+END_RCPP
+}
+// kMean
+arma::cx_mat kMean(arma::cx_mat M, arma::vec mu);
+RcppExport SEXP _pdSpecEst_kMean(SEXP MSEXP, SEXP muSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cx_mat >::type M(MSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type mu(muSEXP);
+    rcpp_result_gen = Rcpp::wrap(kMean(M, mu));
+    return rcpp_result_gen;
+END_RCPP
+}
 // Mid
 arma::cx_mat Mid(arma::cx_mat A, arma::cx_mat B);
 RcppExport SEXP _pdSpecEst_Mid(SEXP ASEXP, SEXP BSEXP) {
@@ -169,29 +195,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// ARMA
-arma::mat ARMA(arma::cube Phi, arma::cube Theta, arma::mat Z, int len);
-RcppExport SEXP _pdSpecEst_ARMA(SEXP PhiSEXP, SEXP ThetaSEXP, SEXP ZSEXP, SEXP lenSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cube >::type Phi(PhiSEXP);
-    Rcpp::traits::input_parameter< arma::cube >::type Theta(ThetaSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Z(ZSEXP);
-    Rcpp::traits::input_parameter< int >::type len(lenSEXP);
-    rcpp_result_gen = Rcpp::wrap(ARMA(Phi, Theta, Z, len));
-    return rcpp_result_gen;
-END_RCPP
-}
-// kMean
-arma::cx_mat kMean(arma::cx_mat M, arma::vec mu);
-RcppExport SEXP _pdSpecEst_kMean(SEXP MSEXP, SEXP muSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cx_mat >::type M(MSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type mu(muSEXP);
-    rcpp_result_gen = Rcpp::wrap(kMean(M, mu));
-    return rcpp_result_gen;
-END_RCPP
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_pdSpecEst_ARMA", (DL_FUNC) &_pdSpecEst_ARMA, 4},
+    {"_pdSpecEst_kMean", (DL_FUNC) &_pdSpecEst_kMean, 2},
+    {"_pdSpecEst_Mid", (DL_FUNC) &_pdSpecEst_Mid, 2},
+    {"_pdSpecEst_solveMid", (DL_FUNC) &_pdSpecEst_solveMid, 2},
+    {"_pdSpecEst_Sqrt", (DL_FUNC) &_pdSpecEst_Sqrt, 1},
+    {"_pdSpecEst_iSqrt", (DL_FUNC) &_pdSpecEst_iSqrt, 1},
+    {"_pdSpecEst_NormF", (DL_FUNC) &_pdSpecEst_NormF, 1},
+    {"_pdSpecEst_Chol", (DL_FUNC) &_pdSpecEst_Chol, 1},
+    {"_pdSpecEst_RiemmDist", (DL_FUNC) &_pdSpecEst_RiemmDist, 2},
+    {"_pdSpecEst_Expm", (DL_FUNC) &_pdSpecEst_Expm, 2},
+    {"_pdSpecEst_Logm", (DL_FUNC) &_pdSpecEst_Logm, 2},
+    {"_pdSpecEst_ParTrans", (DL_FUNC) &_pdSpecEst_ParTrans, 3},
+    {"_pdSpecEst_E_coeff", (DL_FUNC) &_pdSpecEst_E_coeff, 1},
+    {"_pdSpecEst_T_coeff", (DL_FUNC) &_pdSpecEst_T_coeff, 2},
+    {"_pdSpecEst_E_coeff_inv", (DL_FUNC) &_pdSpecEst_E_coeff_inv, 1},
+    {"_pdSpecEst_T_coeff_inv", (DL_FUNC) &_pdSpecEst_T_coeff_inv, 2},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_pdSpecEst(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }
