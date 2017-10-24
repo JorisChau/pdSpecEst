@@ -5,41 +5,41 @@
 
 #include <R_ext/Rdynload.h>
 
-SEXP pdSpecEst_ARMA(SEXP PhiSEXP, SEXP ThetaSEXP, SEXP ZSEXP, SEXP lenSEXP);
-SEXP pdSpecEst_kMean(SEXP MSEXP, SEXP muSEXP);
-SEXP pdSpecEst_Mid(SEXP ASEXP, SEXP BSEXP);
-SEXP pdSpecEst_solveMid(SEXP BSEXP, SEXP CSEXP);
-SEXP pdSpecEst_Sqrt(SEXP MSEXP);
-SEXP pdSpecEst_iSqrt(SEXP MSEXP);
-SEXP pdSpecEst_NormF(SEXP MSEXP);
-SEXP pdSpecEst_Chol(SEXP MSEXP);
-SEXP pdSpecEst_RiemmDist(SEXP ASEXP, SEXP BSEXP);
-SEXP pdSpecEst_Expm(SEXP PSEXP, SEXP HSEXP);
-SEXP pdSpecEst_Logm(SEXP PSEXP, SEXP QSEXP);
-SEXP pdSpecEst_ParTrans(SEXP PSEXP, SEXP VSEXP, SEXP WSEXP);
-SEXP pdSpecEst_E_coeff(SEXP HSEXP);
-SEXP pdSpecEst_T_coeff(SEXP HSEXP, SEXP ySEXP);
-SEXP pdSpecEst_E_coeff_inv(SEXP coeffSEXP);
-SEXP pdSpecEst_T_coeff_inv(SEXP coeffSEXP, SEXP ySEXP);
+SEXP _pdSpecEst_ARMA(SEXP PhiSEXP, SEXP ThetaSEXP, SEXP ZSEXP, SEXP lenSEXP);
+SEXP _pdSpecEst_kMean(SEXP MSEXP, SEXP muSEXP);
+SEXP _pdSpecEst_Mid(SEXP ASEXP, SEXP BSEXP);
+SEXP _pdSpecEst_solveMid(SEXP BSEXP, SEXP CSEXP);
+SEXP _pdSpecEst_Sqrt(SEXP MSEXP);
+SEXP _pdSpecEst_iSqrt(SEXP MSEXP);
+SEXP _pdSpecEst_NormF(SEXP MSEXP);
+SEXP _pdSpecEst_Chol(SEXP MSEXP);
+SEXP _pdSpecEst_RiemmDist(SEXP ASEXP, SEXP BSEXP);
+SEXP _pdSpecEst_Expm(SEXP PSEXP, SEXP HSEXP);
+SEXP _pdSpecEst_Logm(SEXP PSEXP, SEXP QSEXP);
+SEXP _pdSpecEst_ParTrans(SEXP PSEXP, SEXP VSEXP, SEXP WSEXP);
+SEXP _pdSpecEst_E_coeff(SEXP HSEXP);
+SEXP _pdSpecEst_T_coeff(SEXP HSEXP, SEXP ySEXP);
+SEXP _pdSpecEst_E_coeff_inv(SEXP coeffSEXP);
+SEXP _pdSpecEst_T_coeff_inv(SEXP coeffSEXP, SEXP ySEXP);
 void R_init_pdSpecEst(DllInfo *dll);
 
 R_CallMethodDef callMethods[]  = {
-  {"pdSpecEst_ARMA", (DL_FUNC) &pdSpecEst_ARMA, 4},
-  {"pdSpecEst_kMean", (DL_FUNC) &pdSpecEst_kMean, 2},
-  {"pdSpecEst_Mid", (DL_FUNC) &pdSpecEst_Mid, 2},
-  {"pdSpecEst_solveMid", (DL_FUNC) &pdSpecEst_solveMid, 2},
-  {"pdSpecEst_Sqrt", (DL_FUNC) &pdSpecEst_Sqrt, 1},
-  {"pdSpecEst_iSqrt", (DL_FUNC) &pdSpecEst_iSqrt, 1},
-  {"pdSpecEst_NormF", (DL_FUNC) &pdSpecEst_NormF, 1},
-  {"pdSpecEst_Chol", (DL_FUNC) &pdSpecEst_Chol, 1},
-  {"pdSpecEst_RiemmDist", (DL_FUNC) &pdSpecEst_RiemmDist, 2},
-  {"pdSpecEst_Expm", (DL_FUNC) &pdSpecEst_Expm, 2},
-  {"pdSpecEst_Logm", (DL_FUNC) &pdSpecEst_Logm, 2},
-  {"pdSpecEst_ParTrans", (DL_FUNC) &pdSpecEst_ParTrans, 3},
-  {"pdSpecEst_E_coeff", (DL_FUNC) &pdSpecEst_E_coeff, 1},
-  {"pdSpecEst_T_coeff", (DL_FUNC) &pdSpecEst_T_coeff, 2},
-  {"pdSpecEst_E_coeff_inv", (DL_FUNC) &pdSpecEst_E_coeff_inv, 1},
-  {"pdSpecEst_T_coeff_inv", (DL_FUNC) &pdSpecEst_T_coeff_inv, 2},
+  {"_pdSpecEst_ARMA", (DL_FUNC) &_pdSpecEst_ARMA, 4},
+  {"_pdSpecEst_kMean", (DL_FUNC) &_pdSpecEst_kMean, 2},
+  {"_pdSpecEst_Mid", (DL_FUNC) &_pdSpecEst_Mid, 2},
+  {"_pdSpecEst_solveMid", (DL_FUNC) &_pdSpecEst_solveMid, 2},
+  {"_pdSpecEst_Sqrt", (DL_FUNC) &_pdSpecEst_Sqrt, 1},
+  {"_pdSpecEst_iSqrt", (DL_FUNC) &_pdSpecEst_iSqrt, 1},
+  {"_pdSpecEst_NormF", (DL_FUNC) &_pdSpecEst_NormF, 1},
+  {"_pdSpecEst_Chol", (DL_FUNC) &_pdSpecEst_Chol, 1},
+  {"_pdSpecEst_RiemmDist", (DL_FUNC) &_pdSpecEst_RiemmDist, 2},
+  {"_pdSpecEst_Expm", (DL_FUNC) &_pdSpecEst_Expm, 2},
+  {"_pdSpecEst_Logm", (DL_FUNC) &_pdSpecEst_Logm, 2},
+  {"_pdSpecEst_ParTrans", (DL_FUNC) &_pdSpecEst_ParTrans, 3},
+  {"_pdSpecEst_E_coeff", (DL_FUNC) &_pdSpecEst_E_coeff, 1},
+  {"_pdSpecEst_T_coeff", (DL_FUNC) &_pdSpecEst_T_coeff, 2},
+  {"_pdSpecEst_E_coeff_inv", (DL_FUNC) &_pdSpecEst_E_coeff_inv, 1},
+  {"_pdSpecEst_T_coeff_inv", (DL_FUNC) &_pdSpecEst_T_coeff_inv, 2},
   {"R_init_pdSpecEst", (DL_FUNC) &R_init_pdSpecEst, 1},
   {NULL, NULL, 0}
 };
