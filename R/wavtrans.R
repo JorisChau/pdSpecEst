@@ -126,10 +126,13 @@ WavTransf <- function(P, order = 5, jmax, periodic = T, metric = "Riemannian", p
                                                                                           M[[j + 2]][, , 2 * l]) %*% iSqrt_tm1[, , l]), simplify = "array")
     }
     names(D)[j + 1] <- paste0("D.scale", j + 1)
-    if(progress) utils::setTxtProgressBar(pb, round(100 * (j + 1) / (jmax + 1)))
+    if(progress){
+      utils::setTxtProgressBar(pb, round(100 * (j + 1) / (jmax + 1)))
+    }
   }
-  if(progress) close(pb)
-
+  if(progress){
+    close(pb)
+  }
   return(list(D = D, M = M[1:J], tM = tM))
 }
 

@@ -37,7 +37,7 @@ InvWavTransf <- function(D, M0, order = 5, jmax, periodic = T, metric = "Riemann
 
   dots <- list(...)
   return_val <- (if(is.null(dots$return_val)) "manifold" else dots$return_val)
-  progress <- (if(is.null(dots$progressbar)) T else F)
+  progress <- (if(is.null(dots$progress)) F else dots$progress)
 
   if (!(order %% 2 == 1)) {
     warning("Refinement order should be an odd integer, by default set to 5")
@@ -98,10 +98,13 @@ InvWavTransf <- function(D, M0, order = 5, jmax, periodic = T, metric = "Riemann
     }
     m1 <- m2
 
-    if(progress) utils::setTxtProgressBar(pb, round(100 * (j + 1) / J))
+    if(progress){
+      utils::setTxtProgressBar(pb, round(100 * (j + 1) / J))
+    }
   }
-  if(progress) close(pb)
-
+  if(progress){
+    close(pb)
+  }
   if(return_val == "manifold"){
     m1 <- (if(metric == "logEuclidean"){
       sapply(1:dim(m1)[3], function(i) Expm(diag(d), m1[, , i]), simplify = "array")

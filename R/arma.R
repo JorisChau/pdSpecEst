@@ -37,6 +37,7 @@
 #' @useDynLib pdSpecEst, .registration = TRUE
 #' @importFrom Rcpp evalCpp
 #' @importFrom stats rnorm
+#'
 #' @export
 rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
 
@@ -89,9 +90,9 @@ rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
 #' Test functions
 #'
 #' @export
-rExamples <- function(n, example = c("heaviSine", "bumps", "sine1", "sine2"), ...){
+rExamples <- function(n, example = c("heaviSine", "bumps", "cat", "sine1", "sine2"), ...){
 
-  example <- match.arg(example, c("heaviSine", "bumps", "sine1", "sine2"))
+  example <- match.arg(example, c("heaviSine", "bumps", "cat", "sine1", "sine2"))
   if(n %% 2 != 0){
     warning("'n' is odd and cannot be divided by 2, instead 'n' is replaced by 'n + 1'")
     n <- n + 1
@@ -110,22 +111,37 @@ rExamples <- function(n, example = c("heaviSine", "bumps", "sine1", "sine2"), ..
   if (is.null(bias.corr)) {
     bias.corr <- F
   }
-
+  v0 <- (if(is.null(dots$v0)) NULL else dots$v0)
+  v1 <- (if(is.null(dots$v1)) NULL else dots$v1)
   x <- seq(0, 1, length.out = n / 2)
 
   if(example %in% c("heaviSine", "sine1", "sine2")){
+
     P0 <- sapply(x, function(t) E_coeff_inv(sin(HeaviSine[2, ] * pi * t + HeaviSine[1, ])), simplify = "array")
     P1 <- sapply(x, function(t) E_coeff_inv(sin(HeaviSine[4, ] * pi * t + HeaviSine[3, ])), simplify = "array")
-    P <- (if(example == "heaviSine"){
-      sapply(1:(n/2), function(i) (if(i <= n / 4) Expm(diag(2, 3), P0[, , i]) else 3 * Expm(diag(2, 3), P1[, , i])),
-             simplify = "array")
+    P2 <- sapply(x, function(t) E_coeff_inv(sin(v0[5, ] * pi * t + v0[6,])), simplify = "array")
+
+    if(example == "heaviSine"){
+      if(!is.null(v0)){
+        P <- sapply(1:(n/2), function(i) (if(i <= n/4) 3 * Expm(diag(2, 3), P0[, , i]) else if(i <= 3/8 * n){
+                           Expm(diag(2, 3), P1[, , i]) }else 2 * Expm(diag(2, 3), P2[, , i])), simplify = "array")
+      } else {
+        P <- sapply(1:(n/2), function(i) (if(i <= n / 4) Expm(diag(2, 3), P0[, , i]) else 3 * Expm(diag(2, 3), P1[, , i])),
+              simplify = "array")
+      }
     } else{
-      sapply(1:(n/2), function(i) Expm(diag(2, 3), (if(example == "sine1") P0[, , i] else P1[, , i])),
+      P <- sapply(1:(n/2), function(i) 3 * Expm(diag(2, 3), (if(example == "sine1") P0[, , i] else P1[, , i])),
              simplify = "array")
-    })
+    }
+  } else if(example == "cat"){
+    v1 <- (if(is.null(v1)) c(2.0000000, 0.4961828, -0.8595843, -0.8290600, 2.5000000, -1.3037704, -1.4214866,
+            1.7449149, 3.0000000) else v1)
+    f <- cat_fun[round(seq(from = 1, to = 2^10, length = n/2))]
+    P0 <- sapply(1:9, function(i) if(i %in% c(1,5,9)) v1[i] * f + 0.1 else v1[i] * f)
+    P <- sapply(1:(n/2), function(i) t(Conj(E_coeff_inv(P0[i,]))) %*% E_coeff_inv(P0[i,]), simplify = "array")
   } else if(example == "bumps"){
     P0 <- sapply(x, function(t)  (1 - 0.4 * t) * E_coeff_inv(sqrt(t * (1 - t) + 1) *
-                                                               sin(pi/(0.4 * t + 0.1)) * (1 + Bumps)), simplify = "array")
+                                    sin(pi/(0.4 * t + 0.1)) * (1 + Bumps)), simplify = "array")
     P <- sapply(1:(n/2), function(i) Expm(diag(3), P0[,,i]), simplify = "array")
   }
 

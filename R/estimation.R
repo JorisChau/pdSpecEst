@@ -294,6 +294,7 @@ pdSpecEst1D <- function(P, order = 5, policy = c("universal", "cv"), metric = "R
   jmax = (if(is.null(dots$jmax)) J - 3 else dots$jmax)
   d = dim(P)[1]
   B = (if(is.null(dots$B)) d else dots$B)
+  progress = (if(is.null(dots$progress)) F else dots$progress)
 
   # Manifold bias-correction
   P = (if(metric == "Riemannian" | metric == "logEuclidean") {
@@ -324,8 +325,8 @@ pdSpecEst1D <- function(P, order = 5, policy = c("universal", "cv"), metric = "R
       }
     }
 
-    coeff.odd <- WavTransf(P1$odd, order, periodic = periodic, metric = "Euclidean")
-    coeff.even <- WavTransf(P1$even, order, periodic = periodic, metric = "Euclidean")
+    coeff.odd <- WavTransf(P1$odd, order, periodic = periodic, metric = "Euclidean", progress = F)
+    coeff.even <- WavTransf(P1$even, order, periodic = periodic, metric = "Euclidean", progress = F)
 
     cv <- function(alpha){
 
@@ -355,11 +356,11 @@ pdSpecEst1D <- function(P, order = 5, policy = c("universal", "cv"), metric = "R
 
   ## Threshold full data using 'alpha.opt'
   coeff <- (if(policy == "cv"){
-              WavTransf(P, order, jmax = jmax.cv - 1, periodic = periodic, metric = metric)
-            } else  WavTransf(P, order, jmax = jmax - 1, periodic = periodic, metric = metric))
+              WavTransf(P, order, jmax = jmax.cv - 1, periodic = periodic, metric = metric, progress = progress)
+            } else  WavTransf(P, order, jmax = jmax - 1, periodic = periodic, metric = metric, progress = progress))
   coeff.opt <- pdCART(coeff$D, alpha = alpha.opt, tree = tree, periodic = periodic)
   f <- (if(return == "f"){
-    InvWavTransf(coeff.opt$D_w, coeff$M[[1]], order, jmax = J, periodic = periodic, metric = metric)
+    InvWavTransf(coeff.opt$D_w, coeff$M[[1]], order, jmax = J, periodic = periodic, metric = metric, progress = progress)
   } else NULL)
 
   return(list(f = f, D = coeff.opt$D_w, M0 = coeff$M[[1]], tree.weights = coeff.opt$w, alpha.opt = alpha.opt))
