@@ -103,6 +103,7 @@ rExamples <- function(n, example = c("heaviSine", "bumps", "cat", "sine1", "sine
   if (is.null(B)){
     B <- 3
   }
+  m <- n/2
   method <- dots$method
   if (is.null(method)) {
     method <- "multitaper"
@@ -113,6 +114,7 @@ rExamples <- function(n, example = c("heaviSine", "bumps", "cat", "sine1", "sine
   }
   v0 <- (if(is.null(dots$v0)) NULL else dots$v0)
   v1 <- (if(is.null(dots$v1)) NULL else dots$v1)
+  # W <- (if(is.null(dots$W)) F else dots$W)
   x <- seq(0, 1, length.out = n / 2)
 
   if(example %in% c("heaviSine", "sine1", "sine2")){
@@ -123,49 +125,43 @@ rExamples <- function(n, example = c("heaviSine", "bumps", "cat", "sine1", "sine
 
     if(example == "heaviSine"){
       if(!is.null(v0)){
-        P <- sapply(1:(n/2), function(i) (if(i <= n/4) 3 * Expm(diag(2, 3), P0[, , i]) else if(i <= 3/8 * n){
-                           Expm(diag(2, 3), P1[, , i]) }else 2 * Expm(diag(2, 3), P2[, , i])), simplify = "array")
+        P <- sapply(1:m, function(i) (if(i <= m/2) 3 * Expm(diag(2, 3), P0[, , i]) else if(i <= 3/4 * m){
+          Expm(diag(2, 3), P1[, , i]) }else 2 * Expm(diag(2, 3), P2[, , i])), simplify = "array")
       } else {
-        P <- sapply(1:(n/2), function(i) (if(i <= n / 4) Expm(diag(2, 3), P0[, , i]) else 3 * Expm(diag(2, 3), P1[, , i])),
-              simplify = "array")
+        P <- sapply(1:m, function(i) (if(i <= m/2) Expm(diag(2, 3), P0[, , i]) else 3 * Expm(diag(2, 3), P1[, , i])),
+                    simplify = "array")
       }
     } else{
-      P <- sapply(1:(n/2), function(i) 3 * Expm(diag(2, 3), (if(example == "sine1") P0[, , i] else P1[, , i])),
-             simplify = "array")
+      P <- sapply(1:m, function(i) 3 * Expm(diag(2, 3), (if(example == "sine1") P0[, , i] else P1[, , i])),
+                  simplify = "array")
     }
   } else if(example == "cat"){
     v1 <- (if(is.null(v1)) c(2.0000000, 0.4961828, -0.8595843, -0.8290600, 2.5000000, -1.3037704, -1.4214866,
-            1.7449149, 3.0000000) else v1)
-    f <- cat_fun[round(seq(from = 1, to = 2^10, length = n/2))]
+                             1.7449149, 3.0000000) else v1)
+    f <- cat_fun[round(seq(from = 1, to = 2^10, length = m))]
     P0 <- sapply(1:9, function(i) if(i %in% c(1,5,9)) v1[i] * f + 0.05 else v1[i] * f)
-    P <- sapply(1:(n/2), function(i) t(Conj(E_coeff_inv(P0[i,]))) %*% E_coeff_inv(P0[i,]), simplify = "array")
+    P <- sapply(1:m, function(i) t(Conj(E_coeff_inv(P0[i,]))) %*% E_coeff_inv(P0[i,]), simplify = "array")
   } else if(example == "bumps"){
     P0 <- sapply(x, function(t)  (1 - 0.4 * t) * E_coeff_inv(sqrt(t * (1 - t) + 1) *
-                                    sin(pi/(0.4 * t + 0.1)) * (1 + Bumps)), simplify = "array")
-    P <- sapply(1:(n/2), function(i) Expm(diag(3), P0[,,i]), simplify = "array")
+                                                               sin(pi/(0.4 * t + 0.1)) * (1 + Bumps)), simplify = "array")
+    P <- sapply(1:m, function(i) Expm(diag(3), P0[,,i]), simplify = "array")
   }
 
-  P.sqrt <- sapply(1:(n/2), function(i) Sqrt(P[,,i]), simplify = "array")
-
-  ## Independent Wishart distribution
-  X0 <- replicate(n/2 * B, complex(3, rnorm(3, sd = sqrt(1/2)), rnorm(3, sd = sqrt(1/2))))
-  W0 <- sapply(1:(n/2 * B), function(j) X0[, j] %*% t(Conj(X0[, j])), simplify = "array")
-  W <- sapply(1:(n/2), function(j) apply(W0[, , (j - 1) * B + 1:B], c(1, 2), mean), simplify = "array")
-  per.W <- sapply(1:(n/2), function(j) (P.sqrt[, , j] %*% W[, , j]) %*% t(Conj(P.sqrt[, , j])), simplify = "array")
+  P.sqrt <- sapply(1:m, function(i) Sqrt(P[,,i]), simplify = "array")
 
   ## Generate time series via Cramer
-  chi <- matrix(nrow = 3, ncol = n)
-  chi[, 1:(n/2 - 1)] <- replicate(n/2 - 1, complex(3, rnorm(3, sd = sqrt(1/2)), rnorm(3, sd = sqrt(1/2))))
-  chi[, c(n/2, n)] <- replicate(2, rnorm(3))
-  chi[, (n/2 + 1):(n - 1)] <- Conj(chi[, 1:(n/2 - 1)])
+  chi <- matrix(nrow = 3, ncol = 2 * m)
+  chi[, 1:(m - 1)] <- replicate(m - 1, complex(3, rnorm(3, sd = sqrt(1/2)), rnorm(3, sd = sqrt(1/2))))
+  chi[, c(m, 2 * m)] <- replicate(2, rnorm(3))
+  chi[, (m + 1):(2 * m - 1)] <- Conj(chi[, 1:(m - 1)])
 
-  P.sqrt1 <- array(c(P.sqrt, Conj(P.sqrt[, , (n/2):1])), dim = c(3, 3, n))
-  ts <- sqrt(2 * pi) / sqrt(n) * mvfft(t(sapply(1:n, function(i) P.sqrt1[, , i] %*% chi[, i])), inverse = T)
+  P.sqrt1 <- array(c(P.sqrt, Conj(P.sqrt[, , m:1])), dim = c(3, 3, 2 * m))
+  ts <- sqrt(2 * pi) / sqrt(2 * m) * mvfft(t(sapply(1:(2 * m), function(i) P.sqrt1[, , i] %*% chi[, i])), inverse = T)
 
   ## Compute pre-smoothed periodogram
   per <- pdPgram(ts, B = B, method = method, bias.corr = bias.corr)
 
-  return(list(f = P, freq = per$freq, per = per$P, ts = ts, per.W = per.W))
+  return(list(f = P, freq = per$freq, per = per$P, ts = ts))
 
 }
 
