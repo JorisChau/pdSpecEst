@@ -137,7 +137,7 @@ rExamples <- function(n, example = c("heaviSine", "bumps", "cat", "sine1", "sine
     v1 <- (if(is.null(v1)) c(2.0000000, 0.4961828, -0.8595843, -0.8290600, 2.5000000, -1.3037704, -1.4214866,
             1.7449149, 3.0000000) else v1)
     f <- cat_fun[round(seq(from = 1, to = 2^10, length = n/2))]
-    P0 <- sapply(1:9, function(i) if(i %in% c(1,5,9)) v1[i] * f + 0.1 else v1[i] * f)
+    P0 <- sapply(1:9, function(i) if(i %in% c(1,5,9)) v1[i] * f + 0.05 else v1[i] * f)
     P <- sapply(1:(n/2), function(i) t(Conj(E_coeff_inv(P0[i,]))) %*% E_coeff_inv(P0[i,]), simplify = "array")
   } else if(example == "bumps"){
     P0 <- sapply(x, function(t)  (1 - 0.4 * t) * E_coeff_inv(sqrt(t * (1 - t) + 1) *
@@ -146,6 +146,12 @@ rExamples <- function(n, example = c("heaviSine", "bumps", "cat", "sine1", "sine
   }
 
   P.sqrt <- sapply(1:(n/2), function(i) Sqrt(P[,,i]), simplify = "array")
+
+  ## Independent Wishart distribution
+  X0 <- replicate(n/2 * B, complex(3, rnorm(3, sd = sqrt(1/2)), rnorm(3, sd = sqrt(1/2))))
+  W0 <- sapply(1:(n/2 * B), function(j) X0[, j] %*% t(Conj(X0[, j])), simplify = "array")
+  W <- sapply(1:(n/2), function(j) apply(W0[, , (j - 1) * B + 1:B], c(1, 2), mean), simplify = "array")
+  per.W <- sapply(1:(n/2), function(j) (P.sqrt[, , j] %*% W[, , j]) %*% t(Conj(P.sqrt[, , j])), simplify = "array")
 
   ## Generate time series via Cramer
   chi <- matrix(nrow = 3, ncol = n)
@@ -159,7 +165,7 @@ rExamples <- function(n, example = c("heaviSine", "bumps", "cat", "sine1", "sine
   ## Compute pre-smoothed periodogram
   per <- pdPgram(ts, B = B, method = method, bias.corr = bias.corr)
 
-  return(list(f = P, freq = per$freq, per = per$P, ts = ts))
+  return(list(f = P, freq = per$freq, per = per$P, ts = ts, per.W = per.W))
 
 }
 
