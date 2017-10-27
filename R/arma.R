@@ -90,51 +90,43 @@ rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
 #' Test functions
 #'
 #' @export
-rExamples <- function(n, example = c("heaviSine", "bumps", "cat", "sine1", "sine2"), ...){
+rExamples <- function(n, example = c("heaviSine", "bumps", "cat", "sine"), ...){
 
-  example <- match.arg(example, c("heaviSine", "bumps", "cat", "sine1", "sine2"))
+  ## Set variables
+  example = match.arg(example, c("heaviSine", "bumps", "cat", "sine"))
   if(n %% 2 != 0){
     warning("'n' is odd and cannot be divided by 2, instead 'n' is replaced by 'n + 1'")
-    n <- n + 1
+    n = n + 1
   }
-  dots <- list(...)
+  m = n/2
+  dots = list(...)
+  B = (if(is.null(dots$B)) 3 else dots$B)
+  method = (if(is.null(dots$method)) "multitaper" else dots$method)
+  bias.corr = (if(is.null(dots$bias.corr)) F else dots$bias.corr)
+  breaks = (if(is.null(dots$breaks)) 2 else breaks)
+  v0 = (if(is.null(dots$v0)) NULL else dots$v0)
+  v1 = (if(is.null(dots$v1)) NULL else dots$v1)
+  x = seq(0, 1, length.out = n / 2)
 
-  B <- dots$B
-  if (is.null(B)){
-    B <- 3
-  }
-  m <- n/2
-  method <- dots$method
-  if (is.null(method)) {
-    method <- "multitaper"
-  }
-  bias.corr <- dots$bias.corr
-  if (is.null(bias.corr)) {
-    bias.corr <- F
-  }
-  v0 <- (if(is.null(dots$v0)) NULL else dots$v0)
-  v1 <- (if(is.null(dots$v1)) NULL else dots$v1)
-  # W <- (if(is.null(dots$W)) F else dots$W)
-  x <- seq(0, 1, length.out = n / 2)
-
-  if(example %in% c("heaviSine", "sine1", "sine2")){
-
+  if(example == "heaviSine"){
     P0 <- sapply(x, function(t) E_coeff_inv(sin(HeaviSine[2, ] * pi * t + HeaviSine[1, ])), simplify = "array")
     P1 <- sapply(x, function(t) E_coeff_inv(sin(HeaviSine[4, ] * pi * t + HeaviSine[3, ])), simplify = "array")
-    P2 <- sapply(x, function(t) E_coeff_inv(sin(v0[5, ] * pi * t + v0[6,])), simplify = "array")
 
-    if(example == "heaviSine"){
-      if(!is.null(v0)){
+      if(breaks == 3){
+        P2 <- sapply(x, function(t) E_coeff_inv(HeaviSine[2, ] * pi * t + HeaviSine[1, ]), simplify = "array")
         P <- sapply(1:m, function(i) (if(i <= m/2) 3 * Expm(diag(2, 3), P0[, , i]) else if(i <= 3/4 * m){
-          Expm(diag(2, 3), P1[, , i]) }else 2 * Expm(diag(2, 3), P2[, , i])), simplify = "array")
-      } else {
+          Expm(diag(2, 3), P1[, , i]) } else 2 * Expm(diag(2, 3), P2[, , i])), simplify = "array")
+      } else if(breaks == 2){
         P <- sapply(1:m, function(i) (if(i <= m/2) Expm(diag(2, 3), P0[, , i]) else 3 * Expm(diag(2, 3), P1[, , i])),
                     simplify = "array")
       }
-    } else{
-      P <- sapply(1:m, function(i) 3 * Expm(diag(2, 3), (if(example == "sine1") P0[, , i] else P1[, , i])),
-                  simplify = "array")
-    }
+    } else if(example == "sine") {
+      if(!is.null(v0)){
+        P0 <- sapply(x, function(t) E_coeff_inv(v0[1, ] * sin(v0[2, ] * 2 * pi * t + v0[3, ] * pi)), simplify = "array")
+      } else {
+        P0 <- sapply(x, function(t) E_coeff_inv(Sine1[1, ] * sin(Sine1[2, ] * 2 * pi * t + Sine1[3, ] * pi)), simplify = "array")
+      }
+      P <- sapply(1:m, function(i) 3 * Expm(diag(2, 3), P0[, , i]), simplify = "array")
   } else if(example == "cat"){
     v1 <- (if(is.null(v1)) c(2.0000000, 0.4961828, -0.8595843, -0.8290600, 2.5000000, -1.3037704, -1.4214866,
                              1.7449149, 3.0000000) else v1)

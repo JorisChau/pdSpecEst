@@ -64,8 +64,9 @@ InvWavTransf <- function(D, M0, order = 5, jmax, periodic = T, metric = "Riemann
   }
   for (j in 0:(J - 1)) {
     tm1 <- Impute1D(m1, L, method = ifelse(order <= 9, "weights", "neville"), metric = metric)
-    tm1 <- tm1[, , ifelse(j > 0, L_round, 2 * floor(L / 2)) + 1:(2^(j + 1) + 2 * L_round)]
-
+    if(periodic){
+      tm1 <- tm1[, , ifelse(j > 0, L_round, 2 * floor(L / 2)) + 1:(2^(j + 1) + 2 * L_round)]
+    }
     reconstr_even <- function(i) {
       if((j + 1) <= length(D)){
         if (any(c(D[[j + 1]][, , i]) != 0)) {
@@ -88,13 +89,22 @@ InvWavTransf <- function(D, M0, order = 5, jmax, periodic = T, metric = "Riemann
     m2 <- array(dim = c(d, d, dim(tm1)[3]))
     m2[, , c(F, T)] <- sapply(grid_j, reconstr_even, simplify = "array")
     if(metric == "Riemannian"){
-      m2[, , c(T, F)] <- sapply(grid_j, function(i) (m1[, , i + L_round / 2 +
+      if(periodic){
+        m2[, , c(T, F)] <- sapply(grid_j, function(i) (m1[, , i + L_round / 2 +
           ifelse((j > 0) | (L %% 2  == 0), 0, -1)] %*% solve(m2[, , 2 * i])) %*%
           m1[, , i + L_round / 2 + ifelse((j > 0) | (L %% 2 == 0), 0, -1)],
           simplify = "array")
+      } else{
+        m2[, , c(T, F)] <- sapply(grid_j, function(i) (m1[, , i] %*% solve(m2[, , 2 * i])) %*%
+          m1[, , i], simplify = "array")
+      }
     } else{
-      m2[, , c(T, F)] <- sapply(grid_j, function(i) 2 * m1[, , i + L_round / 2 +
+      if(periodic){
+        m2[, , c(T, F)] <- sapply(grid_j, function(i) 2 * m1[, , i + L_round / 2 +
           ifelse((j > 0) | (L %% 2  == 0), 0, -1)] - m2[, , 2 * i], simplify = "array")
+      } else{
+        m2[, , c(T, F)] <- sapply(grid_j, function(i) 2 * m1[, , i] - m2[, , 2 * i], simplify = "array")
+      }
     }
     m1 <- m2
 

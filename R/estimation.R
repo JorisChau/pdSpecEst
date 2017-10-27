@@ -200,7 +200,7 @@ pdCART <- function(D, tree = T, lam = NA, alpha = 1, periodic = T) {
   d <- dim(D[[1]])[1]
   N <- dim(D[[1]])[3]
   L <- (N - 1) / 2
-  L_b <- ceiling(L/2)
+  L_b <- (if(periodic) ceiling(L/2) else 0)
   is_2D <- ifelse(length(dim(D[[1]])) == 4, T, F)
   D_trace_full <- if(is_2D){
     lapply(2:J, function(j) apply(D[[j]], c(3, 4), function(A) Re(sum(diag(A)))))
@@ -267,7 +267,11 @@ pdCART <- function(D, tree = T, lam = NA, alpha = 1, periodic = T) {
       D_w[[j]] <- array(D0, dim = c(d, d, dim(D_w[[j]])[3], dim(D_w[[j]])[4]))
     } else {
       w[[j - 1]] <- (if(tree) w[[j - 1]] & rep((if(j == 2) T else w[[j - 2]]), each = 2) else w[[j - 1]])
-      zeros <- !(c(abs(D_trace_full[[j - 1]][1:L_b]) > lam, w[[j - 1]], abs(D_trace_full[[j - 1]][2^(j - 1) + L_b + 1:L_b]) > lam))
+      if(periodic){
+        zeros <- !(c(abs(D_trace_full[[j - 1]][1:L_b]) > lam, w[[j - 1]], abs(D_trace_full[[j - 1]][2^(j - 1) + L_b + 1:L_b]) > lam))
+      } else{
+        zeros <- !(w[[j - 1]])
+      }
       D_w[[j]][, , zeros] <- 0
     }
   }

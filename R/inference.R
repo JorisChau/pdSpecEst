@@ -8,13 +8,14 @@ pdConfInt <- function(f, alpha = 0.05, conf_indices, N_samples = 250,
   J = log2(dim(f))[3]
   n = 2 * dim(f)[3]
   d = dim(f)[1]
+  depth_vec = depth
 
   if(missing(conf_indices)) {
     conf_indices <- 1:(n/2)
     warning("'conf_indices' is missing, by default it is set to the entire domain")
   }
-  if(!isTRUE(alpha > 0 & alpha < 1)) {
-   stop(paste0("alpha = ", alpha, " should be a numeric value (quantile) between 0 and 1"))
+  if(!isTRUE(all(alpha > 0 & alpha < 1))) {
+   stop(paste0("alpha = ", alpha, " should be a numeric vector (of quantiles) between 0 and 1"))
   }
   if (!isTRUE(all.equal(as.integer(J), J))) {
     stop(paste0("Input length is non-dyadic, please change length ", dim(f)[3],
@@ -32,6 +33,8 @@ pdConfInt <- function(f, alpha = 0.05, conf_indices, N_samples = 250,
   jmax.cv = (if(is.null(dots$jmax.cv)) J - 3 else dots$jmax.cv)
   jmax = (if(is.null(dots$jmax)) J - 3 else dots$jmax)
   n_ts = (if(is.null(dots$n)) n else dots$n_ts)
+  # Jmax_out = (if(is.null(dots$Jmax_out)) J else dots$Jmax_out)
+  return_f = (if(is.null(dots$return_f)) F else dots$return_f)
 
   ## Generate bootstrap samples
   if(!(n_ts == n)){
@@ -64,49 +67,54 @@ pdConfInt <- function(f, alpha = 0.05, conf_indices, N_samples = 250,
   }
   close(pb)
 
-  ## Generate integrated depth values
-  if(depth == 'gdd'){
+  depth_CI <- rad_CI <- f_CI <- lapply(1:length(depth_vec), function(j) NA)
+  names(depth_CI) <- names(rad_CI) <- names(f_CI) <- depth_vec
 
-    dist <- matrix(0, nrow = N_samples, ncol = N_samples)
-    grid <- expand.grid(1:N_samples, 1:N_samples)
-    grid <- grid[grid$Var1 > grid$Var2, ]
+  for(depth in depth_vec){
 
-    cat("2. Computing integrated depth values...")
-    pb <- utils::txtProgressBar(1, 100, style = 3)
+    ## Generate integrated depth values
+    if(depth == 'gdd'){
 
-    for(l in 1:nrow(grid)){
-      dist[grid[l, 1], grid[l, 2]] <- mean(sapply(conf_indices, function(t) pdDist(f_m[, , t, grid[l, 1]],
+      dist <- matrix(0, nrow = N_samples, ncol = N_samples)
+      grid <- expand.grid(1:N_samples, 1:N_samples)
+      grid <- grid[grid$Var1 > grid$Var2, ]
+
+      cat("2. Computing integrated depth values...")
+      pb <- utils::txtProgressBar(1, 100, style = 3)
+
+      for(l in 1:nrow(grid)){
+        dist[grid[l, 1], grid[l, 2]] <- mean(sapply(conf_indices, function(t) pdDist(f_m[, , t, grid[l, 1]],
                                                                                 f_m[, , t, grid[l, 2]])))
-      utils::setTxtProgressBar(pb, round(100 * l / nrow(grid)))
-    }
-    close(pb)
-
-    dist[upper.tri(dist)] <- t(dist)[upper.tri(dist)]
-    dd <- exp(-colMeans(dist))
-
-  } else {
-
-    if(depth == "zonoid"){
-
-      intDepth <- function(y, X) {
-        depth.t <- numeric(dim(y)[3])
-        for (t in 1:dim(y)[3]) {
-          # E_y <- T_basis(E, y[, , t])
-          depth.t[t] <- ddalpha::depth.zonoid(t(as.matrix(rep(0, d^2))), t(sapply(1:N_samples,
-                                 function(m) pdSpecEst:::E_coeff(Logm(y[, , t], X[, , t, m])))))
-        }
-        return(mean(depth.t))
+        utils::setTxtProgressBar(pb, round(100 * l / nrow(grid)))
       }
+      close(pb)
 
-    } else if(depth == "spatial"){
+      dist[upper.tri(dist)] <- t(dist)[upper.tri(dist)]
+      dd <- exp(-colMeans(dist))
+
+    } else {
+
+      if(depth == "zonoid"){
+
+        intDepth <- function(y, X) {
+          depth.t <- numeric(dim(y)[3])
+          for (t in 1:dim(y)[3]) {
+            # E_y <- T_basis(E, y[, , t])
+            depth.t[t] <- ddalpha::depth.zonoid(t(as.matrix(rep(0, d^2))), t(sapply(1:N_samples,
+                                 function(m) pdSpecEst:::E_coeff(Logm(y[, , t], X[, , t, m])))))
+          }
+          return(mean(depth.t))
+        }
+
+      } else if(depth == "spatial"){
 
       intDepth <- function(y, X) {
         depth.t <- numeric(dim(y)[3])
         for (t in 1:dim(y)[3]) {
-          y.isqrt <- pdSpecEst:::iSqrt(y[, , t])
+          y.isqrt <- iSqrt(y[, , t])
           log.yx <- sapply(1:N_samples, function(m) Logm(diag(d), (y.isqrt %*% X[, , t, m]) %*% y.isqrt), simplify = "array")
-          depth.t[t] <- 1 - pdSpecEst:::NormF(apply(sapply(1:N_samples,
-                                  function(m) log.yx[, , m]/pdSpecEst:::NormF(log.yx[, , m]), simplify = "array"), c(1, 2), mean))
+          depth.t[t] <- 1 - NormF(apply(sapply(1:N_samples,
+                                  function(m) log.yx[, , m]/NormF(log.yx[, , m]), simplify = "array"), c(1, 2), mean))
         }
         return(mean(depth.t))
       }
@@ -122,15 +130,19 @@ pdConfInt <- function(f, alpha = 0.05, conf_indices, N_samples = 250,
     }
     close(pb)
 
+    }
+
+    ## Construct confidence regions
+    depth_CI[[which(depth_vec == depth)]] <- t(sapply(1:length(alpha), function(i) c(1, unname(quantile(dd, alpha[i])))))
+    colnames(depth_CI[[which(depth_vec == depth)]]) <- c("max-depth", "min-depth", "radius")
+    rownames(depth_CI[[which(depth_vec == depth)]]) <- sapply(1:length(alpha), function(i) paste0(100 * (1 - alpha[i]), "%-CI"))
+    if(return_f){
+      f_CI[[which(depth_vec == depth)]] <- f_m[, , , which(dd > depth_CI[[which(depth_vec == depth)]][1, 2])]
+    }
+    depth_CI[[which(depth_vec == depth)]][, 3] <- sapply(1:length(alpha), function(j) mean(sapply(conf_indices, function(i)
+                            pdDist(f[, , i], f_m[, , i, which.min(abs(dd - depth_CI[[which(depth_vec == depth)]][j, 2]))]))))
   }
-
-  ## Construct confidence regions
-  depth_CI <- c(1, unname(quantile(dd, alpha)))
-  f_CI <- f_m[, , , which(dd > depth_CI[2])]
-  rad_CI <- mean(sapply(conf_indices, function(i) pdDist(f[, , i], f_m[, , i, which.min(abs(dd - depth_CI[2]))])))
-
-  return(list(depth_CI = depth_CI, rad_CI = rad_CI, f_CI = f_CI, depth = depth))
-
+  return(list(depth_CI = depth_CI, f_CI = (if(return_f) f_CI else NULL)))
 }
 
 
