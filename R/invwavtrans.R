@@ -65,7 +65,7 @@ InvWavTransf <- function(D, M0, order = 5, jmax, periodic = T, metric = "Riemann
   for (j in 0:(J - 1)) {
     tm1 <- Impute1D(m1, L, method = ifelse(order <= 9, "weights", "neville"), metric = metric)
     if(periodic){
-      tm1 <- tm1[, , ifelse(j > 0, L_round, 2 * floor(L / 2)) + 1:(2^(j + 1) + 2 * L_round)]
+      tm1 <- tm1[, , ifelse(j > 0, L_round, 2 * floor(L / 2)) + 1:(2^(j + 1) + 2 * L_round), drop = F]
     }
     reconstr_even <- function(i) {
       if((j + 1) <= length(D)){

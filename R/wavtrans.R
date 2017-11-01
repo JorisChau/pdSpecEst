@@ -115,13 +115,13 @@ WavTransf <- function(P, order = 5, jmax, periodic = T, metric = "Riemannian", p
     pb <- utils::txtProgressBar(1, 100, style = 3)
   }
   for (j in 0:jmax) {
-    tm1 <- Impute1D(M[[j + 1]], L, ifelse(order <= 9, "weights", "neville"), inverse = F, metric = metric)
-    tM[[j + 1]] <- (if(periodic) tm1[, , L_round / 2 + ifelse(j > 0 | L %% 2 == 0, 0, -1) + 1:(2^j + L_round)] else tm1)
+    tm1 <- pdSpecEst:::Impute1D(M[[j + 1]], L, ifelse(order <= 9, "weights", "neville"), inverse = F, metric = metric)
+    tM[[j + 1]] <- (if(periodic) tm1[, , L_round / 2 + ifelse(j > 0 | L %% 2 == 0, 0, -1) + 1:(2^j + L_round), drop = F] else tm1)
     if(!(metric == "Riemannian")){
       D[[j + 1]] <- sapply(1:dim(tM[[j + 1]])[3], function(l) 2^(-j/2) * (M[[j + 2]][, , 2 * l] - tM[[j + 1]][, , l]),
                            simplify = "array")
     } else{
-      iSqrt_tm1 <- sapply(1:dim(tM[[j + 1]])[3], function(l) iSqrt(tM[[j + 1]][, , l]), simplify = "array")
+      iSqrt_tm1 <- sapply(1:dim(tM[[j + 1]])[3], function(l) pdSpecEst:::iSqrt(tM[[j + 1]][, , l]), simplify = "array")
       D[[j + 1]] <- sapply(1:dim(tM[[j + 1]])[3], function(l) 2^(-j/2) * Logm(diag(d), (iSqrt_tm1[, , l] %*%
                          M[[j + 2]][, , 2 * l]) %*% iSqrt_tm1[, , l]), simplify = "array")
     }

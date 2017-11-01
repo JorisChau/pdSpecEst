@@ -90,10 +90,10 @@ rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
 #' Test functions
 #'
 #' @export
-rExamples <- function(n, example = c("heaviSine", "bumps", "cat", "sine"), ...){
+rExamples <- function(n, example = c("heaviSine", "bumps", "two-cats", "sine"), ...){
 
   ## Set variables
-  example = match.arg(example, c("heaviSine", "bumps", "cat", "sine"))
+  example = match.arg(example, c("heaviSine", "bumps", "two-cats", "sine"))
   if(n %% 2 != 0){
     warning("'n' is odd and cannot be divided by 2, instead 'n' is replaced by 'n + 1'")
     n = n + 1
@@ -103,7 +103,7 @@ rExamples <- function(n, example = c("heaviSine", "bumps", "cat", "sine"), ...){
   B = (if(is.null(dots$B)) 3 else dots$B)
   method = (if(is.null(dots$method)) "multitaper" else dots$method)
   bias.corr = (if(is.null(dots$bias.corr)) F else dots$bias.corr)
-  breaks = (if(is.null(dots$breaks)) 2 else breaks)
+  breaks = (if(is.null(dots$breaks)) 2 else dots$breaks)
   v0 = (if(is.null(dots$v0)) NULL else dots$v0)
   v1 = (if(is.null(dots$v1)) NULL else dots$v1)
   x = seq(0, 1, length.out = n / 2)
@@ -127,7 +127,7 @@ rExamples <- function(n, example = c("heaviSine", "bumps", "cat", "sine"), ...){
         P0 <- sapply(x, function(t) E_coeff_inv(Sine1[1, ] * sin(Sine1[2, ] * 2 * pi * t + Sine1[3, ] * pi)), simplify = "array")
       }
       P <- sapply(1:m, function(i) 3 * Expm(diag(2, 3), P0[, , i]), simplify = "array")
-  } else if(example == "cat"){
+  } else if(example == "two-cats"){
     v1 <- (if(is.null(v1)) c(2.0000000, 0.4961828, -0.8595843, -0.8290600, 2.5000000, -1.3037704, -1.4214866,
                              1.7449149, 3.0000000) else v1)
     f <- cat_fun[round(seq(from = 1, to = 2^10, length = m))]

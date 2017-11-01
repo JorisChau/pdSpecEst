@@ -267,7 +267,7 @@ pdCART <- function(D, tree = T, lam = NA, alpha = 1, periodic = T) {
       D_w[[j]] <- array(D0, dim = c(d, d, dim(D_w[[j]])[3], dim(D_w[[j]])[4]))
     } else {
       w[[j - 1]] <- (if(tree) w[[j - 1]] & rep((if(j == 2) T else w[[j - 2]]), each = 2) else w[[j - 1]])
-      if(periodic){
+      if(periodic & (L_b > 0)){
         zeros <- !(c(abs(D_trace_full[[j - 1]][1:L_b]) > lam, w[[j - 1]], abs(D_trace_full[[j - 1]][2^(j - 1) + L_b + 1:L_b]) > lam))
       } else{
         zeros <- !(w[[j - 1]])
@@ -297,7 +297,7 @@ pdSpecEst1D <- function(P, order = 5, policy = c("universal", "cv"), metric = "R
   d = dim(P)[1]
   B = (if(is.null(dots$B)) d else dots$B)
   progress = (if(is.null(dots$progress)) F else dots$progress)
-  J.out = (if(is.null(dots$J.out)) J else J.out)
+  J.out = (if(is.null(dots$J.out)) J else dots$J.out)
   jmax = min((if(is.null(dots$jmax)) J - 3 else dots$jmax), J.out - 1)
   jmax.cv = min((if(is.null(dots$jmax.cv)) J - 3 else dots$jmax.cv), J.out - 1)
 
