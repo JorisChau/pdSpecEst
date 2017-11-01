@@ -90,15 +90,16 @@ rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
 #' Test functions
 #'
 #' @export
-rExamples <- function(n, example = c("heaviSine", "bumps", "two-cats", "sine"), ...){
+rExamples <- function(n, example = c("heaviSine", "bumps", "two-cats", "sine", "gaussian-mix"), ...){
 
   ## Set variables
-  example = match.arg(example, c("heaviSine", "bumps", "two-cats", "sine"))
+  example = match.arg(example, c("heaviSine", "bumps", "two-cats", "sine", "gaussian-mix"))
   if(n %% 2 != 0){
     warning("'n' is odd and cannot be divided by 2, instead 'n' is replaced by 'n + 1'")
     n = n + 1
   }
   m = n/2
+  d = ifelse(example == "gaussian-mix", 2, 3)
   dots = list(...)
   B = (if(is.null(dots$B)) 3 else dots$B)
   method = (if(is.null(dots$method)) "multitaper" else dots$method)
@@ -114,10 +115,10 @@ rExamples <- function(n, example = c("heaviSine", "bumps", "two-cats", "sine"), 
 
       if(breaks == 3){
         P2 <- sapply(x, function(t) E_coeff_inv(HeaviSine[2, ] * pi * t + HeaviSine[1, ]), simplify = "array")
-        P <- sapply(1:m, function(i) (if(i <= m/2) 3 * Expm(diag(2, 3), P0[, , i]) else if(i <= 3/4 * m){
-          Expm(diag(2, 3), P1[, , i]) } else 2 * Expm(diag(2, 3), P2[, , i])), simplify = "array")
+        P <- sapply(1:m, function(i) (if(i <= m/2) 3 * Expm(diag(2, d), P0[, , i]) else if(i <= 3/4 * m){
+          Expm(diag(2, 3), P1[, , i]) } else 2 * Expm(diag(2, d), P2[, , i])), simplify = "array")
       } else if(breaks == 2){
-        P <- sapply(1:m, function(i) (if(i <= m/2) Expm(diag(2, 3), P0[, , i]) else 3 * Expm(diag(2, 3), P1[, , i])),
+        P <- sapply(1:m, function(i) (if(i <= m/2) Expm(diag(2, d), P0[, , i]) else 3 * Expm(diag(2, d), P1[, , i])),
                     simplify = "array")
       }
     } else if(example == "sine") {
@@ -126,28 +127,34 @@ rExamples <- function(n, example = c("heaviSine", "bumps", "two-cats", "sine"), 
       } else {
         P0 <- sapply(x, function(t) E_coeff_inv(Sine1[1, ] * sin(Sine1[2, ] * 2 * pi * t + Sine1[3, ] * pi)), simplify = "array")
       }
-      P <- sapply(1:m, function(i) 3 * Expm(diag(2, 3), P0[, , i]), simplify = "array")
+      P <- sapply(1:m, function(i) 3 * Expm(diag(2, d), P0[, , i]), simplify = "array")
   } else if(example == "two-cats"){
     v1 <- (if(is.null(v1)) c(2.0000000, 0.4961828, -0.8595843, -0.8290600, 2.5000000, -1.3037704, -1.4214866,
                              1.7449149, 3.0000000) else v1)
     f <- cat_fun[round(seq(from = 1, to = 2^10, length = m))]
-    P0 <- sapply(1:9, function(i) if(i %in% c(1,5,9)) v1[i] * f + 0.05 else v1[i] * f)
+    P0 <- sapply(1:d^2, function(i) if(i %in% c(1,5,9)) v1[i] * f + 0.05 else v1[i] * f)
     P <- sapply(1:m, function(i) t(Conj(E_coeff_inv(P0[i,]))) %*% E_coeff_inv(P0[i,]), simplify = "array")
   } else if(example == "bumps"){
     P0 <- sapply(x, function(t)  (1 - 0.4 * t) * E_coeff_inv(sqrt(t * (1 - t) + 1) *
                                                                sin(pi/(0.4 * t + 0.1)) * (1 + Bumps)), simplify = "array")
     P <- sapply(1:m, function(i) Expm(diag(3), P0[,,i]), simplify = "array")
+  } else if(example == "gaussian-mix"){
+    v0 <- c(7.21935, 13.05307, 12.70734, 14.73554)
+    v1 <- c(8.645193, 13.572339, 10.166949, 13.223771)
+    P0 <- sapply(x, function(t) E_coeff_inv(v0/sqrt(2*pi) * exp(-((t - 0.75)/0.15)^2/2) +
+                                            v1/sqrt(2*pi) * exp(-((t - 0.25)/0.15)^2/2)), simplify = "array")
+    P <- sapply(1:m, function(i) Expm(diag(2, d), P0[,,i]), simplify = "array")
   }
 
   P.sqrt <- sapply(1:m, function(i) Sqrt(P[,,i]), simplify = "array")
 
   ## Generate time series via Cramer
-  chi <- matrix(nrow = 3, ncol = 2 * m)
-  chi[, 1:(m - 1)] <- replicate(m - 1, complex(3, rnorm(3, sd = sqrt(1/2)), rnorm(3, sd = sqrt(1/2))))
-  chi[, c(m, 2 * m)] <- replicate(2, rnorm(3))
+  chi <- matrix(nrow = d, ncol = 2 * m)
+  chi[, 1:(m - 1)] <- replicate(m - 1, complex(d, rnorm(d, sd = sqrt(1/2)), rnorm(d, sd = sqrt(1/2))))
+  chi[, c(m, 2 * m)] <- replicate(2, rnorm(d))
   chi[, (m + 1):(2 * m - 1)] <- Conj(chi[, 1:(m - 1)])
 
-  P.sqrt1 <- array(c(P.sqrt, Conj(P.sqrt[, , m:1])), dim = c(3, 3, 2 * m))
+  P.sqrt1 <- array(c(P.sqrt, Conj(P.sqrt[, , m:1])), dim = c(d, d, 2 * m))
   ts <- sqrt(2 * pi) / sqrt(2 * m) * mvfft(t(sapply(1:(2 * m), function(i) P.sqrt1[, , i] %*% chi[, i])), inverse = T)
 
   ## Compute pre-smoothed periodogram
