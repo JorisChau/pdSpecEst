@@ -60,12 +60,12 @@ pdConfInt <- function(f, alpha = 0.05, conf_indices, N_samples = 250,
 
   for(m in 1:N_samples){
     ## Generate time series via Cramer
-    chi <- matrix(nrow = 3, ncol = n)
-    chi[, 1:(n/2 - 1)] <- replicate(n/2 - 1, complex(3, rnorm(3, sd = sqrt(1/2)), rnorm(3, sd = sqrt(1/2))))
-    chi[, c(n/2, n)] <- replicate(2, rnorm(3))
+    chi <- matrix(nrow = d, ncol = n)
+    chi[, 1:(n/2 - 1)] <- replicate(n/2 - 1, complex(d, rnorm(d, sd = sqrt(1/2)), rnorm(d, sd = sqrt(1/2))))
+    chi[, c(n/2, n)] <- replicate(2, rnorm(d))
     chi[, (n/2 + 1):(n - 1)] <- Conj(chi[, 1:(n/2 - 1)])
 
-    f.sqrt1 <- array(c(f.sqrt, Conj(f.sqrt[, , (n/2):1])), dim = c(3, 3, n))
+    f.sqrt1 <- array(c(f.sqrt, Conj(f.sqrt[, , (n/2):1])), dim = c(d, d, n))
     ts <- sqrt(2 * pi) / sqrt(n) * mvfft(t(sapply(1:n, function(i) f.sqrt1[, , i] %*% chi[, i])), inverse = T)
 
     ## Compute m-th pre-smoothed periodogram
