@@ -300,9 +300,10 @@ pdSpecEst1D <- function(P, order = 5, policy = c("universal", "cv"), metric = "R
   J.out = (if(is.null(dots$J.out)) J else dots$J.out)
   jmax = min((if(is.null(dots$jmax)) J - 3 else dots$jmax), J.out - 1)
   jmax.cv = min((if(is.null(dots$jmax.cv)) J - 3 else dots$jmax.cv), J.out - 1)
+  bias.corr = (if(is.null(dots$bias.corr)) T else dots$bias.corr)
 
   # Manifold bias-correction
-  P = (if(metric == "Riemannian" | metric == "logEuclidean") {
+  P = (if((metric == "Riemannian" | metric == "logEuclidean") & bias.corr) {
           B * exp(-1/d * sum(digamma(B - (d - 1:d)))) * P } else P)
 
   if(policy == "cv"){

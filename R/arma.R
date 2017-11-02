@@ -101,7 +101,7 @@ rExamples <- function(n, example = c("heaviSine", "bumps", "two-cats", "sine", "
   m = n/2
   d = ifelse(example == "gaussian-mix", 2, 3)
   dots = list(...)
-  B = (if(is.null(dots$B)) 3 else dots$B)
+  B = (if(is.null(dots$B)) d else dots$B)
   method = (if(is.null(dots$method)) "multitaper" else dots$method)
   bias.corr = (if(is.null(dots$bias.corr)) F else dots$bias.corr)
   breaks = (if(is.null(dots$breaks)) 2 else dots$breaks)
