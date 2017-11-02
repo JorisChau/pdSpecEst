@@ -140,9 +140,10 @@ rExamples <- function(n, example = c("heaviSine", "bumps", "two-cats", "sine", "
     P <- sapply(1:m, function(i) Expm(diag(3), P0[,,i]), simplify = "array")
   } else if(example == "gaussian-mix"){
     v0 <- c(7.21935, 13.05307, 12.70734, 14.73554)
-    v1 <- c(8.645193, 13.572339, 10.166949, 13.223771)
-    P0 <- sapply(x, function(t) E_coeff_inv(v0/sqrt(2*pi) * exp(-((t - 0.75)/0.15)^2/2) +
-                                            v1/sqrt(2*pi) * exp(-((t - 0.25)/0.15)^2/2)), simplify = "array")
+    # v1 <- c(8.645193, 13.572339, 10.166949, 13.223771)
+    P0 <- sapply(x, function(t) E_coeff_inv(v0/sqrt(2*pi) * exp(-((t - 0.5)/0.3)^2/2))
+                                            # +v1/sqrt(2*pi) * exp(-((t - 0.25)/0.15)^2/2))
+                                            , simplify = "array")
     P <- sapply(1:m, function(i) Expm(diag(2, d), P0[,,i]), simplify = "array")
   }
 
