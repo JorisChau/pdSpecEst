@@ -52,7 +52,7 @@ The tools in this package can be used to perform:
 
 For more details and examples on how to use the package see the accompanying vignettes in the vignettes folder. 
 
-A demo Shiny app to test out the implemented functions in the package is available [here](https://jchau.shinyapps.io/pdSpecEst_app/).
+A demo Shiny app to test out the implemented functions in the package is available [here](https://jchau.shinyapps.io/pdSpecEst/).
 
 *Author and maintainer:* Joris Chau (<j.chau@uclouvain.be>).
 
