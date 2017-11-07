@@ -132,7 +132,7 @@ P <- array(c(replicate(5, pgram(Phi1)), replicate(5, pgram(Phi2))), dim=c(d, d, 
 
 ## Shiny app
 
-A demo Shiny app for wavelet-based spectral estimation and clustering is available [here](https://jchau.shinyapps.io/pdspecest/). The app allows the user to test the wavelet-based spectral matrix estimation or wavelet-based spectral matrix clustering procedures on simulated multivariate time series data. The estimated spectral matrices and cluster assignments can be compared to the known generating spectral matrices and clusters, or in the case of the wavelet-based spectral estimate with a benchmark multitaper spectral estimate (obtained via `pdPgram()`).
+A demo Shiny app for wavelet-based spectral estimation and clustering is available [here](https://jchau.shinyapps.io/pdSpecEst_app/). The app allows the user to test the wavelet-based spectral matrix estimation or wavelet-based spectral matrix clustering procedures on simulated multivariate time series data. The estimated spectral matrices and cluster assignments can be compared to the known generating spectral matrices and clusters, or in the case of the wavelet-based spectral estimate with a benchmark multitaper spectral estimate (obtained via `pdPgram()`).
 
 The app also includes a real brain signal data example consisting of local field potential (LFP) time series trials recorded over the course of an associative learning experiment with a male macaque. The goal of the analysis is to study evolving spectral characteristics of the time series trials over the course of the experiment and to this end we perform a fuzzy cluster analysis of the trial-specific spectra via `pdSpecClust()`.
 
