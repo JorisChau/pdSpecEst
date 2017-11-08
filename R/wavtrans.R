@@ -100,8 +100,8 @@ WavTransf <- function(P, order = 5, jmax, periodic = T, metric = "Riemannian", p
   }
   names(M) <- paste0("M.scale", 0:J)
 
-  D <- list()
-  tM <- list()
+  D <- tM <- list()
+  D_white <- (if(metric == "Riemannian") list() else NULL)
   if (missing(jmax)) {
     jmax <- J - 1
   }
@@ -122,8 +122,11 @@ WavTransf <- function(P, order = 5, jmax, periodic = T, metric = "Riemannian", p
                            simplify = "array")
     } else{
       iSqrt_tm1 <- sapply(1:dim(tM[[j + 1]])[3], function(l) pdSpecEst:::iSqrt(tM[[j + 1]][, , l]), simplify = "array")
-      D[[j + 1]] <- sapply(1:dim(tM[[j + 1]])[3], function(l) 2^(-j/2) * Logm(diag(d), (iSqrt_tm1[, , l] %*%
-                         M[[j + 2]][, , 2 * l]) %*% iSqrt_tm1[, , l]), simplify = "array")
+      D[[j + 1]] <- sapply(1:dim(tM[[j + 1]])[3], function(l) 2^(-j/2) * Logm(tM[[j + 1]][, , l], M[[j + 2]][, , 2 * l]),
+                                                              simplify = "array")
+      D_white[[j + 1]] <- sapply(1:dim(D[[j + 1]])[3], function(l) (iSqrt_tm1[, , l] %*% D[[j + 1]][, , l]) %*%
+                                                                    iSqrt_tm1[, , l], simplify = "array")
+      names(D_white)[j + 1] <- paste0("D.scale", j + 1)
     }
     names(D)[j + 1] <- paste0("D.scale", j + 1)
     if(progress){
@@ -133,7 +136,7 @@ WavTransf <- function(P, order = 5, jmax, periodic = T, metric = "Riemannian", p
   if(progress){
     close(pb)
   }
-  return(list(D = D, M = M[1:J], tM = tM))
+  return(list(D = D, D_white = D_white, M = M[1:J], tM = tM))
 }
 
 #' 2D Forward AI wavelet transform

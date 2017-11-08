@@ -71,8 +71,7 @@ InvWavTransf <- function(D, M0, order = 5, jmax, periodic = T, metric = "Riemann
       if((j + 1) <= length(D)){
         if (any(c(D[[j + 1]][, , i]) != 0)) {
           if(metric == "Riemannian"){
-            Sqrt_tm1 <- Sqrt(tm1[, , 2 * i])
-            m1_i <- (Sqrt_tm1 %*% Expm(diag(d), 2^(j/2) * D[[j + 1]][, , i])) %*% Sqrt_tm1
+            m1_i <- Expm(tm1[, , 2 * i], 2^(j/2) * D[[j + 1]][, , i])
           } else{
             m1_i <- 2^(j/2) * D[[j + 1]][, , i] + tm1[, , 2 * i]
           }

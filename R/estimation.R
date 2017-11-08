@@ -194,7 +194,7 @@ pdSpecEst <- function(P, lam = NULL, order = 5, return = "f", alpha = 0.75) {
 #' Tree-structured wavelet-thresholded 2D spectral estimator
 #'
 #' @export
-pdCART <- function(D, tree = T, lam = NA, alpha = 1, periodic = T) {
+pdCART <- function(D, D_white, tree = T, lam = NA, alpha = 1, periodic = T) {
 
   J <- length(D)
   d <- dim(D[[1]])[1]
@@ -203,15 +203,14 @@ pdCART <- function(D, tree = T, lam = NA, alpha = 1, periodic = T) {
   L_b <- (if(periodic) ceiling(L/2) else 0)
   is_2D <- ifelse(length(dim(D[[1]])) == 4, T, F)
   D_trace_full <- if(is_2D){
-    lapply(2:J, function(j) apply(D[[j]], c(3, 4), function(A) Re(sum(diag(A)))))
+    lapply(2:J, function(j) apply(D_white[[j]], c(3, 4), function(A) Re(sum(diag(A)))))
   } else {
-    lapply(2:J, function(j) apply(D[[j]], 3, function(A) Re(sum(diag(A)))))
+    lapply(2:J, function(j) apply(D_white[[j]], 3, function(A) Re(sum(diag(A)))))
   }
   D_trace <- lapply(1:(J-1), function(j) D_trace_full[[j]][L_b + 1:2^j])
   s_e <- mad(c(D_trace[[J-1]]))
   if(is.na(lam)){
     lam <- alpha * s_e * sqrt(2 * log(length(unlist(D_trace))))
-    # lam <- alpha * s_e
   }
 
   if(tree){
@@ -336,8 +335,8 @@ pdSpecEst1D <- function(P, order = 5, policy = c("universal", "cv"), metric = "R
 
     cv <- function(alpha){
 
-      D <- list(odd = pdCART(coeff.odd$D, tree = F, alpha = alpha, periodic = periodic)$D_w,
-                even = pdCART(coeff.even$D, tree = F, alpha = alpha, periodic = periodic)$D_w)
+      D <- list(odd = pdCART(coeff.odd$D, coeff.odd$D_white, tree = F, alpha = alpha, periodic = periodic)$D_w,
+                even = pdCART(coeff.even$D, coeff.even$D_white, tree = F, alpha = alpha, periodic = periodic)$D_w)
 
       f.hat <- list(odd = InvWavTransf(D$odd, coeff.odd$M[[1]], order,
                                        periodic = periodic, metric = "Euclidean", return_val = "tangent"),
@@ -364,7 +363,7 @@ pdSpecEst1D <- function(P, order = 5, policy = c("universal", "cv"), metric = "R
   coeff <- (if(policy == "cv"){
               WavTransf(P, order, jmax = jmax.cv - 1, periodic = periodic, metric = metric, progress = progress)
             } else  WavTransf(P, order, jmax = jmax - 1, periodic = periodic, metric = metric, progress = progress))
-  coeff.opt <- pdCART(coeff$D, alpha = alpha.opt, tree = tree, periodic = periodic)
+  coeff.opt <- pdCART(coeff$D, coeff$D_white, alpha = alpha.opt, tree = tree, periodic = periodic)
   f <- (if(return == "f"){
     InvWavTransf(coeff.opt$D_w, coeff$M[[1]], order, jmax = J.out, periodic = periodic, metric = metric, progress = progress)
   } else NULL)

@@ -4,7 +4,8 @@
 \alias{rExamples}
 \title{Test functions}
 \usage{
-rExamples(n, example = c("heaviSine", "bumps", "sine1", "sine2"), ...)
+rExamples(n, example = c("heaviSine", "bumps", "two-cats", "sine",
+  "gaussian-mix"), ...)
 }
 \description{
 Test functions

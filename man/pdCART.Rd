@@ -4,7 +4,7 @@
 \alias{pdCART}
 \title{Tree-structured wavelet-thresholded 2D spectral estimator}
 \usage{
-pdCART(D, tree = T, lam = NA, alpha = 1, periodic = T)
+pdCART(D, D_white, tree = T, lam = NA, alpha = 1, periodic = T)
 }
 \description{
 Tree-structured wavelet-thresholded 2D spectral estimator
