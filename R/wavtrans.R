@@ -100,8 +100,7 @@ WavTransf <- function(P, order = 5, jmax, periodic = T, metric = "Riemannian", p
   }
   names(M) <- paste0("M.scale", 0:J)
 
-  D <- tM <- list()
-  D_white <- (if(metric == "Riemannian") list() else NULL)
+  D <- tM <- D_white <- list()
   if (missing(jmax)) {
     jmax <- J - 1
   }
@@ -118,7 +117,7 @@ WavTransf <- function(P, order = 5, jmax, periodic = T, metric = "Riemannian", p
     tm1 <- pdSpecEst:::Impute1D(M[[j + 1]], L, ifelse(order <= 9, "weights", "neville"), inverse = F, metric = metric)
     tM[[j + 1]] <- (if(periodic) tm1[, , L_round / 2 + ifelse(j > 0 | L %% 2 == 0, 0, -1) + 1:(2^j + L_round), drop = F] else tm1)
     if(!(metric == "Riemannian")){
-      D[[j + 1]] <- sapply(1:dim(tM[[j + 1]])[3], function(l) 2^(-j/2) * (M[[j + 2]][, , 2 * l] - tM[[j + 1]][, , l]),
+      D[[j + 1]] <- D_white[[j + 1]] <- sapply(1:dim(tM[[j + 1]])[3], function(l) 2^(-j/2) * (M[[j + 2]][, , 2 * l] - tM[[j + 1]][, , l]),
                            simplify = "array")
     } else{
       iSqrt_tm1 <- sapply(1:dim(tM[[j + 1]])[3], function(l) pdSpecEst:::iSqrt(tM[[j + 1]][, , l]), simplify = "array")
@@ -126,9 +125,8 @@ WavTransf <- function(P, order = 5, jmax, periodic = T, metric = "Riemannian", p
                                                               simplify = "array")
       D_white[[j + 1]] <- sapply(1:dim(D[[j + 1]])[3], function(l) (iSqrt_tm1[, , l] %*% D[[j + 1]][, , l]) %*%
                                                                     iSqrt_tm1[, , l], simplify = "array")
-      names(D_white)[j + 1] <- paste0("D.scale", j + 1)
     }
-    names(D)[j + 1] <- paste0("D.scale", j + 1)
+    names(D)[j + 1] <- names(D_white)[j + 1] <- paste0("D.scale", j + 1)
     if(progress){
       utils::setTxtProgressBar(pb, round(100 * (j + 1) / (jmax + 1)))
     }
