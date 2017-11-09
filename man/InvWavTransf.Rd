@@ -33,8 +33,8 @@ ts.sim <- rARMA(2^10, 2, Phi, Theta, Sigma)
 ts.plot(ts.sim$X) # plot generated time series traces.
 
 pgram <- pdPgram(ts.sim$X)
-D <- WavTransf(pgram$P)$D
-P <- InvWavTransf(D)
+W <- WavTransf(pgram$P)
+P <- InvWavTransf(W$D, W$M[[1]])
 all.equal(pgram$P, P)
 
 }
