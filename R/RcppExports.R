@@ -16,7 +16,7 @@
 #'  Mid(A, B)
 #' @references Bhatia, R. (2009). \emph{Positive Definite Matrices}. New Jersey: Princeton University Press.
 #'
-#' @seealso \code{\link{KarchMean}}
+#' @seealso \code{\link{pdMean}}
 #'
 #' @export
 Mid <- function(A, B) {
@@ -68,7 +68,7 @@ RiemmDist <- function(A, B) {
 #' Pennec, X. (2006). Intrinsic statistics on Riemannian manifolds: Basic tools for geometric
 #' measurements. \emph{Journal of Mathematical Imaging and Vision} 25(1), 127-154.
 #'
-#' @seealso \code{\link{Logm}}
+#' @seealso \code{\link{Logm}, \link{ParTrans}}
 #'
 #' @export
 Expm <- function(P, H) {
@@ -95,13 +95,44 @@ Expm <- function(P, H) {
 #' Pennec, X. (2006). Intrinsic statistics on Riemannian manifolds: Basic tools for geometric
 #' measurements. \emph{Journal of Mathematical Imaging and Vision} 25(1), 127-154.
 #'
-#' @seealso \code{\link{Expm}}
+#' @seealso \code{\link{Expm}, \link{ParTrans}}
 #'
 #' @export
 Logm <- function(P, Q) {
     .Call(`_pdSpecEst_Logm`, P, Q)
 }
 
+#' Parallel transport
+#'
+#' \code{ParTrans()} computes the parallel transport on the manifold of HPD matrices
+#' equipped with the Riemannian metric as described in e.g. (Chau and von Sachs, 2017a). That is,
+#' the function computes the parallel transport  of a vector (Hermitian matrix) \code{W} in the tangent space
+#' at the point (HPD matrix) \code{P} along a geodesic curve in the direction of the vector \code{V}
+#' in the tangent space at \code{P} for a unit time step.
+#'
+#' @param P a \eqn{(d,d)}-dimensional HPD matrix.
+#' @param V a \eqn{(d,d)}-dimensional Hermitian matrix corresponding to a vector in the tangent space of \code{P}.
+#' @param W a \eqn{(d,d)}-dimensional Hermitian matrix corresponding to a vector in the tangent space of \code{P}.
+#'
+#' @return a \eqn{(d,d)}-dimensional Hermitian matrix corresponding to the parallel transportation of \code{W} in
+#' the direction of \code{V} along a geodesic curve for a unit time step.
+#'
+#' @examples
+#' ## Transport the vector W to the tangent space at the identity
+#' W <- matrix(complex(real = rnorm(9), imaginary = rnorm(9)), nrow = 3)
+#' diag(W) <- rnorm(3)
+#' W[lower.tri(W)] <- t(Conj(W))[lower.tri(W)]
+#' p <- matrix(complex(real = rnorm(9), imaginary = rnorm(9)), nrow = 3)
+#' P <- t(Conj(p)) %*% p
+#'
+#' ParTrans(P, Logm(P, diag(3)), W) ## whitening transport
+#'
+#' @references Chau, J. and von Sachs, R. (2017a). \emph{Positive definite multivariate spectral
+#' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
+#'
+#' @seealso \code{\link{Expm}, \link{Logm}}
+#'
+#' @export
 ParTrans <- function(P, V, W) {
     .Call(`_pdSpecEst_ParTrans`, P, V, W)
 }

@@ -1,139 +1,189 @@
-#' Generate intrinsic HPD polynomials
+#' Polynomial interpolation of curves (1D) or surfaces (2D) of HPD matrices
+#'
+#' \code{pdNeville()} performs intrinsic polynomial interpolation of curves or surfaces on the manifold of
+#' HPD matrices equipped with the Riemannian metric via iterative geodesic interpolation, see e.g.
+#' (Chau and von Sachs, 2017).
+#'
+#' For polynomial curve interpolation, given \eqn{N} control points (i.e. HPD
+#' matrices), the degree of the interpolated polynomial is \eqn{N - 1}. For polynomial surface interpolation,
+#' given \eqn{N_1 \times N_2} control points (i.e. HPD matrices) on a tensor product grid, the interpolated
+#' polynomial has bi-degree \eqn{(N_1 - 1, N_2 - 1)}. The function \code{pdNeville()} determines whether
+#' polynomial curve or polynomial surface interpolation has to be performed based on the function input.
+#'
+#' @param P for polynomial curve interpolation, a \eqn{(d, d, N)}-dimensional array corresponding to a sequence
+#' of \eqn{(d, d)}-dimensional HPD matrices, i.e. control points, through which the interpolated polynomial
+#' curve passes. For polynomial surface interpolation, a \eqn{(d, d, N_1, N_2)}-dimensional array corresponding
+#' to a tensor product grid of \eqn{(d, d)}-dimensional matrices, i.e. control points, through which the interpolated
+#' polynomial surface passes.
+#' @param X for polynomial curve interpolation, a numeric vector of length \eqn{N} specifying the time points
+#' the interpolated polynomial passes through the control points \code{P}. For polynomial surface interpolation, a list
+#' with as elements two numeric vectors \code{x} and \code{y} of length \eqn{N_1} and \eqn{N_2} respectively. The numeric
+#' vectors specify the time points on the tensor product grid \code{expand.grid(X$x, X$y)} the interpolated polynomial passes
+#' trough the control points \code{P}.
+#' @param x for polynomial curve interpolation, a numeric vector specifying the time grid (resolution) at which the
+#' interpolated polynomial is estimated. For polynomial surface interpolation, a list with as elements two numeric vectors
+#' \code{x} and \code{y} specifying the time tensor product grid (resolution) \code{expand.grid(x$x, x$y)} at which the
+#' intepolated polynomial surface is estimated.
+#' @param metric the metric the space of HPD gets equipped with, by default \code{metric = "Riemannian"}, but instead
+#' this can also be set to \code{metric = "Euclidean"} to perform (standard) Euclidean polynomial interpolation of curves or
+#' surfaces in the space of HPD matrices.
+#'
+#' @return For polynomial curve interpolation, a \code{(d, d, length(x))}-dimensional array containing the interpolated
+#' polynomial of degree \eqn{N-1} at the time grid \code{x} passing through the control points \code{P} at times \code{X}.
+#' For polynomial surface interpolation, a \code{(d, d, length(x$x), length(x$y))}-dimensional array containing the interpolated
+#' polynomial of bi-degree \eqn{N_1 - 1, N_2 - 1} at the time grid \code{expand.grid(x$x, x$y)} passing through the control points
+#' \code{P} at times \code{expand.grid(X$x, X$y)}.
+#'
+#' @examples
+#' ### Polynomial curve interpolation
+#' P <- rExamples(100, example = 'gaussian')$f[, , 10*(1:5)]
+#' P.poly <- pdNeville(P, (1:5)/5, (1:50)/50)
+#' ## Examine matrix-component (1,1)
+#' plot((1:50)/50, Re(P.poly[1, 1, ]), type = "l") ## interpolated polynomial
+#' lines((1:5)/5, Re(P[1, 1, ]), col = 2) ## control points
+#'
+#' ### Polynomial surface interpolation
+#' P.surf <- array(P[, , 1:4], dim = c(2,2,2,2)) ## control points
+#' P.poly <- pdNeville(P.surf, list(x = c(0, 1), y = c(0, 1)), list(x = (0:10)/10, y = (0:10)/10))
+#'
+#' @seealso \code{\link{pdPolynomial}}
+#'
+#' @references Chau, J. and von Sachs, R. (2017a). \emph{Positive definite multivariate spectral
+#' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
 #'
 #' @export
-pdPolynomial <- function(p0, v0, delta.t=0.01, steps = 100) {
+pdNeville <- function(P, X, x, metric = "Riemannian"){
 
+  ## Set variables
+  if(!isTRUE((length(dim(P)) == 3 | length(dim(P)) == 4) & (is.complex(P) | is.numeric(P)))){
+    stop("'P' should be a numeric or complex 3- or 4-dimensional array")
+  }
+  is_2D = (length(dim(P)) == 4)
+  if(!is_2D){
+    if(!isTRUE(dim(P)[3] == length(X))){
+      stop("The number of control points 'dim(P)[3]' should be equal to 'length(X)'.")
+    }
+    n = dim(P)[3] - 1
+  } else if(is_2D){
+    if(!isTRUE(dim(P)[3] == length(X$x) & dim(P)[4] == length(X$y))){
+      stop("The dimensions of the grid of control points in 'P' and 'X' do not match.")
+    }
+    n = c(dim(P)[3] - 1, dim(P)[4] - 1)
+  }
+  d = dim(P)[1]
+  metric = match.arg(metric, match.arg(metric, c("Riemannian", "Euclidean")))
+
+  ## 1D Neville's algorithm via geodesic curve interpolation
+  pdNeville1D <- function(P, X, x){
+
+    nn <- dim(P)[3] - 1
+    geo <- function(Pi, t.range, t){
+      if(metric == "Riemannian"){
+        res <- Expm(Pi[, , 1], (t - t.range[1]) / (t.range[2] - t.range[1]) * Logm(Pi[, , 1], Pi[, , 2]))
+      } else if(metric == "Euclidean"){
+        res <- (t.range[2] - t)/(t.range[2] - t.range[1]) * Pi[, , 1] +
+                  (t - t.range[1])/(t.range[2] - t.range[1]) * Pi[, , 2]
+      }
+      res
+    }
+    ind <- expand.grid(1:nn, x)
+    Li <- array(c(mapply(function(i, xj) geo(P[, , c(i, i + 1)], X[c(i, i + 1)], xj),
+                         ind$Var1, ind$Var2)), dim = c(d, d, nn, length(x)))
+    if(nn > 1){
+      for(m in 2:nn){
+        ind_m <- expand.grid(1:(nn - m  + 1), 1:length(x))
+        Li <- array(c(mapply(function(i, j) geo(Li[, , c(i, i + 1), j], X[c(i, i + m)], x[j]),
+                             ind_m$Var1, ind_m$Var2)), dim = c(d, d, nn - m + 1, length(x)))
+      }
+    }
+    Li[, , 1, ]
+  }
+
+  if(!is_2D) {
+
+    PP <- pdNeville1D(P, X, x)
+
+  } else if(is_2D) {
+
+    ## 2D Neville's algorithm via geodesic surface interpolation
+    if(n[1] < 1 & n[2] < 1){
+      PP <- array(P[, , 1, 1], dim = c(d, d, length(x$x), length(x$y)))
+    } else if(n[1] < 1 | n[2] < 1){
+      if(length(X$y) > 1){
+        PP_i <- pdNeville1D(P[, , 1, ], X$y, x$y)
+        PP <- aperm(sapply(1:length(x$x), function(i) PP_i, simplify = "array"), c(1, 2, 4, 3))
+      } else if(length(X$x) > 1){
+        PP_j <- pdNeville1D(P[, , , 1], X$x, x$x)
+        PP <- sapply(1:length(x$y), function(j) PP_j, simplify = "array")
+      }
+    } else {
+      PP_i <- sapply(1:(n[1] + 1), function(i) pdNeville1D(P[, , i, ], X$y, x$y), simplify = "array")
+      PP <- sapply(1:length(x$y), function(j) pdNeville1D(PP_i[, , j, ], X$x, x$x), simplify = "array")
+    }
+
+  }
+  return(PP)
+}
+
+#' Generate intrinsic HPD polynomial curves
+#'
+#' \code{pdPolynomial()} generates intrinsic polynomial curves on the manifold of HPD matrices
+#' equipped with the Riemannian metric according to the numerical integration procedure described in (Hinkle et al., 2014).
+#' Given an initial starting point \code{p0} (i.e. HPD matrix) on the Riemannian manifold and the covariant
+#' derivatives up to order \eqn{k - 1} at \code{p0}, \code{pdPolynomial()} approximates the uniquely existing
+#' intrinsic polynomial curve of degree \eqn{k} passing through \code{p0} with the given covariant derivatives up
+#' to order \eqn{k - 1} and vanishing higher order covariant derivatives.
+#'
+#' @param p0 a \eqn{(d, d)}-dimensional HPD matrix specifying the starting point of the polynomial curve.
+#' @param v0 a \eqn{(d, d, k)}-dimensional array corresponding to a sequence of covariant derivatives of
+#' order zero up to order \eqn{k - 1} at the starting point \code{p0}.
+#' @param delta.t a numeric value determining the incrementing step size in the numerical integration procedure.
+#' A smaller step size results in a higher resolution and therefore a more accurate approximation of the polynomial curve,
+#' defaults to \code{delta.t = 0.01}.
+#' @param steps number of incrementing steps in the numerical integration procedure, defaults to \code{steps = 100}.
+#'
+#' @examples
+#' ## First-order polynomial
+#' p0 <- diag(3) ## HPD starting point
+#' v0 <- array(H.coeff(rnorm(9), inverse = T), dim = c(3, 3, 1)) ## zero-th order covariant derivative
+#' P.poly <- pdPolynomial(p0, v0)
+#'
+#' ## First-order polynomials coincide with geodesic curves
+#' geo <- function(A, B, t) Expm(A, t * Logm(A, B))
+#' P.geo <- sapply(seq(0, 1, length = 100), function(t) geo(p0, P.poly[, , 100], t), simplify = "array")
+#' all.equal(P.poly, P.geo)
+#'
+#' @return A \code{(d, d, length(steps))}-dimensional array containing the approximated intrinsic polynomial
+#' curve of degree \eqn{k} passing through \code{p0} with the given covariant derivatives up to order
+#' \eqn{k - 1} and vanishing higher order covariant derivatives.
+#'
+#' @references
+#' Hinkle, J., Fletcher, P. and Joshi, S. (2014). Intrinsic polynomials for regression on Riemannian manifolds.
+#' \emph{Journal of Mathematical Imaging and Vision} 50, 32-52.
+#'
+#' @seealso \code{\link{pdNeville}}
+#'
+#' @export
+pdPolynomial <- function(p0, v0, delta.t = 0.01, steps = 100) {
+
+  if(!isTRUE(length(dim(v0)) == 3)){
+    stop("'v0' should be a 3-dimensional array of covariant derivatives.")
+  }
   d <- dim(p0)[1]
-  k <- dim(v0)[3]
+  k <- max(dim(v0)[3], 2)
   p <- array(dim = c(d, d, steps))
-  p[ , , 1] <- p0
-  vi <- v0
+  p[, , 1] <- p0
+  vi <- array(0, dim = c(d, d, k))
+  vi[, , 1:dim(v0)[3]] <- v0
 
   for(ti in 1:(steps - 1)){
-    w <- vi[ , , 1]
-    vi[ , , 1:(k - 1)] <- sapply(1:(k - 1), function(i) ParTrans(p[ , , ti], delta.t * w, vi[ , , i] +
-                                                            delta.t * vi[ , , i+1]), simplify = "array")
-    vi[ , , k] <- ParTrans(p[ , , ti], delta.t * w, vi[ , , k])
-    p[ , , ti+1] <- Expm(p[ , , ti], delta.t * w)
+    w <- vi[, , 1]
+    vi[, , 1:(k - 1)] <- sapply(1:(k - 1), function(i) ParTrans(p[, , ti], delta.t * w, vi[, , i] +
+                                                                  delta.t * vi[, , i + 1]), simplify = "array")
+    vi[, , k] <- ParTrans(p[, , ti], delta.t * w, vi[, , k])
+    p[, , ti + 1] <- Expm(p[, , ti], delta.t * w)
   }
 
   return(p)
-}
-
-#' HPD cubic smoothing spline regression
-#'
-#'
-#' @export
-pdSplineReg <- function(P, f.hat0, lam, K, initial_step = 1, max.iter = 100, eps = 1E-3, ...) {
-
-  dots <- list(...)
-  tau = (if(is.null(dots$tau)) 0.5 else dots$tau)
-  sigma = (if(is.null(dots$sigma)) 0.5 else dots$sigma)
-  max.iter_a = (if(is.null(dots$max.iter_a)) 100 else dots$max.iter_a)
-
-  d <- dim(P)[1]
-  n <- dim(P)[3]
-  if(missing(lam)){
-    lam <- 1
-  }
-  if(missing(K)){
-    K <- n/2
-  }
-
-  K.seq <- round(seq(from = 1, to = n, length = K))
-  K.ind <- sapply(1:n, function(j) which.min(abs(K.seq - j)))
-  delta.t <- mean(diff(K.seq))
-
-  ast <- function(A, B) (A %*% B) %*% t(Conj(A))
-
-  DLog <- function(A, H){
-    e <- eigen(A, symmetric = T)
-    e_vec <- e$vectors
-    e_val <- e$values
-    H1 <- (t(Conj(e_vec)) %*% H) %*% e_vec
-    grid <- expand.grid(1:d, 1:d)
-    Z1 <- array(mapply(function(i1, i2) if(i1 == i2) 1/e_val[i1] else (log(e_val[i1]) - log(e_val[i2])) /
-                   (e_val[i1] - e_val[i2]), grid$Var1, grid$Var2), dim = c(d, d))
-    return(e_vec %*% (H1 * Z1) %*% t(Conj(e_vec)))
-  }
-
-  grad_fA <- function(A, B) -2 * Logm(A, B)
-
-  grad_gA <- function(A, B, C){
-    B1 <- pdSpecEst:::iSqrt(B)
-    C1 <- pdSpecEst:::iSqrt(C)
-    return(ast(A, ast(B1, DLog(ast(B1, A), Logm(diag(d),
-            ast(pdSpecEst:::Sqrt(solve(ast(B1, C))), ast(B1, A)))))) +
-           ast(A, ast(C1, DLog(ast(C1, A), Logm(diag(d),
-            ast(pdSpecEst:::Sqrt(ast(C1, A)), solve(ast(C1, B))))))))
-  }
-
-  grad_gB <- function(A, B, C){
-    A1 <- pdSpecEst:::iSqrt(A)
-    return(ast(B, ast(A1, DLog(ast(A1, B), Logm(diag(d), ast(A1, C))))))
-  }
-
-  grad_E <- function(gamma){
-    return(sapply(1:K, function(k) 0.5 * apply(sapply(which(K.ind == k),
-            function(ki) grad_fA(gamma[, , k], P[, , ki]), simplify = "array"),
-              c(1, 2), sum) + delta.t^3  * lam / 2 * (if(k %in% 2:(K-1)){
-              2 * grad_fA(gamma[, , k], gamma[, , k + 1]) +
-              2 * grad_fA(gamma[, , k], gamma[, , k - 1])  +
-              2 * grad_gA(gamma[, , k], gamma[, , k + 1], gamma[, , k - 1]) +
-              (if(k > 2) 2 * grad_gB(gamma[, , k - 1], gamma[, , k], gamma[, , k - 2]) else 0) +
-              (if(k < K-1) 2 * grad_gB(gamma[, , k + 1], gamma[, , k], gamma[, , k + 2]) else 0)
-              } else 0),
-           simplify = "array"))
-  }
-
-  E <- function(gamma){
-    gamma.isqrt <- sapply(1:K, function(k) pdSpecEst:::iSqrt(gamma[, , k]), simplify = "array")
-    return((0.5 * sum(sapply(1:n, function(i) pdDist(P[,,i], gamma[,,which.min(abs(K.seq - i))])^2)) +
-              delta.t^3 * lam / 2 * sum(sapply(2:(K-1), function(k) pdSpecEst:::NormF(ast(gamma.isqrt[, , k],
-                Logm(gamma[, , k], gamma[, , k + 1]) + Logm(gamma[, , k], gamma[, , k - 1])))^2))))
-  }
-
-  backtrack <- function(p, gamma, E0){
-    alpha <- initial_step
-    t <- mean(sapply(1:K, function(k) sigma * pdSpecEst:::NormF(ast(pdSpecEst:::iSqrt(gamma[,,k]), p[,,k]))^2))
-    E1 <- NULL
-    iter_a <- 0
-    while(isTRUE(iter_a < max.iter_a) & isTRUE(is.null(E1) | isTRUE((E0 - E1) < (alpha * t)))){
-      E1 <- tryCatch({ E(sapply(1:dim(p)[3], function(i) Expm(gamma[, , i], alpha * p[, , i]),
-                 simplify = "array")) }, error = function(e) return(NULL))
-      alpha <- tau * alpha
-      iter_a <- iter_a + 1
-    }
-    return(c(alpha, iter_a))
-  }
-
-  p <- -grad_E(f.hat0[, , K.seq])
-  cost <- E(f.hat0[, , K.seq])
-  gamma_0 <- f.hat0[, , K.seq]
-  iter <- 0
-  cost_diff <- -1
-
-  while(isTRUE(abs(cost_diff) > eps) & isTRUE(cost_diff < 0) & isTRUE(iter < max.iter)){
-    alpha <- backtrack(p, gamma_0, tail(cost, 1))
-    if(alpha[2] == max.iter_a){
-      message("Backtracking line search not converging, increase 'max.iter_a' or choose smaller 'initial_step'")
-      break
-    }
-    gamma_1 <- sapply(1:K, function(k) Expm(gamma_0[, , k], alpha[1] * p[, , k]),
-                      simplify = "array")
-    grad_1 <- grad_E(gamma_1)
-    beta_1 <- sapply(1:K, function(k) NormF(grad_1[, , k])^2/NormF(p[, , k])^2)
-    p <- -grad_1 + array(rep(beta_1, each = d^2), dim = c(d, d, K)) * p
-    cost <- c(cost, E(gamma_1))
-    cost_diff <- tail(cost, 1) - tail(cost, 2)[1]
-    gamma_0 <- gamma_1
-    iter <- iter + 1
-    if(iter == max.iter){
-      message("Reached maximum number of iterations in gradient descent")
-    }
-  }
-
-  return(list(f.hat = gamma_0, cost = cost, total.iter = iter))
-
 }
 

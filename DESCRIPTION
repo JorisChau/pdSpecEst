@@ -13,7 +13,7 @@ Description: An implementation of data analysis tools for samples of symmetric o
 URL: https://github.com/JorisChau/pdSpecEst, https://jchau.shinyapps.io/pdSpecEst_app/
 Depends:
     R (>= 3.3.1)
-License: GPL (>= 2)
+License: CC0
 LazyData: TRUE
 Imports:
     multitaper,

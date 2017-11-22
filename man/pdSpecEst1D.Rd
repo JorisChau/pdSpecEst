@@ -2,11 +2,67 @@
 % Please edit documentation in R/estimation.R
 \name{pdSpecEst1D}
 \alias{pdSpecEst1D}
-\title{Automatic tree-structured wavelet regression for curves of HPD matrices}
+\title{Intrinsic 1D wavelet-based spectral matrix estimation}
 \usage{
-pdSpecEst1D(P, order = 5, policy = c("universal", "cv"),
-  metric = "Riemannian", periodic = T, alpha = 1, return = "f", ...)
+pdSpecEst1D(P, order = 5, policy = "universal", metric = "Riemannian",
+  alpha = 1, return = "f", ...)
+}
+\arguments{
+\item{P}{a (\eqn{d,d,m})-dimensional array of HPD matrices, with \eqn{m} a dyadic number.}
+
+\item{order}{an odd integer larger or equal to 1 corresponding to the order of the intrinsic AI refinement scheme,
+defaults to \code{order = 5}. Note that if \code{order > 9}, the computational cost
+significantly increases as the wavelet transform no longer uses a fast wavelet refinement scheme based
+on pre-determined weights.}
+
+\item{policy}{a character, one of \code{"universal"} or \code{"cv"}, defaults to \code{policy = "universal"}.}
+
+\item{metric}{the metric that the space of HPD matrices is equipped with. The default choice is \code{"Riemannian"},
+but this can also be one of: \code{"logEuclidean"}, \code{"Cholesky"}, \code{"rootEuclidean"} or
+\code{"Euclidean"}. The intrinsic AI wavelet transform fundamentally relies on the chosen metric.}
+
+\item{alpha}{an opional tuning parameter in the wavelet the thresholding procedure. If \code{policy = "universal"},
+the sparsity parameter in the tree-structured wavelet thresholding procedure is set to \code{alpha} times the
+universal threshold, defaults to \code{alpha = 1}.}
+
+\item{return}{an optional argument that specifies whether the denoised spectral estimator
+is returned or not.}
+
+\item{...}{additional arguments for internal use.}
+}
+\value{
+The function returns a list with four components:
+\item{f }{a (\eqn{d,d,m})-dimensional array corresponding to the wavelet-denoised HPD (\eqn{d,d})-dimensional
+spectral estimate at the \code{m} different frequencies. If \code{!(return == 'f')}, the inverse wavelet transform
+of the thresholded wavelet coefficients is not computed and \code{f} is set equal to \code{NULL}.}
+\item{D }{the pyramid of threshold wavelet coefficients. This is a list of arrays, where each array contains the
+(\eqn{d,d})-dimensional thresholded wavelet coefficients from the finest wavelet scale \code{j = jmax} up to the coarsest
+wavelet scale \code{j = 0}.}
+\item{M0 }{a numeric array containing the midpoint(s) at the coarsest scale \code{j = 0} in the midpoint pyramid.}
+\item{tree.weights }{a list of logical values specifying which coefficients to keep, with each list component
+   corresponding to an individual wavelet scale.}
+\item{alpha.opt }{the wavelet thresholding tuning parameter equal to the input argument \code{alpha} if
+\code{policy = "universal"}; or determined data-adaptively via two-fold cross-validation if \code{policy = "cv"}.}
 }
 \description{
-Automatic tree-structured wavelet regression for curves of HPD matrices
+\code{pdSpecEst1D} calculates a \eqn{(d,d)}-dimensional HPD wavelet-denoised spectral matrix estimator
+by: (i) applying an intrinsic 1D AI wavelet transform (\code{\link{WavTransf1D}}) to an initial noisy
+HPD spectral estimate, (ii) (tree-structured) thresholding of the wavelet coefficients (\code{\link{pdCART}})
+and (iii) applying an intrinsic inverse 1D AI wavelet transform (\code{\link{InvWavTransf1D}}). The complete
+estimation procedure is described in detail (Chau and von Sachs, 2017a).
+}
+\examples{
+P <- rExamples(2^8, example = "bumps")
+f <- pdSpecEst1D(P)
+
+}
+\references{
+Chau, J. and von Sachs, R. (2017a). \emph{Positive definite multivariate spectral
+estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
+
+Nason, G.P. (1996). \emph{Wavelet shrinkage using cross-validation}. Journal of the
+Royal Statistical Society: Series B, 58, 463-479.
+}
+\seealso{
+\code{\link{pdPgram}}, \code{\link{WavTransf1D}}, \code{\link{InvWavTransf1D}}, \code{\link{pdCART}}
 }

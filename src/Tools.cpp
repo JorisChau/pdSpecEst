@@ -18,7 +18,7 @@
 //'  Mid(A, B)
 //' @references Bhatia, R. (2009). \emph{Positive Definite Matrices}. New Jersey: Princeton University Press.
 //'
-//' @seealso \code{\link{KarchMean}}
+//' @seealso \code{\link{pdMean}}
 //'
 //' @export
 // [[Rcpp::export()]]
