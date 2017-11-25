@@ -52,7 +52,7 @@ pdCART(Coeffs$D, Coeffs$D.white)$w ## logical tree of non-zero coefficients
 Chau, J. and von Sachs, R. (2017a). \emph{Positive definite multivariate spectral
 estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
 
-Donoho, D.L. (1997). CART and best-ortho-basis: a connection. \emph{Annals of Statistics},
+Donoho, D.L. (1997). \emph{CART and best-ortho-basis: a connection}. Annals of Statistics,
 25(5), 1870-1911.
 }
 \seealso{

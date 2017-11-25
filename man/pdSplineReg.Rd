@@ -32,7 +32,7 @@ of the evaluated objective function is smaller than \code{eps}, defaults to \cod
 }
 \value{
 A list with three components:
-\item{f }{a \eqn{(d, d, Nd)}-dimensional array containing the HPD cubic smoothing spling regression estimator.}
+\item{f }{a \eqn{(d, d, N_d)}-dimensional array containing the HPD cubic smoothing spling regression estimator.}
 \item{cost }{a numeric vector containing the costs of the objective function after each gradient descent iteration.}
 \item{total.iter }{total number of gradient descent iterations.}
 }

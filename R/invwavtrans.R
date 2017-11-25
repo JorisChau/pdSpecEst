@@ -106,11 +106,11 @@ InvWavTransf1D <- function(D, M0, order = 5, jmax, periodic = F, metric = "Riema
     L_i <- ifelse(periodic, L_round / 2 + ifelse((j > 0) | (L %% 2 == 0), 0, -1), 0)
 
     if(metric == "Riemannian"){
-        m2[, , c(T, F)] <- sapply(grid_j, function(i) (m1[, , i + L_i] %*%
-                                  solve(m2[, , 2 * i])) %*% m1[, , i + L_i], simplify = "array")
+      m2[, , c(T, F)] <- sapply(grid_j, function(i) (m1[, , i + L_i] %*%
+                                                       solve(m2[, , 2 * i])) %*% m1[, , i + L_i], simplify = "array")
     } else{
-        m2[, , c(T, F)] <- sapply(grid_j, function(i) 2 * m1[, , i + L_i] - m2[, , 2 * i],
-                                  simplify = "array")
+      m2[, , c(T, F)] <- sapply(grid_j, function(i) 2 * m1[, , i + L_i] - m2[, , 2 * i],
+                                simplify = "array")
     }
     m1 <- m2
 
@@ -210,29 +210,37 @@ InvWavTransf2D <- function(D, M0, order = c(5, 5), jmax, metric = "Riemannian", 
   }
   for (j in 0:(J - 1)) {
 
-    if(dim(D[[j + 1]])[3] == 1){
-      ## Refine 1D
-      tm1 <- array(pdSpecEst:::AIRefine1D(array(m1[, , 1, ], dim = c(d, d, 2^j)), L[2], method = method,
-                              inverse = T, metric = metric), dim = c(d, d, 1, 2^(j + 1)))
-
-    } else if (dim(D[[j + 1]])[4] == 1){
-      ## Refine 1D
-      tm1 <- array(pdSpecEst:::AIRefine1D(array(m1[, , , 1], dim = c(d, d, 2^j)), L[1], method = method,
-                              inverse = T, metric = metric), dim = c(d, d, 2^(j + 1), 1))
+    if((j + 1) <= length(D)){
+      if(dim(D[[j + 1]])[3] == 1){
+        ## Refine 1D
+        tm1 <- array(AIRefine1D(array(m1[, , 1, ], dim = c(d, d, 2^j)), L[2], method = method,
+                                inverse = T, metric = metric), dim = c(d, d, 1, 2^(j + 1)))
+      } else if (dim(D[[j + 1]])[4] == 1){
+        ## Refine 1D
+        tm1 <- array(AIRefine1D(array(m1[, , , 1], dim = c(d, d, 2^j)), L[1], method = method,
+                                inverse = T, metric = metric), dim = c(d, d, 2^(j + 1), 1))
+      }else{
+        ## Refine 2D
+        tm1 <- AIRefine2D(m1, L, method = method, metric = metric)
+      }
     } else{
       ## Refine 2D
-      tm1 <- pdSpecEst:::AIRefine2D(m1, L, method = method, metric = metric)
+      tm1 <- AIRefine2D(m1, L, method = method, metric = metric)
     }
 
     reconstr <- function(i1, i2) {
-      if((j + 1) <= length(D) & any(c(D[[j + 1]][, , i1, i2]) != 0)) {
+      if((j + 1) <= length(D)) {
+        if(any(c(D[[j + 1]][, , i1, i2]) != 0)){
           if(metric == "Riemannian"){
             m1_i <- Expm(tm1[, , i1, i2], ifelse(any(dim(D[[j + 1]]) == 1),
-                          2^(j/2), 2^j) * D[[j + 1]][, , i1, i2])
+                                                 2^(j/2), 2^j) * D[[j + 1]][, , i1, i2])
           } else{
             m1_i <- ifelse(any(dim(D[[j + 1]]) == 1), 2^(j/2), 2^j) *
-                                          D[[j + 1]][, , i1, i2] + tm1[, , i1, i2]
+              D[[j + 1]][, , i1, i2] + tm1[, , i1, i2]
           }
+        } else{
+          m1_i <- tm1[, , i1, i2]
+        }
       } else {
         m1_i <- tm1[, , i1, i2]
       }

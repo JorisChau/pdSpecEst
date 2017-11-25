@@ -13,7 +13,7 @@
 #' 1D AI wavelet transform based on e.g. the Riemannian metric. The noise is removed by tree-structured thresholding
 #' of the wavelet coefficients based on the trace of the whitened coefficients as in \code{\link{pdCART}} by
 #' minimization of a \emph{complexity penalized residual sum of squares} (CPRESS) criterion in (Donoho, 1997),
-#' via a fast tree-pruning algorithm. As in \code{\link{pdCART}, the sparsity parameter is set equal to \code{alpha}
+#' via a fast tree-pruning algorithm. As in \code{\link{pdCART}}, the sparsity parameter is set equal to \code{alpha}
 #' times the universal threshold where the noise variance of the traces of the whitened wavelet
 #' coefficients determined from the finest wavelet scale. If the thresholding policy is set to \code{policy = "universal"},
 #' the sparsity parameter is set equal to the universal threshold. If the thresholding policy is set to \code{policy = "cv"},
@@ -82,6 +82,7 @@ pdSpecEst1D <- function(P, order = 5, policy = "universal", metric = "Riemannian
   jmax = min((if(is.null(dots$jmax)) J - 3 else dots$jmax), J.out - 1)
   jmax.cv = min((if(is.null(dots$jmax.cv)) J - 3 else dots$jmax.cv), J.out - 1)
   bias.corr = (if(is.null(dots$bias.corr)) T else dots$bias.corr)
+  return.D = (if(is.null(dots$return.D)) NA else dots$return.D)
 
   # Manifold bias-correction
   P <- (if((metric == "Riemannian" | metric == "logEuclidean") & bias.corr) {
@@ -146,14 +147,23 @@ pdSpecEst1D <- function(P, order = 5, policy = "universal", metric = "Riemannian
     WavTransf1D(P, order, jmax = jmax.cv, periodic = periodic, metric = metric, progress = progress)
   } else WavTransf1D(P, order, jmax = jmax, periodic = periodic, metric = metric, progress = progress))
 
-  coeff.opt <- pdCART(coeff$D, coeff$D.white, alpha = alpha.opt, tree = tree, periodic = periodic)
+  coeff.opt <- pdCART(coeff$D, coeff$D.white, alpha = alpha.opt, tree = tree, periodic = periodic,
+                      return.D = return.D)
 
   ## Return 'f' or not
   f <- (if(return == "f"){
     InvWavTransf1D(coeff.opt$D_w, coeff$M0, order, jmax = J.out, periodic = periodic, metric = metric, progress = progress)
   } else NULL)
 
-  return(list(f = f, D = coeff.opt$D_w, M0 = coeff$M0, tree.weights = coeff.opt$w, alpha.opt = alpha.opt))
+  ## Return whitened coeff's or not
+  if(!isTRUE(return.D == "D.white")){
+    res <- list(f = f, D = coeff.opt$D_w, M0 = coeff$M0, tree.weights = coeff.opt$w, alpha.opt = alpha.opt)
+  } else{
+    res <- list(f = f, D = coeff.opt$D_w, M0 = coeff$M0, tree.weights = coeff.opt$w, alpha.opt = alpha.opt,
+                D.white = coeff.opt$D.white_w)
+  }
+
+  return(res)
 }
 
 #' Intrinsic 2D wavelet-based time-varying spectral matrix estimation
@@ -164,13 +174,13 @@ pdSpecEst1D <- function(P, order = 5, policy = "universal", metric = "Riemannian
 #' and (iii) applying an intrinsic inverse 2D AI wavelet transform (\code{\link{InvWavTransf2D}}).
 #'
 #' The input array \code{P} corresponds to an initial noisy HPD time-varying spectral estimate of the (\eqn{d, d})-dimensional
-#' spectral matrix at \code{m_1 \times m_2} different time-frequency points, with \eqn{m_1, m_2} dyadic numbers. This can be e.g.
+#' spectral matrix at \eqn{m_1 \times m_2} different time-frequency points, with \eqn{m_1, m_2} dyadic numbers. This can be e.g.
 #' a multitaper HPD time-varying periodogram given as output by the function \code{\link{pdPgram2D}}.\cr
 #' \code{P} is transformed to the wavelet domain by the function \code{\link{WavTransf2D}}, which applies an intrinsic
 #' 2D AI wavelet transform based on e.g. the Riemannian metric. The noise is removed by tree-structured thresholding
 #' of the wavelet coefficients based on the trace of the whitened coefficients as in \code{\link{pdCART}} by
 #' minimization of a \emph{complexity penalized residual sum of squares} (CPRESS) criterion in (Donoho, 1997),
-#' via a fast tree-pruning algorithm. As in \code{\link{pdCART}, the sparsity parameter is set equal to \code{alpha}
+#' via a fast tree-pruning algorithm. As in \code{\link{pdCART}}, the sparsity parameter is set equal to \code{alpha}
 #' times the universal threshold where the noise variance of the traces of the whitened wavelet
 #' coefficients determined from the finest wavelet scale. \cr
 #' If \code{return == 'f'} the thresholded wavelet coefficients are transformed back to the frequency domain by
@@ -202,6 +212,8 @@ pdSpecEst1D <- function(P, order = 5, policy = "universal", metric = "Riemannian
 #' \item{M0 }{a numeric array containing the midpoint(s) at the coarsest scale \code{j = 0} in the 2D midpoint pyramid.}
 #' \item{tree.weights }{a list of logical values specifying which coefficients to keep, with each list component
 #'    corresponding to an individual wavelet scale.}
+#' \item{D.raw }{the 2D pyramid of non-thresholded wavelet coefficients in the same format as the component \code{$D}.}
+#'
 #' @examples
 #' ## NEEDS TO BE UPDATED
 #'
@@ -226,6 +238,7 @@ pdSpecEst2D <- function(P, order = c(3, 3), metric = "Riemannian", alpha = 1, re
   J.out = (if(is.null(dots$J.out)) J else dots$J.out)
   jmax = min((if(is.null(dots$jmax)) J - 2 else dots$jmax), J.out - 1)
   bias.corr = (if(is.null(dots$bias.corr)) T else dots$bias.corr)
+  return.D = (if(is.null(dots$return.D)) NA else dots$return.D)
 
   # Manifold bias-correction
   P <- (if((metric == "Riemannian" | metric == "logEuclidean") & bias.corr) {
@@ -233,7 +246,8 @@ pdSpecEst2D <- function(P, order = c(3, 3), metric = "Riemannian", alpha = 1, re
 
   ## Threshold full data using 'alpha'
   coeff <- WavTransf2D(P, order = order, jmax = jmax, metric = metric, progress = progress)
-  coeff.opt <- pdCART(coeff$D, coeff$D.white, alpha = alpha, tree = tree)
+  coeff.opt <- pdCART(coeff$D, coeff$D.white, alpha = alpha, tree = tree,
+                      return.D = return.D)
 
   ## Return 'f' or not
   f <- (if(return == "f"){
@@ -241,7 +255,15 @@ pdSpecEst2D <- function(P, order = c(3, 3), metric = "Riemannian", alpha = 1, re
                          progress = progress, chol.bias = T)
         } else NULL)
 
-  return(list(f = f, D = coeff.opt$D_w, M0 = coeff$M0, tree.weights = coeff.opt$w))
+  ## Return whitened coeff's or not
+  if(!isTRUE(return.D == "D.white")){
+    res <- list(f = f, D = coeff.opt$D_w, M0 = coeff$M0, tree.weights = coeff.opt$w, D.raw = coeff$D)
+  } else{
+    res <- list(f = f, D = coeff.opt$D_w, M0 = coeff$M0, tree.weights = coeff.opt$w, D.raw = coeff$D,
+                D.white = coeff.opt$D.white_w)
+  }
+
+  return(res)
 }
 
 #' Tree-structured trace thresholding of wavelet coefficients
@@ -283,7 +305,7 @@ pdSpecEst2D <- function(P, order = c(3, 3), metric = "Riemannian", alpha = 1, re
 #'
 #' @references Chau, J. and von Sachs, R. (2017a). \emph{Positive definite multivariate spectral
 #' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
-#' @references Donoho, D.L. (1997). CART and best-ortho-basis: a connection. \emph{Annals of Statistics},
+#' @references Donoho, D.L. (1997). \emph{CART and best-ortho-basis: a connection}. Annals of Statistics,
 #' 25(5), 1870-1911.
 #'
 #' @importFrom stats mad
@@ -296,6 +318,7 @@ pdCART <- function(D, D.white, alpha = 1, tree = T, ...) {
   is_2D = ifelse(length(dim(D[[1]])) == 4, T, F)
   dots = list(...)
   periodic = (if(is.null(dots$periodic) | is_2D) F else dots$periodic)
+  return.D = (if(is.null(dots$return.D)) NA else dots$return.D)
   if(periodic){
     N = dim(D[[1]])[3]
     L = (N - 1) / 2
@@ -357,6 +380,9 @@ variances of coefficients between the 1D and 2D AI wavelet transform.'))
 
   ## Threshold wavelet coefficients with weights 'w'
   D_w <- D
+  if(return.D == "D.white"){
+    D.white_w <- D.white
+  }
   if(is_2D){
     ## 2D
     for(j in J0_2D:J){
@@ -369,6 +395,11 @@ variances of coefficients between the 1D and 2D AI wavelet transform.'))
       D0 <- array(D_w[[j]], dim = c(d, d, dim(D_w[[j]])[3] * dim(D_w[[j]])[4]))
       D0[, , !(w[[j - J0_2D + 1]])] <- 0
       D_w[[j]] <- array(D0, dim = c(d, d, dim(D_w[[j]])[3], dim(D_w[[j]])[4]))
+      if(return.D == "D.white"){
+        D0 <- array(D.white[[j]], dim = c(d, d, dim(D.white_w[[j]])[3] * dim(D.white_w[[j]])[4]))
+        D0[, , !(w[[j - J0_2D + 1]])] <- 0
+        D.white_w[[j]] <- array(D0, dim = c(d, d, dim(D.white_w[[j]])[3], dim(D.white_w[[j]])[4]))
+      }
     }
   } else {
     ## 1D
@@ -380,10 +411,15 @@ variances of coefficients between the 1D and 2D AI wavelet transform.'))
         zeros <- !(w[[j - 1]])
       }
       D_w[[j]][, , zeros] <- 0
+      if(return.D == "D.white"){
+        D.white_w[[j]][, , zeros] <- 0
+      }
     }
   }
 
-  return(list(w = w, D_w = D_w))
+  res <- (if(!isTRUE(return.D == "D.white")) list(w = w, D_w = D_w) else list(w = w, D_w = D_w, D.white_w = D.white_w))
+
+  return(res)
 }
 
 

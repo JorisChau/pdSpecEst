@@ -42,7 +42,7 @@ X1[ , , which(dd1.ranks == 50)] ## most outlying HPD matrix
 
 
 ## ------------------------------------------------------------------------
-(mean.X1 <- KarchMean(X1)) 
+(mean.X1 <- pdMean(X1)) 
 
 pdDepth(y = mean.X1, X = X1, method = "gdd")
 

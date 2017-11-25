@@ -39,12 +39,28 @@ wavelet scale \code{j = 0}.}
 \item{M0 }{a numeric array containing the midpoint(s) at the coarsest scale \code{j = 0} in the 2D midpoint pyramid.}
 \item{tree.weights }{a list of logical values specifying which coefficients to keep, with each list component
    corresponding to an individual wavelet scale.}
+\item{D.raw }{the 2D pyramid of non-thresholded wavelet coefficients in the same format as the component \code{$D}.}
 }
 \description{
 \code{pdSpecEst2D} calculates a \eqn{(d,d)}-dimensional HPD wavelet-denoised time-varying spectral matrix estimator
 by: (i) applying an intrinsic 2D AI wavelet transform (\code{\link{WavTransf2D}}) to an initial noisy
 HPD spectral estimate, (ii) (tree-structured) thresholding of the wavelet coefficients (\code{\link{pdCART}})
 and (iii) applying an intrinsic inverse 2D AI wavelet transform (\code{\link{InvWavTransf2D}}).
+}
+\details{
+The input array \code{P} corresponds to an initial noisy HPD time-varying spectral estimate of the (\eqn{d, d})-dimensional
+spectral matrix at \eqn{m_1 \times m_2} different time-frequency points, with \eqn{m_1, m_2} dyadic numbers. This can be e.g.
+a multitaper HPD time-varying periodogram given as output by the function \code{\link{pdPgram2D}}.\cr
+\code{P} is transformed to the wavelet domain by the function \code{\link{WavTransf2D}}, which applies an intrinsic
+2D AI wavelet transform based on e.g. the Riemannian metric. The noise is removed by tree-structured thresholding
+of the wavelet coefficients based on the trace of the whitened coefficients as in \code{\link{pdCART}} by
+minimization of a \emph{complexity penalized residual sum of squares} (CPRESS) criterion in (Donoho, 1997),
+via a fast tree-pruning algorithm. As in \code{\link{pdCART}}, the sparsity parameter is set equal to \code{alpha}
+times the universal threshold where the noise variance of the traces of the whitened wavelet
+coefficients determined from the finest wavelet scale. \cr
+If \code{return == 'f'} the thresholded wavelet coefficients are transformed back to the frequency domain by
+the inverse intrinsic 2D AI wavelet transform via \code{\link{InvWavTransf2D}} giving the wavelet-denoised
+HPD time-varying spectral estimate.
 }
 \examples{
 ## NEEDS TO BE UPDATED

@@ -194,5 +194,79 @@ rExamples <- function(n, example = c("heaviSine", "bumps", "two-cats", "gaussian
 
 }
 
+#' 2D Examples
+#'
+#' @export
+rExamples2D <- function(n, d, B, example = c("smiley", "arma")){
 
+  d = (if(example == "smiley") 3 else d)
+  B = (if(missing(B)) d else B)
+  bias.corr = B * exp(-1/d * sum(digamma(B - (d - 1:d))))
+
+  ## Create spectrum
+  if(example == "smiley"){
+
+    f <- array(dim = c(d, d, n[1], n[2]))
+    center <- c(n[1]/2, n[2]/2)
+    eye1 <- c(1/3 * n[1], 2/3 * n[2])
+    eye2 <- c(2/3 * n[1], 2/3 * n[2])
+    p_i <- replicate(4, Expm(2*diag(d), Re(H.coeff(rnorm(d^2), inverse = T))))
+
+    for(i1 in 1:n[1]){
+      for(i2 in 1:n[2]){
+        if(((i1 - center[1])^2/(n[1] * 3/7)^2 + (i2 - center[2])^2/(n[2] * 2/5)^2) <= 1){
+          f[,,i1,i2] <- p_i[,,1]
+        } else {
+          f[,,i1,i2] <- p_i[,,3]
+        }
+        if(((i1 - center[1])^2/(n[1] * 1/sqrt(10))^2 + (i2 - center[2])^2 /
+            (n[2] * 1/sqrt(10))^2) <= 1 &
+           ((i1 - center[1])^2/(n[1] * 1/sqrt(25))^2 + (i2 - center[2])^2 /
+            (n[2] * 1/sqrt(25))^2) >= 1 &
+           (i2 - center[2]) < -0.25 * abs(i1 - center[1])) {
+          f[,,i1,i2] <- p_i[,,2]
+        }
+        if(((i1 - eye1[1])^2/(n[1] * 1/sqrt(100))^2 + (i2 - eye1[2])^2 /
+            (n[2] * 1/sqrt(100))^2) <= 1 |
+           ((i1 - eye2[1])^2/(n[1] * 1/sqrt(100))^2 + (i2 - eye2[2])^2 /
+            (n[2] * 1/sqrt(100))^2) <= 1) {
+          f[,,i1,i2] <- p_i[,,4]
+        }
+      }
+    }
+  }
+
+    if(example == "arma"){
+
+      Sigma <- Expm(diag(d), H.coeff(rnorm(d^2), inverse = T))
+      x <- head(seq(0, 1, len = n[2] + 1), -1)
+      v0 <- matrix(0.1, nrow=d, ncol=d) + diag(0.5, nrow = d)
+      v1 <- 2*rnorm(d^2)
+      v2 <- 2+rnorm(d^2)
+      Phi.t <- sapply(x, function(t) matrix(c(v0 * sin(v2*pi*t + v1)), nrow = d), simplify = "array")
+
+      f.nu_t <- function(nu, t) {
+        PhiB <- solve(diag(d) - Phi.t[, , t] * exp(-1i * pi * nu / n[1]))
+        return(1/(2 * pi) * ((PhiB %*% Sigma) %*% t(Conj(PhiB))))
+      }
+
+      grid <- expand.grid(1:n[1], 1:n[2])
+      f <- array(c(mapply(function(nu, t) f.nu_t(nu, t), grid$Var1, grid$Var2)),
+                 dim = c(d, d, n[1], n[2]))
+    }
+
+    ## Create iid Wishart periodogram
+    grid.n <- expand.grid(1:n[1], 1:n[2])
+    ast <- function(A, B) (A %*% B) %*% t(Conj(A))
+    f.sqrt <- array(c(apply(f, c(3, 4), function(f) pdSpecEst:::Sqrt(f))), dim = dim(f))
+    X0 <- array(c(replicate(n[1] * n[2] * d, complex(d, rnorm(d, sd = sqrt(1/2)), rnorm(d, sd = sqrt(1/2))))),
+                  dim = c(d, n[1] * d, n[2]))
+    W0 <- array(c(apply(X0, c(2,3), function(X) X %*% t(Conj(X)))), dim = c(d,d,n[1]*d,n[2]))
+    W <- array(c(mapply(function(i1, i2) apply(W0[, , (i1 - 1) * d + 1:d, i2], c(1, 2), mean), grid.n$Var1,
+                 grid.n$Var2)), dim = c(d, d, n[1], n[2]))
+    X <- array(c(mapply(function(i1, i2) bias.corr * ast(f.sqrt[, , i1, i2], W[, , i1, i2]), grid.n$Var1,
+                        grid.n$Var2)), dim = dim(W))
+
+    return(list(f = f, per = X))
+}
 

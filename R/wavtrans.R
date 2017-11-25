@@ -18,7 +18,7 @@
 #' (v) root-Euclidean metric. The default choice (Riemannian) has several appealing properties not shared by the
 #' other metrics, see (Chau and von Sachs, 2017a) for more details.
 #'
-#' @param P a (\eqn{d,d,m})-dimensional array of Hermitian PD matrices, with \eqn{m = 2^J} for some \eqn{J > 0}.
+#' @param P a (\eqn{d,d,m})-dimensional array of HPD matrices, with \eqn{m = 2^J} for some \eqn{J > 0}.
 #' @param order an odd integer larger or equal to 1 corresponding to the order of the intrinsic AI refinement scheme,
 #' defaults to \code{order = 5}. Note that if \code{order > 9}, the computational cost
 #' significantly increases as the wavelet transform no longer uses a fast wavelet refinement scheme based
@@ -111,7 +111,6 @@ WavTransf1D <- function(P, order = 5, jmax, periodic = F, metric = "Riemannian",
       Mper
     }
   }
-  names(M) <- paste0("M.scale", 0:J)
 
   D <- tM <- D.white <- list()
   if (missing(jmax)) {
@@ -139,7 +138,7 @@ WavTransf1D <- function(P, order = 5, jmax, periodic = F, metric = "Riemannian",
       D.white[[j + 1]] <- sapply(1:dim(D[[j + 1]])[3], function(l) (iSqrt_tm1[, , l] %*% D[[j + 1]][, , l]) %*%
                                    iSqrt_tm1[, , l], simplify = "array")
     }
-    names(D)[j + 1] <- names(D.white)[j + 1] <- paste0("D.scale", j + 1)
+    names(D)[j + 1] <- names(D.white)[j + 1] <- paste0("D.scale", j)
     if(progress){
       utils::setTxtProgressBar(pb, round(100 * (j + 1) / (jmax + 1)))
     }
@@ -266,7 +265,6 @@ WavTransf2D <- function(P, order = c(3, 3), jmax, metric = "Riemannian", progres
     }
     M[[j + 1]] <- Mper
   }
-  names(M) <- paste0("M.scale", 0:J)
 
   D <- tM <- D.white <- list()
   if (missing(jmax)) {
@@ -337,7 +335,7 @@ WavTransf2D <- function(P, order = c(3, 3), jmax, metric = "Riemannian", progres
       }
     }
     tM[[j + 1]] <- tm1
-    names(D)[j + 1] <- names(D.white)[j + 1] <- paste0("D.scale", j + 1)
+    names(D)[j + 1] <- names(D.white)[j + 1] <- paste0("D.scale", j)
     if(progress){
       utils::setTxtProgressBar(pb, round(100 * (j + 1) / (jmax + 1)))
     }

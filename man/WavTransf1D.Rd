@@ -8,7 +8,7 @@ WavTransf1D(P, order = 5, jmax, periodic = F, metric = "Riemannian",
   progress = F, ...)
 }
 \arguments{
-\item{P}{a (\eqn{d,d,m})-dimensional array of Hermitian PD matrices, with \eqn{m = 2^J} for some \eqn{J > 0}.}
+\item{P}{a (\eqn{d,d,m})-dimensional array of HPD matrices, with \eqn{m = 2^J} for some \eqn{J > 0}.}
 
 \item{order}{an odd integer larger or equal to 1 corresponding to the order of the intrinsic AI refinement scheme,
 defaults to \code{order = 5}. Note that if \code{order > 9}, the computational cost

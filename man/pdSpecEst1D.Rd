@@ -51,6 +51,23 @@ HPD spectral estimate, (ii) (tree-structured) thresholding of the wavelet coeffi
 and (iii) applying an intrinsic inverse 1D AI wavelet transform (\code{\link{InvWavTransf1D}}). The complete
 estimation procedure is described in detail (Chau and von Sachs, 2017a).
 }
+\details{
+The input array \code{P} corresponds to an initial noisy HPD spectral estimate of the (\eqn{d, d})-dimensional
+spectral matrix at \code{m} different frequencies, with \eqn{m = 2^J} for some \eqn{J > 0}. This can be e.g.
+a multitaper HPD periodogram given as output by the function \code{\link{pdPgram}}.\cr
+\code{P} is transformed to the wavelet domain by the function \code{\link{WavTransf1D}}, which applies an intrinsic
+1D AI wavelet transform based on e.g. the Riemannian metric. The noise is removed by tree-structured thresholding
+of the wavelet coefficients based on the trace of the whitened coefficients as in \code{\link{pdCART}} by
+minimization of a \emph{complexity penalized residual sum of squares} (CPRESS) criterion in (Donoho, 1997),
+via a fast tree-pruning algorithm. As in \code{\link{pdCART}}, the sparsity parameter is set equal to \code{alpha}
+times the universal threshold where the noise variance of the traces of the whitened wavelet
+coefficients determined from the finest wavelet scale. If the thresholding policy is set to \code{policy = "universal"},
+the sparsity parameter is set equal to the universal threshold. If the thresholding policy is set to \code{policy = "cv"},
+a data-adaptive sparsity parameter is computed via two-fold cross-validation as in (Nason, 1996) based on the chosen metric.\cr
+If \code{return == 'f'} the thresholded wavelet coefficients are transformed back to the frequency domain by
+the inverse intrinsic 1D AI wavelet transform via \code{\link{InvWavTransf1D}} giving the wavelet-denoised
+HPD spectral estimate.
+}
 \examples{
 P <- rExamples(2^8, example = "bumps")
 f <- pdSpecEst1D(P)

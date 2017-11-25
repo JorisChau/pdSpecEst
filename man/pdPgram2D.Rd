@@ -4,8 +4,74 @@
 \alias{pdPgram2D}
 \title{Tapered HPD time-varying periodogram matrix}
 \usage{
-pdPgram2D(X, B, method = c("DPSS", "Hermite"), bias.corr = F, time, freq)
+pdPgram2D(X, B, tf.grid, method = c("dpss", "hermite"), nw = pi,
+  bias.corr = F)
+}
+\arguments{
+\item{X}{an (\eqn{n,d})-dimensional matrix corresponding to a multivariate time series,
+with the \code{d} columns corresponding to the components of the time series.}
+
+\item{B}{depending on \code{method}, either the number of orthogonal Slepian or Hermite tapering functions.
+By default, \code{B = d}, such that the multitaper periodogram is guaranteed to be positive definite.}
+
+\item{tf.grid}{a list with two components \code{tf.grid$time} and \code{tf.grid$frequency} specifying the
+rectangular grid of time-frequency points at which the multitaper periodogram is estimated. \code{tf.grid$time}
+should be a numeric vector of rescaled time points in \code{(0,1)}. \code{tf.grid$frequency} should be a numeric
+vector of frequency points in \code{(0,0.5)}, with 0.5 corresponding to the Nyquist frequency.}
+
+\item{method}{the tapering method, either \code{"dpss"} or \code{"hermite"} explained in the Details
+section below. Defaults to \code{method = "dpss"}.}
+
+\item{nw}{a positive numeric value corresponding to the time-bandwidth parameter of the tapering functions,
+see also \code{\link{multitaper::dpss}}, defaults to \code{nw = pi}. Both the Slepian and Hermite tapers are
+rescaled with the same time-bandwidth parameter.}
+
+\item{bias.corr}{should the Riemannian manifold bias-correction be applied to the HPD periodogram matrix?
+Defaults to \code{FALSE}.}
+}
+\value{
+A list containing two components:
+   \item{\code{tf.grid} }{ a list with two components corresponding to the rectangular grid of time-frequency points
+   at which the multitaper periodogram is returned.}
+   \item{\code{P} }{ a \eqn{(d,d,m_1,m_2)}-dimensional array with \code{m_1 = length(tf.grid$time)} and
+   \code{m_2 = length(tf.grid$frequency)} containing the (\eqn{d,d})-dimensional tapered periodogram matrices at
+   the time-frequency points corresponding to \code{tf.grid}.}
 }
 \description{
-Tapered HPD time-varying periodogram matrix
+Given a multivariate time series, \code{pdPgram2D} calculates a tapered HPD time-varying periodogram matrix based on
+averaging raw HPSD time-varying periodogram matrices of tapered multivariate time series segments.
+}
+\details{
+If \code{method == "dpss"}, \code{pdPgram2D} calculates a \eqn{(d,d)}-dimensional multitaper time-varying
+periodogram matrix based on sliding \eqn{B} Discrete Prolate Spheroidal (i.e. Slepian) orthogonal tapering functions
+as in \code{\link[multitaper]{dpss}} applied to the \eqn{d}-dimensional time series \code{X}. If \eqn{B \ge d}, the
+multitaper time-varying periodogram matrix is guaranteed to be positive definite at each time-frequency point in the
+grid \code{expand.grid(tf.grid$time, tf.grid$frequency)}. Essentially, the function
+computes a multitaper periodogram matrix (as in \code{\link{pdPgram}}) in each of a number of non-overlapping time series
+segments of \code{X}, with the time series segments centered around the (rescaled) time points in \code{tf.grid$time}.
+If \code{method == "hermite"}, the function calculates a multitaper time-varying periodogram matrix replacing the Slepian
+tapers by ortogonal Hermite tapering functions. \cr
+If we perform additional periodogram matrix denoising in the space of HPD matrices equipped with the
+Riemannian metric or the Log-Euclidean metric, we should set \code{bias.corr = T}, which corrects for the asymptotic
+bias of the periodogram matrix on the manifold of HPD matrices equipped with the Riemannian or Log-Euclidean metric
+as described in (Chau and von Sachs, 2017). The pre-smoothed HPD periodogram matrix (i.e. an initial noisy HPD spectral estimator)
+can be given as input to the intrinsic wavelet HPD spectral estimation procedure in \code{\link{pdSpecEst1D}}.
+In this case, we set \code{bias.corr = F} (the default) as the appropriate bias-correction based on the chosen metric is
+applied by the function \code{\link{pdSpecEst1D}}.
+}
+\examples{
+## NEEDS TO BE UPDATED
+
+}
+\references{
+Bartlett, M.S. (1950). \emph{Periodogram analysis and continuous spectra}.
+Biometrika 37 (1-2): 1-16.
+
+Chau, J. and von Sachs, R. (2017). \emph{Positive definite multivariate spectral
+estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
+
+Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
+}
+\seealso{
+\code{\link{pdPgram}}, \code{\link[multitaper]{dpss}}
 }

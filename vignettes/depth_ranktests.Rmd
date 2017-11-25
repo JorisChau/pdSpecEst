@@ -95,10 +95,10 @@ X1[ , , which(dd1.ranks == 50)] ## most outlying HPD matrix
 
 ```
 
-We can compare the most central HPD matrix above with the (approximate) empirical geometric mean of the observations obtained with `KarchMean()`. The empirical geometric mean is known to maximize the data depth for observations from a *centrally symmetric* distribution (as in this example). For more details, see [@COvS17].
+We can compare the most central HPD matrix above with the (approximate) empirical geometric mean of the observations obtained with `pdMean()`. The empirical geometric mean is known to maximize the data depth for observations from a *centrally symmetric* distribution (as in this example). For more details, see [@COvS17].
 
 ```{r}
-(mean.X1 <- KarchMean(X1)) 
+(mean.X1 <- pdMean(X1)) 
 
 pdDepth(y = mean.X1, X = X1, method = "gdd")
 ```

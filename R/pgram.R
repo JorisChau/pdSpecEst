@@ -1,30 +1,36 @@
 #' Tapered HPD periodogram matrix
 #'
-#' \code{pdPgram} calculates a tapered Hermitian PD periodogram matrix based on averaging raw
-#' Hermitian PSD periodogram matrices of tapered multivariate time series segments. The tapered Hermitian
-#' PD periodogram matrix is rescaled by the \emph{manifold} bias-correction in (Chau and von Sachs, 2017).
+#' Given a multivariate time series, \code{pdPgram} calculates a tapered HPD periodogram matrix based on
+#' averaging raw HPSD periodogram matrices of tapered multivariate time series segments.
 #'
-#' If \code{method == "multitaper"}, \code{pdPgram} calculates a \eqn{(d \times d)}-dimensional multitaper
+#' If \code{method == "multitaper"}, \code{pdPgram} calculates a \eqn{(d,d)}-dimensional multitaper
 #' periodogram matrix based on \eqn{B} Discrete Prolate Spheroidal (i.e. Slepian) orthogonal tapering functions
-#' as in \code{\link[multitaper]{dpss}} applied to the \eqn{d}-dimensional time series \code{X}. If \code{method == "bartlett"}, \code{pdPgram} calculates
-#' Bartlett's spectral estimator by averaging the periodogram matrices of \code{B} non-overlapping segments of the
-#' \eqn{d}-dimensional time series \code{X}.Note that Bartlett's spectral estimator is a
-#' specific (trivial) case of a multitaper spectral estimator with uniform orthogonal tapering windows.
+#' as in \code{\link[multitaper]{dpss}} applied to the \eqn{d}-dimensional time series \code{X}. If \code{method == "bartlett"},
+#' \code{pdPgram} computes a Bartlett spectral estimator by averaging the periodogram matrices of \code{B} non-overlapping
+#' segments of the \eqn{d}-dimensional time series \code{X}. Note that Bartlett's spectral estimator is a
+#' specific (trivial) case of a multitaper spectral estimator with uniform orthogonal tapering windows.\cr
+#' If we perform additional periodogram matrix denoising in the space of HPD matrices equipped with the
+#' Riemannian metric or the Log-Euclidean metric, we should set \code{bias.corr = T}, which corrects for the asymptotic
+#' bias of the periodogram matrix on the manifold of HPD matrices equipped with the Riemannian or Log-Euclidean metric
+#' as described in (Chau and von Sachs, 2017). The pre-smoothed HPD periodogram matrix (i.e. an initial noisy HPD spectral estimator)
+#' can be given as input to the intrinsic wavelet HPD spectral estimation procedure in \code{\link{pdSpecEst1D}}.
+#' In this case, we set \code{bias.corr = F} (the default) as the appropriate bias-correction based on the chosen metric is
+#' applied by the function \code{\link{pdSpecEst1D}}.
 #'
-#' @param X  a multivariate time series, with the \code{d} columns corresponding to the components
-#'  of the time series.
+#' @param X  an (\eqn{n,d})-dimensional matrix corresponding to a multivariate time series,
+#' with the \code{d} columns corresponding to the components of the time series.
 #' @param B  depending on \code{method}, either the number of orthogonal Slepian tapers, or the number of
 #' non-overlapping segments to compute Bartlett's averaged periodogram. By default,
-#' \code{B = d}, such that the averaged periodogram is  positive definite.
+#' \code{B = d}, such that the averaged periodogram is guaranteed to be positive definite.
 #' @param method the tapering method, either \code{"multitaper"} or \code{"bartlett"} explained in the Details
-#' section below. Defaults to \code{"bartlett"}.
-#' @param bias.corr should the manifold bias-correction be applied to the Hermitian PD periodogram matrix?
-#' Defaults to \code{TRUE}.
+#' section below. Defaults to \code{"multitaper"}.
+#' @param bias.corr should the Riemannian manifold bias-correction be applied to the HPD periodogram matrix?
+#' Defaults to \code{FALSE}.
 #'
 #' @return A list containing two components:
-#'    \item{\code{freq} }{ vector of frequencies at which the periodogram is computed.}
-#'    \item{\code{P} }{ a \code{(d, d, length(freq))}-dimensional array containing the
-#'      (\eqn{d \times d})-dimensional tapered periodogram matrices at frequencies corresponding
+#'    \item{\code{freq} }{ vector of of \eqn{n/2} frequencies in \eqn{[0,0.5)} at which the periodogram is computed.}
+#'    \item{\code{P} }{ a \eqn{(d, d, n/2)}-dimensional array containing the
+#'      (\eqn{d,d})-dimensional tapered periodogram matrices at frequencies corresponding
 #'      to \code{freq}.}
 #'
 #' @references Bartlett, M.S. (1950). \emph{Periodogram analysis and continuous spectra}.
@@ -33,10 +39,7 @@
 #' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
 #' @references Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
 #'
-#' @note The curve of HPD periodogram matrices obtained from \code{pdPgram(X)$P} can be
-#' used as input in the functions \code{\link{WavTransf}} or \code{\link{pdSpecEst}}.
-#'
-#' @seealso \code{\link{rARMA}}, \code{\link[multitaper]{dpss}}
+#' @seealso \code{\link{pdPgram2D}}, \code{\link[multitaper]{dpss}}
 #'
 #' @examples
 #' ## ARMA(1,1) process: Example 11.4.1 in (Brockwell and Davis, 1991)
@@ -50,20 +53,23 @@
 #'
 #' @importFrom multitaper dpss
 #' @importFrom stats mvfft
-#' @importFrom stats quantile
 #' @importFrom utils head
 #'
 #' @export
-pdPgram <- function(X, B, method = c("multitaper", "bartlett"), bias.corr = T) {
+pdPgram <- function(X, B, method = c("multitaper", "bartlett"), bias.corr = F, nw = pi) {
 
   if(missing(method)){
-    method <- "bartlett"
+    method <- "multitaper"
   }
   method <- match.arg(method, c("multitaper", "bartlett"))
   d <- ncol(X)
   n <- nrow(X)
   if (missing(B)) {
     B <- d
+  }
+  if(B < d){
+    warning("The number of tapers 'B' is smaller than the dimension of the time series 'ncol(X)'; the periodogram matrix
+            is not positive definite!")
   }
   pgram <- function(Y){
     dft <- 1/sqrt(nrow(Y)) * mvfft(Y)
@@ -73,7 +79,7 @@ pdPgram <- function(X, B, method = c("multitaper", "bartlett"), bias.corr = T) {
   if (method == "bartlett") {
     Per <- sapply(1:B, function(b) 1/(2 * pi) * pgram(X[floor(n/B) * (b - 1) + 1:floor(n/B), ]), simplify = "array")
   } else if (method == "multitaper") {
-    h <- multitaper::dpss(n, B, 1, returnEigenvalues = F)$v * sqrt(n)
+    h <- multitaper::dpss(n, B, nw = nw, returnEigenvalues = F)$v * sqrt(n)
     Per <- sapply(1:B, function(k) 1/(2 * pi) * pgram(h[, k] * X), simplify = "array")
   }
   if(bias.corr){
@@ -88,35 +94,93 @@ pdPgram <- function(X, B, method = c("multitaper", "bartlett"), bias.corr = T) {
 
 #' Tapered HPD time-varying periodogram matrix
 #'
+#' Given a multivariate time series, \code{pdPgram2D} calculates a tapered HPD time-varying periodogram matrix based on
+#' averaging raw HPSD time-varying periodogram matrices of tapered multivariate time series segments.
+#'
+#' If \code{method == "dpss"}, \code{pdPgram2D} calculates a \eqn{(d,d)}-dimensional multitaper time-varying
+#' periodogram matrix based on sliding \eqn{B} Discrete Prolate Spheroidal (i.e. Slepian) orthogonal tapering functions
+#' as in \code{\link[multitaper]{dpss}} applied to the \eqn{d}-dimensional time series \code{X}. If \eqn{B \ge d}, the
+#' multitaper time-varying periodogram matrix is guaranteed to be positive definite at each time-frequency point in the
+#' grid \code{expand.grid(tf.grid$time, tf.grid$frequency)}. Essentially, the function
+#' computes a multitaper periodogram matrix (as in \code{\link{pdPgram}}) in each of a number of non-overlapping time series
+#' segments of \code{X}, with the time series segments centered around the (rescaled) time points in \code{tf.grid$time}.
+#' If \code{method == "hermite"}, the function calculates a multitaper time-varying periodogram matrix replacing the Slepian
+#' tapers by ortogonal Hermite tapering functions. \cr
+#' If we perform additional periodogram matrix denoising in the space of HPD matrices equipped with the
+#' Riemannian metric or the Log-Euclidean metric, we should set \code{bias.corr = T}, which corrects for the asymptotic
+#' bias of the periodogram matrix on the manifold of HPD matrices equipped with the Riemannian or Log-Euclidean metric
+#' as described in (Chau and von Sachs, 2017). The pre-smoothed HPD periodogram matrix (i.e. an initial noisy HPD spectral estimator)
+#' can be given as input to the intrinsic wavelet HPD spectral estimation procedure in \code{\link{pdSpecEst1D}}.
+#' In this case, we set \code{bias.corr = F} (the default) as the appropriate bias-correction based on the chosen metric is
+#' applied by the function \code{\link{pdSpecEst1D}}.
+#'
+#' @param X  an (\eqn{n,d})-dimensional matrix corresponding to a multivariate time series,
+#' with the \code{d} columns corresponding to the components of the time series.
+#' @param B  depending on \code{method}, either the number of orthogonal Slepian or Hermite tapering functions.
+#' By default, \code{B = d}, such that the multitaper periodogram is guaranteed to be positive definite.
+#' @param tf.grid a list with two components \code{tf.grid$time} and \code{tf.grid$frequency} specifying the
+#' rectangular grid of time-frequency points at which the multitaper periodogram is estimated. \code{tf.grid$time}
+#' should be a numeric vector of rescaled time points in \code{(0,1)}. \code{tf.grid$frequency} should be a numeric
+#' vector of frequency points in \code{(0,0.5)}, with 0.5 corresponding to the Nyquist frequency.
+#' @param method the tapering method, either \code{"dpss"} or \code{"hermite"} explained in the Details
+#' section below. Defaults to \code{method = "dpss"}.
+#' @param nw a positive numeric value corresponding to the time-bandwidth parameter of the tapering functions,
+#' see also \code{\link{multitaper::dpss}}, defaults to \code{nw = pi}. Both the Slepian and Hermite tapers are
+#' rescaled with the same time-bandwidth parameter.
+#' @param bias.corr should the Riemannian manifold bias-correction be applied to the HPD periodogram matrix?
+#' Defaults to \code{FALSE}.
+#'
+#' @return A list containing two components:
+#'    \item{\code{tf.grid} }{ a list with two components corresponding to the rectangular grid of time-frequency points
+#'    at which the multitaper periodogram is returned.}
+#'    \item{\code{P} }{ a \eqn{(d,d,m_1,m_2)}-dimensional array with \code{m_1 = length(tf.grid$time)} and
+#'    \code{m_2 = length(tf.grid$frequency)} containing the (\eqn{d,d})-dimensional tapered periodogram matrices at
+#'    the time-frequency points corresponding to \code{tf.grid}.}
+#'
+#' @references Bartlett, M.S. (1950). \emph{Periodogram analysis and continuous spectra}.
+#' Biometrika 37 (1-2): 1-16.
+#' @references Chau, J. and von Sachs, R. (2017). \emph{Positive definite multivariate spectral
+#' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
+#' @references Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
+#'
+#' @seealso \code{\link{pdPgram}}, \code{\link[multitaper]{dpss}}
+#'
+#' @examples
+#' ## NEEDS TO BE UPDATED
+#'
 #' @export
-pdPgram2D <- function(X, B, method = c("DPSS", "Hermite"), bias.corr = F, time, freq){
+pdPgram2D <- function(X, B, tf.grid, method = c("dpss", "hermite"), nw = pi, bias.corr = F){
 
-  d <- ncol(X)
+  ## Set variables
+  d = ncol(X)
+  n = nrow(X)
   if(missing(method)) {
-    method <- "DPSS"
+    method = "dpss"
   }
-  method <- match.arg(method, c("DPSS", "Hermite"))
+  method = match.arg(method, c("bartlett", "dpss", "hermite"))
   if (missing(B)) {
-    B <- d
+    B = d
   }
-  n <- nrow(X)
-  L <- length(time)
-  x <- head(seq(0, 1, len = n + 1), -1)
-  bias.corr <- ifelse(bias.corr, B * exp(-1/d * sum(digamma(B - (d - 1:d)))), 1)
+  if(missing(tf.grid)){
+    tf.grid = list(time = seq((2^round(log2(sqrt(n))) + 1)/2, n - (2^round(log2(sqrt(n))) - 1)/2,
+                              length = 2^round(log2(sqrt(n))))/n,
+                   freq = seq((2^round(log2(sqrt(n))) + 1)/2, n - (2^round(log2(sqrt(n))) - 1)/2,
+                       length = 2^round(log2(sqrt(n))))/(2*n))
+  }
+  L = length(tf.grid$time)
+  x = head(seq(0, 1, len = n + 1), -1)
+  bias.corr = ifelse(bias.corr, B * exp(-1/d * sum(digamma(B - (d - 1:d)))), 1)
 
   ## Periodogram matrix pointwise in time
   Per_t <- function(Y){
     dft <- 1/sqrt(nrow(Y)) * mvfft(Y)
-    return(sapply(ceiling(freq * nrow(Y)), function(i) dft[i, ] %*% t(Conj(dft[i, ])), simplify = "array"))
+    return(sapply(ceiling(tf.grid$freq * nrow(Y)), function(i) dft[i, ] %*% t(Conj(dft[i, ])), simplify = "array"))
   }
 
-  if(method == "Hermite"){
+  if(method == "hermite"){
 
     ## Hermite functions
     Hermite <- function(k, t){
-      # if(!all.equal(k, as.integer(k)) | (k < 0)){
-      #   stop(paste0("The Hermite order k = ", k, " is not a non-negative integer!"))
-      # }
       Herm_poly <- function(ti){
         H <- numeric(k + 1)
         for(i in 0:k){
@@ -132,23 +196,22 @@ pdPgram2D <- function(X, B, method = c("DPSS", "Hermite"), bias.corr = F, time, 
       }
       sapply(t, function(ti) exp(-ti^2 / 2) * Herm_poly(ti) / sqrt(sqrt(pi) * 2^k * factorial(k)))
     }
-
-    ## Time-varying periodogram matrix
-    Per <- sapply(time, function(ti) bias.corr * apply(sapply(0:(B - 1), function(b) 1/(2 * pi) *
-                          Per_t(Hermite(b, (n^0.2 * L * (x - ti))[(round(ti * n)  - floor(n / (2 * L) - 1)):
-                          (round(ti * n) + floor(n / (2 * L)))]) * X[(round(ti * n)  - floor(n / (2 * L) - 1)):
-                          (round(ti * n) + floor(n / (2 * L))),]), simplify = "array"),
-                          c(1, 2, 3), mean), simplify = "array")
-  } else if(method == "DPSS") {
-
-    h <- multitaper::dpss(2 * floor(n / (2 * L)), B, 1, returnEigenvalues = F)$v * sqrt(2 * floor(n / (2 * L)))
-
-    ## Sliding DPSS multitaper
-    Per <- sapply(time, function(ti) bias.corr * apply(sapply(1:B, function(b) 1/(2 * pi) *
-                  Per_t(h[, b] * X[(round(ti * n)  - floor(n / (2 * L) - 1)):(round(ti * n) + floor(n / (2 * L))),]),
-                  simplify = "array"), c(1, 2, 3), mean), simplify = "array")
   }
 
-  return(list(P = aperm(Per, c(1, 2, 4, 3)), time = time, freq = freq))
+    ## Taper weights
+    if(method == "dpss"){
+            h <- multitaper::dpss(2 * floor(n / (2 * L)), B, nw, returnEigenvalues = F)$v * sqrt(2 * floor(n / (2 * L)))
+      } else if(method == "hermite"){
+            h0 <- sapply(1:B, function(b) Hermite(b, seq(-nw, nw, length = 2 * floor(n / (2 * L)))))
+            norm.h0 <- sqrt(mean(h0[, 1]^2))
+            h <- apply(h, 2, function(h.col) h.col / norm.h0)
+      }
+
+    ## Sliding dpss or hermite multitaper
+    Per <- sapply(tf.grid$time, function(ti) bias.corr * apply(sapply(1:B, function(b) 1/(2 * pi) *
+                  Per_t(h[, b] * X[(round(ti * n)  - floor(n / (2 * L) - 1)):(round(ti * n) + floor(n / (2 * L))),]),
+                  simplify = "array"), c(1, 2, 3), mean), simplify = "array")
+
+  return(list(tf.grid = tf.grid, P = aperm(Per, c(1, 2, 4, 3))))
 
 }
