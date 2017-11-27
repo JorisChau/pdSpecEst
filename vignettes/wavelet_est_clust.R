@@ -57,8 +57,8 @@ plotspec <- function(i, data, col){
   }
 }
 grid <- expand.grid(1:d, 1:d)
-invisible(apply(grid, 1, function(i) plotspec(i, ts.sim, 1)))
-invisible(apply(grid, 1, function(i) plotspec(i, f.hat, 2)))
+# invisible(apply(grid, 1, function(i) plotspec(i, ts.sim, 1))) ## NEEDS TO BE UPDATED
+# invisible(apply(grid, 1, function(i) plotspec(i, f.hat, 2))) ## NEEDS TO BE UPDATED
 
 ## ------------------------------------------------------------------------
 Phi1 <- array(c(0.5, 0, 0, 0.1, 0, 0, 0, -0.9), dim = c(d, d, 2))

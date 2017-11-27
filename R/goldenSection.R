@@ -1,3 +1,4 @@
+## Golden section search
 gss <- function(range, f, tol = 0.01) {
   x1 <- range[1]
   x4 <- range[2]

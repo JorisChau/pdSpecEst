@@ -32,12 +32,12 @@
 #'
 #' @examples
 #' ## Pointwise depth
-#' X1 <- replicate(50, Expm(diag(2), pdSpecEst:::E_coeff_inv(rnorm(4))))
+#' X1 <- replicate(50, Expm(diag(2), H.coeff(rnorm(4), inverse = TRUE)))
 #' pdDepth(y = diag(2), X1, method = "gdd") ## depth of one point
 #' pdDepth(X = X1, method = "gdd") ## depth of each point in the data cloud
 #'
 #' ## Integrated depth
-#' X2 <- replicate(50, replicate(5, Expm(diag(2), pdSpecEst:::E_coeff_inv(rnorm(4)))))
+#' X2 <- replicate(50, replicate(5, Expm(diag(2), H.coeff(rnorm(4), inverse = TRUE))))
 #' pdDepth(y = replicate(5, diag(2)), X2, method = "gdd") ## depth of one curve
 #' pdDepth(X = X2, method = "gdd") ## depth of each curve in the data cloud
 #'
@@ -77,7 +77,6 @@ pdDepth <- function(y = NULL, X, method = c("zonoid", "gdd", "spatial")) {
   if (method == "zonoid") {
     if (length(dim(X)) == 3) {
       ZD <- function(y, X) {
-        # E_y <- T_basis(E, y)
         return(ddalpha::depth.zonoid(t(as.matrix(rep(0, d^2))), t(sapply(1:S,
                                         function(s) E_coeff(Logm(y, X[, , s]))))))
       }
@@ -90,7 +89,6 @@ pdDepth <- function(y = NULL, X, method = c("zonoid", "gdd", "spatial")) {
       iZD <- function(y, X) {
         depth.t <- numeric(n)
         for (t in 1:n) {
-          # E_y <- T_basis(E, y[, , t])
           depth.t[t] <- ddalpha::depth.zonoid(t(as.matrix(rep(0, d^2))), t(sapply(1:S,
                                         function(s) E_coeff(Logm(y[, , t], X[, , t, s])))))
         }

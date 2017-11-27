@@ -26,6 +26,8 @@
 #' section below. Defaults to \code{"multitaper"}.
 #' @param bias.corr should the Riemannian manifold bias-correction be applied to the HPD periodogram matrix?
 #' Defaults to \code{FALSE}.
+#' @param nw a positive numeric value corresponding to the time-bandwidth parameter of the Slepian tapering functions,
+#' see also \code{\link[multitaper]{dpss}}, defaults to \code{nw = pi}.
 #'
 #' @return A list containing two components:
 #'    \item{\code{freq} }{ vector of of \eqn{n/2} frequencies in \eqn{[0,0.5)} at which the periodogram is computed.}
@@ -52,8 +54,6 @@
 #' pgram <- pdPgram(ts.sim$X)
 #'
 #' @importFrom multitaper dpss
-#' @importFrom stats mvfft
-#' @importFrom utils head
 #'
 #' @export
 pdPgram <- function(X, B, method = c("multitaper", "bartlett"), bias.corr = F, nw = pi) {
@@ -125,7 +125,7 @@ pdPgram <- function(X, B, method = c("multitaper", "bartlett"), bias.corr = F, n
 #' @param method the tapering method, either \code{"dpss"} or \code{"hermite"} explained in the Details
 #' section below. Defaults to \code{method = "dpss"}.
 #' @param nw a positive numeric value corresponding to the time-bandwidth parameter of the tapering functions,
-#' see also \code{\link{multitaper::dpss}}, defaults to \code{nw = pi}. Both the Slepian and Hermite tapers are
+#' see also \code{\link[multitaper]{dpss}}, defaults to \code{nw = pi}. Both the Slepian and Hermite tapers are
 #' rescaled with the same time-bandwidth parameter.
 #' @param bias.corr should the Riemannian manifold bias-correction be applied to the HPD periodogram matrix?
 #' Defaults to \code{FALSE}.
@@ -160,6 +160,10 @@ pdPgram2D <- function(X, B, tf.grid, method = c("dpss", "hermite"), nw = pi, bia
   method = match.arg(method, c("bartlett", "dpss", "hermite"))
   if (missing(B)) {
     B = d
+  }
+  if(B < d){
+    warning("The number of tapers 'B' is smaller than the dimension of the time series 'ncol(X)'; the periodogram matrix
+            is not positive definite!")
   }
   if(missing(tf.grid)){
     tf.grid = list(time = seq((2^round(log2(sqrt(n))) + 1)/2, n - (2^round(log2(sqrt(n))) - 1)/2,

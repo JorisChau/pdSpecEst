@@ -69,7 +69,7 @@ the inverse intrinsic 1D AI wavelet transform via \code{\link{InvWavTransf1D}} g
 HPD spectral estimate.
 }
 \examples{
-P <- rExamples(2^8, example = "bumps")
+P <- rExamples(2^8, example = "bumps")$per
 f <- pdSpecEst1D(P)
 
 }

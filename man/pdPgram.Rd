@@ -20,6 +20,9 @@ section below. Defaults to \code{"multitaper"}.}
 
 \item{bias.corr}{should the Riemannian manifold bias-correction be applied to the HPD periodogram matrix?
 Defaults to \code{FALSE}.}
+
+\item{nw}{a positive numeric value corresponding to the time-bandwidth parameter of the Slepian tapering functions,
+see also \code{\link[multitaper]{dpss}}, defaults to \code{nw = pi}.}
 }
 \value{
 A list containing two components:

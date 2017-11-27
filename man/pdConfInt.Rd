@@ -7,6 +7,19 @@
 pdConfInt(f, alpha = 0.05, conf_indices, N_samples = 250, depth = c("gdd",
   "zonoid", "spatial"), ...)
 }
+\arguments{
+\item{f}{f}
+
+\item{alpha}{alpha}
+
+\item{conf_indices}{conf_indices}
+
+\item{N_samples}{N_samples}
+
+\item{depth}{depth}
+
+\item{...}{additional arguments for internal use.}
+}
 \description{
 HPD depth-based confidence intervals for wavelet-based spectral matrix estimators
 }

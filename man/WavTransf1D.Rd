@@ -62,7 +62,7 @@ other metrics, see (Chau and von Sachs, 2017a) for more details.
 }
 \examples{
 P <- rExamples(2^8, example = "bumps")
-P.wt <- WavTransf1D(P$f, periodic = F)
+P.wt <- WavTransf1D(P$f, periodic = FALSE)
 
 }
 \references{
@@ -70,5 +70,5 @@ Chau, J. and von Sachs, R. (2017a). \emph{Positive definite multivariate spectra
 estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
 }
 \seealso{
-\code{\link{InvWavTransf}}, \code{\link{pdSpecEst1D}}, \code{\link{pdNeville}}
+\code{\link{InvWavTransf1D}}, \code{\link{pdSpecEst1D}}, \code{\link{pdNeville}}
 }

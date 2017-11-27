@@ -1,5 +1,12 @@
 #' HPD depth-based confidence intervals for wavelet-based spectral matrix estimators
 #'
+#' @param f f
+#' @param alpha alpha
+#' @param conf_indices conf_indices
+#' @param N_samples N_samples
+#' @param depth depth
+#' @param ... additional arguments for internal use.
+#'
 #' @export
 pdConfInt <- function(f, alpha = 0.05, conf_indices, N_samples = 250,
                       depth = c("gdd", "zonoid", "spatial"), ...) {
@@ -53,7 +60,7 @@ pdConfInt <- function(f, alpha = 0.05, conf_indices, N_samples = 250,
   }
 
   ## Generate bootstrap samples
-  f.sqrt <- sapply(1:(n/2), function(i) pdSpecEst:::Sqrt(f[, , i]), simplify = "array")
+  f.sqrt <- sapply(1:(n/2), function(i) Sqrt(f[, , i]), simplify = "array")
   f_m <- array(dim = c(d, d, 2^J.out, N_samples))
   cat("1. Generating bootstrap samples...")
   pb <- utils::txtProgressBar(1, 100, style = 3)
@@ -74,7 +81,7 @@ pdConfInt <- function(f, alpha = 0.05, conf_indices, N_samples = 250,
     ## Compute m-th spectral estimator
     coeffs <- pdSpecEst1D(per_m, order = order, policy = policy, alpha = lam,
                           jmax = jmax, jmax.cv = jmax.cv, return = "coeff")
-    f_m[, , , m] <- InvWavTransf(coeffs$D, coeffs$M0, order = order, jmax = J.out)
+    f_m[, , , m] <- InvWavTransf1D(coeffs$D, coeffs$M0, order = order, jmax = J.out)
 
     utils::setTxtProgressBar(pb, round(100 * m / N_samples))
   }

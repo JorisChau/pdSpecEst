@@ -154,7 +154,7 @@ pdSplineReg <- function(P, f0, lam = 1, Nd, ini.step = 1, max.iter = 100, eps = 
 
 #' Orthonormal basis expansion of a Hermitian matrix
 #'
-#' \code{H.coeff()} expands a \eqn{(d,d)}-dimensional Hermitian matrix \code{H}  with respect to
+#' \code{H.coeff} expands a \eqn{(d,d)}-dimensional Hermitian matrix \code{H}  with respect to
 #' an orthonormal (in terms of the Frobenius inner product) basis of the space of Hermitian matrices,
 #' i.e. it transforms \code{H} into a numeric vector of \eqn{d^2} real-valued basis coefficients.
 #' This is possible as the space of Hermitian matrices is a real vector space. Let \eqn{E_{nm}} be a
@@ -187,7 +187,7 @@ pdSplineReg <- function(P, f0, lam = 1, Nd, ini.step = 1, max.iter = 100, eps = 
 #'
 #' ## orthonormal basis expansion
 #' h <- H.coeff(H)
-#' H1 <- H.coeff(h, inverse = T) ## reconstructed Hermitian matrix
+#' H1 <- H.coeff(h, inverse = TRUE) ## reconstructed Hermitian matrix
 #' all.equal(H, H1)
 #'
 #' @export
@@ -237,5 +237,28 @@ E_chol <- function(R, inverse = F){
   return(P)
 }
 
+## Basis Hermitian matrices
+E_basis <- function(d) {
+  E <- function(i, j) {
+    E_ij <- matrix(0, nrow = d, ncol = d)
+    if (i == j) {
+      E_ij[i, j] <- 1
+    } else if (i < j) {
+      E_ij[c((j - 1) * d + i, (i - 1) * d + j)] <- 1/sqrt(2)
+    } else {
+      E_ij[c((j - 1) * d + i, (i - 1) * d + j)] <- complex(imaginary = c(-1, 1))/sqrt(2)
+    }
+    E_ij
+  }
 
+  indices <- expand.grid(1:d, 1:d)
+  return(mapply(E, indices$Var1, indices$Var2, SIMPLIFY = "array"))
+}
+
+## Basis Tangent space
+T_basis <- function(E, y) {
+  d <- nrow(E)
+  y.sqrt <- Sqrt(y)
+  return(array(c(apply(E, 3, function(E) (y.sqrt %*% E) %*% y.sqrt)), dim = c(d, d, d^2)))
+}
 

@@ -62,8 +62,8 @@
 #'   to cluster \eqn{k}.}
 #'   \item{cl.centers.D }{a list of \code{K} wavelet coefficient pyramids, where each pyramid of wavelet
 #'   coefficients is associated to a cluster center.}
-#'   \item{cl.centers.M0 }{an array of \code{K} \eqn{(d,d)}-dimensional coarse-scale midpoints at scale
-#'   \code{j = 0}, where each coarse-scale midpoint is associated to a cluster center.}
+#'   \item{cl.centers.M0 }{a list \code{K} arrays of coarse-scale midpoints at scale \code{j = 0}, where each
+#'   array is associated to a cluster center.}
 #'   \item{cl.centers.f }{if \code{return.centers = T} returns a list of \code{K} \eqn{(d,d,n)}-dimensional arrays,
 #'   where each array corresponds to a discretized curve of HPD matrices associated to a cluster center. If
 #'   \code{return.centers = F}, \code{cl.centers.f} returns \code{NULL}.}
@@ -84,7 +84,7 @@
 #' pgram <- function(Phi) pdPgram(rARMA(2^9, 2, Phi, Theta, Sigma)$X)$P
 #' P <- array(c(replicate(5, pgram(Phi1)), replicate(5, pgram(Phi2))), dim=c(2,2,2^7,10))
 #'
-#' cl <- pdSpecClust(P, K=2)
+#' cl <- pdSpecClust1D(P, K = 2)
 #'
 #' @seealso \code{\link{pdSpecEst1D}}, \code{\link{WavTransf1D}}, \code{\link{pdDist}}, \code{\link{pdPgram}}
 #'
@@ -119,12 +119,14 @@ pdSpecClust1D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
 
   D <- D.est <- list()
   M0 <- array(dim = c(d, d, S))
+  M0.est <- array(dim = c(d, d, order, S))
   D.nzero <- matrix(NA, S, jmax + 1)
   for (s in 1:S) {
     D.s <- pdSpecEst1D(P[, , , s], order, policy, metric, alpha, return = "D",
                        periodic = periodic, jmax = jmax, return.D = "D.white")
     D[[s]] <- sapply(0:jmax, function(j) D.s$D.white[[j + 1]][, , L_b + 1:2^j, drop = F])
     M0[, , s] <- D.s$M0[, , L + 1]
+    M0.est[, , , s] <- D.s$M0
     D.nzero[s, ] <- sapply(0:jmax, function(j) ifelse(j == 0, T, sum(D.s$tree.weights[[j]])/2^j))
     D.est[[s]] <- D.s$D
   }
@@ -199,7 +201,7 @@ pdSpecClust1D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
   dist0 <- dist
   clust0 <- clust
   cent1 <- lapply(0:jmax, function(j) array(dim = c(d, d, 2^j, K)))
-  distj <- function(D1, D2) sum(sapply(1:dim(D1)[3], function(i) pdSpecEst:::NormF(D1[, , i, 1] - D2[, , i, 1])^2))
+  distj <- function(D1, D2) sum(sapply(1:dim(D1)[3], function(i) NormF(D1[, , i, 1] - D2[, , i, 1])^2))
 
   ## Run weighted c-means algorithm
   while ((!stopit) & (jj < max.iter)) {
@@ -245,8 +247,8 @@ pdSpecClust1D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
 
   ## Compute centers
   weights <- unname(sapply(1:K, function(k) clust[, k]^m/sum(clust[, k]^m)))
-  cent.M0 <- sapply(1:K, function(k) pdMean(M0, weights[,k], metric = ifelse(metric == "Riemannian",
-                                                                             "Riemannian", "Euclidean")), simplify = "array")
+  cent.M0 <- lapply(1:K, function(k) sapply(1:dim(M0.est)[3], function(i) pdMean(M0.est[, , i,], weights[, k],
+                              metric = ifelse(metric == "Riemannian", "Riemannian", "Euclidean")), simplify = "array"))
   DD.est <- lapply(1:length(D.est[[1]]), function(j) sapply(1:S, function(s) D.est[[s]][[j]],
                                                             simplify = "array"))
   cent.D <-  lapply(1:K, function(k) lapply(1:length(DD.est), function(j) sapply(1:dim(DD.est[[j]])[3],
@@ -254,7 +256,7 @@ pdSpecClust1D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
                                                                                                      DD.est[[j]][, , i, ], c(1, 2), sum), simplify = "array")))
   ## Return 'cl.centers.f' or not
   if(return.centers){
-    cent.f <- lapply(1:K, function(k) InvWavTransf1D(cent.D[[k]], cent.M0[, , k], order = order,
+    cent.f <- lapply(1:K, function(k) InvWavTransf1D(cent.D[[k]], cent.M0[[k]], order = order,
                                                      periodic = periodic, metric = metric, chol.bias = T))
   }
 
@@ -329,8 +331,8 @@ pdSpecClust1D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
 #'   to cluster \eqn{k}.}
 #'   \item{cl.centers.D }{a list of \code{K} wavelet coefficient pyramids, where each 2D pyramid of wavelet
 #'   coefficients is associated to a cluster center.}
-#'   \item{cl.centers.M0 }{an array of \code{K} \eqn{(d,d)}-dimensional coarse-scale midpoints at scale
-#'   \code{j = 0}, where each coarse-scale midpoint is associated to a cluster center.}
+#'   \item{cl.centers.M0 }{an array \code{K} \eqn{(d,d)}-dimensional coarse-scale midpoints at scale \code{j = 0},
+#'   where each midpoint is associated to a cluster center.}
 #'   \item{cl.centers.f }{if \code{return.centers = T} returns a list of \code{K} \eqn{(d,d,n_1,n_2)}-dimensional arrays,
 #'   where each array corresponds to a discretized surface of HPD matrices associated to a cluster center. If
 #'   \code{return.centers = F}, \code{cl.centers.f} returns \code{NULL}.}
@@ -427,7 +429,7 @@ pdSpecClust2D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
   cent1 <- lapply(0:jmax, function(j) array(dim = c(dim(DD[[j + 1]])[1:4], K)))
   distj <- function(D1, D2){
     grid <- expand.grid(1:dim(D1)[3], 1:dim(D1)[4])
-    sum(mapply(function(i1, i2) pdSpecEst:::NormF(D1[, , i1, i2, 1] - D2[, , i1, i2, 1])^2,
+    sum(mapply(function(i1, i2) NormF(D1[, , i1, i2, 1] - D2[, , i1, i2, 1])^2,
                grid$Var1, grid$Var2))
   }
 

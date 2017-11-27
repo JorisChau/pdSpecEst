@@ -145,12 +145,13 @@ pdNeville <- function(P, X, x, metric = "Riemannian"){
 #' @examples
 #' ## First-order polynomial
 #' p0 <- diag(3) ## HPD starting point
-#' v0 <- array(H.coeff(rnorm(9), inverse = T), dim = c(3, 3, 1)) ## zero-th order covariant derivative
+#' v0 <- array(H.coeff(rnorm(9), inverse = TRUE), dim = c(3, 3, 1)) ## zero-th order cov. derivative
 #' P.poly <- pdPolynomial(p0, v0)
 #'
 #' ## First-order polynomials coincide with geodesic curves
 #' geo <- function(A, B, t) Expm(A, t * Logm(A, B))
-#' P.geo <- sapply(seq(0, 1, length = 100), function(t) geo(p0, P.poly[, , 100], t), simplify = "array")
+#' P.geo <- sapply(seq(0, 1, length = 100), function(t) geo(p0, P.poly[, , 100], t),
+#'                 simplify = "array")
 #' all.equal(P.poly, P.geo)
 #'
 #' @return A \code{(d, d, length(steps))}-dimensional array containing the approximated intrinsic polynomial

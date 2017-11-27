@@ -115,8 +115,8 @@ plotspec <- function(i, data, col){
   }
 }
 grid <- expand.grid(1:d, 1:d)
-invisible(apply(grid, 1, function(i) plotspec(i, ts.sim, 1)))
-invisible(apply(grid, 1, function(i) plotspec(i, f.hat, 2)))
+# invisible(apply(grid, 1, function(i) plotspec(i, ts.sim, 1))) ## NEEDS TO BE UPDATED
+# invisible(apply(grid, 1, function(i) plotspec(i, f.hat, 2))) ## NEEDS TO BE UPDATED
 ```
 
 ## Wavelet-based spectral clustering with `pdSpecClust()`

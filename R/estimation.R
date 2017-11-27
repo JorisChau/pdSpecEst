@@ -52,7 +52,7 @@
 #' \code{policy = "universal"}; or determined data-adaptively via two-fold cross-validation if \code{policy = "cv"}.}
 #'
 #' @examples
-#' P <- rExamples(2^8, example = "bumps")
+#' P <- rExamples(2^8, example = "bumps")$per
 #' f <- pdSpecEst1D(P)
 #'
 #' @seealso \code{\link{pdPgram}}, \code{\link{WavTransf1D}}, \code{\link{InvWavTransf1D}}, \code{\link{pdCART}}
@@ -380,7 +380,7 @@ variances of coefficients between the 1D and 2D AI wavelet transform.'))
 
   ## Threshold wavelet coefficients with weights 'w'
   D_w <- D
-  if(return.D == "D.white"){
+  if(isTRUE(return.D == "D.white")){
     D.white_w <- D.white
   }
   if(is_2D){
@@ -395,7 +395,7 @@ variances of coefficients between the 1D and 2D AI wavelet transform.'))
       D0 <- array(D_w[[j]], dim = c(d, d, dim(D_w[[j]])[3] * dim(D_w[[j]])[4]))
       D0[, , !(w[[j - J0_2D + 1]])] <- 0
       D_w[[j]] <- array(D0, dim = c(d, d, dim(D_w[[j]])[3], dim(D_w[[j]])[4]))
-      if(return.D == "D.white"){
+      if(isTRUE(return.D == "D.white")){
         D0 <- array(D.white[[j]], dim = c(d, d, dim(D.white_w[[j]])[3] * dim(D.white_w[[j]])[4]))
         D0[, , !(w[[j - J0_2D + 1]])] <- 0
         D.white_w[[j]] <- array(D0, dim = c(d, d, dim(D.white_w[[j]])[3], dim(D.white_w[[j]])[4]))
@@ -411,7 +411,7 @@ variances of coefficients between the 1D and 2D AI wavelet transform.'))
         zeros <- !(w[[j - 1]])
       }
       D_w[[j]][, , zeros] <- 0
-      if(return.D == "D.white"){
+      if(isTRUE(return.D == "D.white")){
         D.white_w[[j]][, , zeros] <- 0
       }
     }

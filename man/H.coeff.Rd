@@ -20,7 +20,7 @@ vector of length \eqn{d^2} containing the real-valued basis coefficients. If \co
 Hermitian matrix.
 }
 \description{
-\code{H.coeff()} expands a \eqn{(d,d)}-dimensional Hermitian matrix \code{H}  with respect to
+\code{H.coeff} expands a \eqn{(d,d)}-dimensional Hermitian matrix \code{H}  with respect to
 an orthonormal (in terms of the Frobenius inner product) basis of the space of Hermitian matrices,
 i.e. it transforms \code{H} into a numeric vector of \eqn{d^2} real-valued basis coefficients.
 This is possible as the space of Hermitian matrices is a real vector space. Let \eqn{E_{nm}} be a
@@ -43,7 +43,7 @@ H[lower.tri(H)] <- t(Conj(H))[lower.tri(H)]
 
 ## orthonormal basis expansion
 h <- H.coeff(H)
-H1 <- H.coeff(h, inverse = T) ## reconstructed Hermitian matrix
+H1 <- H.coeff(h, inverse = TRUE) ## reconstructed Hermitian matrix
 all.equal(H, H1)
 
 }

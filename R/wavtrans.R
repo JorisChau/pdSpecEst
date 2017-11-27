@@ -36,7 +36,7 @@
 #'
 #' @examples
 #' P <- rExamples(2^8, example = "bumps")
-#' P.wt <- WavTransf1D(P$f, periodic = F)
+#' P.wt <- WavTransf1D(P$f, periodic = FALSE)
 #'
 #' @return The function returns a list with three components:
 #' \item{D }{the pyramid of wavelet coefficients. This is a list of arrays, where each array contains the
@@ -47,12 +47,10 @@
 #' (Chau and von Sachs, 2017).}
 #' \item{M0 }{a numeric array containing the midpoint(s) at the coarsest scale \code{j = 0} in the midpoint pyramid.}
 #'
-#' @seealso \code{\link{InvWavTransf}}, \code{\link{pdSpecEst1D}}, \code{\link{pdNeville}}
+#' @seealso \code{\link{InvWavTransf1D}}, \code{\link{pdSpecEst1D}}, \code{\link{pdNeville}}
 #'
 #' @references Chau, J. and von Sachs, R. (2017a). \emph{Positive definite multivariate spectral
 #' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
-#'
-#' @importFrom utils txtProgressBar
 #'
 #' @export
 WavTransf1D <- function(P, order = 5, jmax, periodic = F, metric = "Riemannian", progress = F, ...) {

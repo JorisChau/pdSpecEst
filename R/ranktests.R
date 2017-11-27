@@ -47,13 +47,13 @@
 #'
 #' @examples
 #' ## null hypothesis is true
-#' data <- replicate(100, Expm(diag(2), pdSpecEst:::E_coeff_inv(rnorm(4))))
+#' data <- replicate(100, Expm(diag(2), H.coeff(rnorm(4), inverse = TRUE)))
 #' pdRankTests(data, sample.sizes = c(50, 50), test = "rank.sum") ## homogeneity 2 samples
 #' pdRankTests(data, sample.sizes = rep(25, 4), test = "krusk.wall") ## homogeneity 4 samples
 #' pdRankTests(data, test = "bartels") ## randomness
 #'
 #' ## null hypothesis is false
-#' data1 <- array(c(data, replicate(50, Expm(diag(2), pdSpecEst:::E_coeff_inv(0.5 * rnorm(4))))),
+#' data1 <- array(c(data, replicate(50, Expm(diag(2), H.coeff(0.5 * rnorm(4), inverse = TRUE)))),
 #'                  dim = c(2,2,150))
 #' pdRankTests(data1, sample.sizes = c(100, 50), test = "rank.sum")
 #' pdRankTests(data1, sample.sizes = rep(50, 3), test = "krusk.wall")
@@ -76,10 +76,6 @@
 #' @references Chau, J., Ombao, H., and von Sachs, R. (2017b). \emph{Data depth and rank-based
 #' tests for covariance and spectral density matrices}. Available at \url{http://arxiv.org/abs/1706.08289}.
 #' @references Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
-#'
-#' @importFrom utils tail
-#' @importFrom stats pchisq
-#' @importFrom stats pnorm
 #'
 #' @export
 pdRankTests <- function(data, sample.sizes, test = c("rank.sum", "krusk.wall",

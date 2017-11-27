@@ -53,8 +53,8 @@ The function returns a list with 6 components:
   to cluster \eqn{k}.}
   \item{cl.centers.D }{a list of \code{K} wavelet coefficient pyramids, where each pyramid of wavelet
   coefficients is associated to a cluster center.}
-  \item{cl.centers.M0 }{an array of \code{K} \eqn{(d,d)}-dimensional coarse-scale midpoints at scale
-  \code{j = 0}, where each coarse-scale midpoint is associated to a cluster center.}
+  \item{cl.centers.M0 }{a list \code{K} arrays of coarse-scale midpoints at scale \code{j = 0}, where each
+  array is associated to a cluster center.}
   \item{cl.centers.f }{if \code{return.centers = T} returns a list of \code{K} \eqn{(d,d,n)}-dimensional arrays,
   where each array corresponds to a discretized curve of HPD matrices associated to a cluster center. If
   \code{return.centers = F}, \code{cl.centers.f} returns \code{NULL}.}
@@ -106,7 +106,7 @@ Sigma <- matrix(c(1, 0.71, 0.71, 2), nrow = 2)
 pgram <- function(Phi) pdPgram(rARMA(2^9, 2, Phi, Theta, Sigma)$X)$P
 P <- array(c(replicate(5, pgram(Phi1)), replicate(5, pgram(Phi2))), dim=c(2,2,2^7,10))
 
-cl <- pdSpecClust(P, K=2)
+cl <- pdSpecClust1D(P, K = 2)
 
 }
 \references{

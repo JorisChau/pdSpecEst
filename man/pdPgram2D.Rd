@@ -23,7 +23,7 @@ vector of frequency points in \code{(0,0.5)}, with 0.5 corresponding to the Nyqu
 section below. Defaults to \code{method = "dpss"}.}
 
 \item{nw}{a positive numeric value corresponding to the time-bandwidth parameter of the tapering functions,
-see also \code{\link{multitaper::dpss}}, defaults to \code{nw = pi}. Both the Slepian and Hermite tapers are
+see also \code{\link[multitaper]{dpss}}, defaults to \code{nw = pi}. Both the Slepian and Hermite tapers are
 rescaled with the same time-bandwidth parameter.}
 
 \item{bias.corr}{should the Riemannian manifold bias-correction be applied to the HPD periodogram matrix?

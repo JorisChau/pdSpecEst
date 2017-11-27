@@ -54,8 +54,8 @@ The function returns a list with 6 components:
   to cluster \eqn{k}.}
   \item{cl.centers.D }{a list of \code{K} wavelet coefficient pyramids, where each 2D pyramid of wavelet
   coefficients is associated to a cluster center.}
-  \item{cl.centers.M0 }{an array of \code{K} \eqn{(d,d)}-dimensional coarse-scale midpoints at scale
-  \code{j = 0}, where each coarse-scale midpoint is associated to a cluster center.}
+  \item{cl.centers.M0 }{an array \code{K} \eqn{(d,d)}-dimensional coarse-scale midpoints at scale \code{j = 0},
+  where each midpoint is associated to a cluster center.}
   \item{cl.centers.f }{if \code{return.centers = T} returns a list of \code{K} \eqn{(d,d,n_1,n_2)}-dimensional arrays,
   where each array corresponds to a discretized surface of HPD matrices associated to a cluster center. If
   \code{return.centers = F}, \code{cl.centers.f} returns \code{NULL}.}
