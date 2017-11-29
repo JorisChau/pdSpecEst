@@ -1,7 +1,8 @@
 #' Rank-based hypothesis tests for HPD matrices
 #'
-#' \code{pdRankTests} performs generalized rank-based hypothesis testing for samples of Hermitian PD matrices or
-#' samples of sequences (curves) of Hermitian PD matrices as described in (Chau, Ombao, and von Sachs, 2017b).
+#' \code{pdRankTests} performs generalized rank-based hypothesis testing in the metric space of HPD matrices equipped
+#' with the Riemannian or Log-Euclidean metric for samples of Hermitian PD matrices or samples of sequences (curves)
+#' of Hermitian PD matrices as described in (Chau, Ombao, and von Sachs, 2017b).
 #'
 #' For samples of \eqn{(d \times d)}-dimensional Hermitian PD matrices with pooled sample size \eqn{S}, the argument
 #' \code{data} is a \eqn{(d,d,S)}-dimensional array of Hermitian PD matrices, where the individual samples are
@@ -24,6 +25,10 @@
 #' Hermitian PD matrices or a sample of sequences of Hermitian PD matrices. The usual univariate ranks are replaced by data depth induced
 #' ranks via \code{\link{pdDepth}}.}
 #' }
+#' The function computes the generalized rank-based test statistics in the \emph{complete} metric space of HPD matrices equipped with one of the following metrics:
+#' (i) Riemannian metric (default) as in (Bhatia, 2009, Chapter 6), or (ii) Log-Euclidean metric, the Euclidean inner product between matrix logarithms.
+#' The default Riemannian metric is invariant under congruence transformation by any invertible matrix, whereas the Log-Euclidean metric is only
+#' invariant under congruence transformation by unitary matrices, see (Chau, Ombao and von Sachs 2017b) for more details.
 #'
 #' @note The manifold signed-rank test also provides a valid test for equivalence of spectral matrices of two multivariate stationary time
 #' series based on the Hermitian PD periodogram matrices obtained via \code{\link{pdPgram}}, see (Chau, Ombao, and von Sachs, 2017b) for the details.
@@ -37,6 +42,8 @@
 #' @param depth data depth measure used in the rank-based tests, one of \code{"gdd"}, \code{"zonoid"}, or \code{"spatial"} corresponding to the
 #' geodesic distance depth, manifold zonoid depth and manifold spatial depth respectively. Defaults to \code{"gdd"}. Not required for test
 #' \code{"signed.rank"}.
+#' @param metric the metric that the space of HPD matrices is equipped with, either \code{"Riemannian"} or \code{"logEuclidean"}. Defaults to
+#' \code{"Riemannian"}.
 #'
 #' @return The function returns a list with five components:
 #' \item{test }{name of the rank-based test}
@@ -78,8 +85,8 @@
 #' @references Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
 #'
 #' @export
-pdRankTests <- function(data, sample.sizes, test = c("rank.sum", "krusk.wall",
-                                    "signed.rank", "bartels"), depth = c("gdd", "zonoid", "spatial")) {
+pdRankTests <- function(data, sample.sizes, test = c("rank.sum", "krusk.wall", "signed.rank", "bartels"),
+                        depth = c("gdd", "zonoid", "spatial"), metric = c("Riemannian", "logEuclidean")) {
   if (missing(depth)) {
     depth <- "gdd"
   }
@@ -87,6 +94,7 @@ pdRankTests <- function(data, sample.sizes, test = c("rank.sum", "krusk.wall",
   if (missing(sample.sizes)) {
     sample.sizes <- NA
   }
+  metric <- match.arg(metric, c("Riemannian", "logEuclidean"))
   test <- match.arg(test, c("rank.sum", "krusk.wall", "signed.rank", "bartels"))
   depth <- match.arg(depth, c("gdd", "zonoid", "spatial"))
   err.message <- "Incorrect input lenghts for arguments: 'samples' and/or 'sample.sizes',
@@ -105,7 +113,7 @@ pdRankTests <- function(data, sample.sizes, test = c("rank.sum", "krusk.wall",
       stop(err.message)
     }
 
-    dd <- pdDepth(X = data, method = depth)
+    dd <- pdDepth(X = data, method = depth, metric = metric)
     T1 <- (sum(rank(dd, ties.method = "random")[1:n[1]]) - n[1] * (sum(n) + 1)/2) /
                                                     sqrt(n[1] * n[2] * (sum(n) + 1)/12)
 
@@ -120,7 +128,7 @@ pdRankTests <- function(data, sample.sizes, test = c("rank.sum", "krusk.wall",
                             (ddim[4] == N))) & (ddim[1] == ddim[2]) & (length(n) > 2))) {
       stop(err.message)
     }
-    dd <- pdDepth(X = data, method = depth)
+    dd <- pdDepth(X = data, method = depth, metric = metric)
     R_bar <- unname(unlist(lapply(split(rank(dd, ties.method = "random"),
                                       f = rep(1:length(n), times = n)), mean)))
     T2 <- 12/(N * (N + 1)) * sum(n * (R_bar - (N + 1)/2)^2)
@@ -137,9 +145,12 @@ pdRankTests <- function(data, sample.sizes, test = c("rank.sum", "krusk.wall",
     }
     n <- ddim[3]/2
     d <- ddim[1]
-    ast <- function(A, B) t(Conj(A)) %*% B %*% A
-    diff <- sapply(1:n, function(i) Re(sum(diag(Logm(diag(d), ast(iSqrt(data[, , n + i]), data[, , i]))))))
-
+    if(metric == "Riemannian"){
+      ast <- function(A, B) t(Conj(A)) %*% B %*% A
+      diff <- sapply(1:n, function(i) Re(sum(diag(Logm(diag(d), ast(iSqrt(data[, , n + i]), data[, , i]))))))
+    } else{
+      diff <- sapply(1:n, function(i) Re(sum(diag(Logm(diag(d), data[, , n + i]) - Logm(diag(d), data[, , i])))))
+    }
     T3 <- stats::wilcox.test(x = diff, y = rep(0, n), paired = T, correct = T)
     output <- list(test = "Manifold Wilcoxon signed-rank", p.value = T3$p.value, statistic = T3$statistic, null.distr = T3$method)
   }
@@ -150,7 +161,7 @@ pdRankTests <- function(data, sample.sizes, test = c("rank.sum", "krusk.wall",
       stop(err.message)
     }
     n <- utils::tail(ddim, 1)
-    dd <- pdDepth(X = data, method = depth)
+    dd <- pdDepth(X = data, method = depth, metric = metric)
     T4 <- sum(diff(rank(dd, ties.method = "random"))^2)/(n * (n^2 - 1)/12)
     sigma <- sqrt(4 * (n - 2) * (5 * n^2 - 2 * n - 9)/(5 * n * (n + 1) * (n - 1)^2))
 
