@@ -185,7 +185,7 @@ InvWavTransf1D <- function(D, M0, order = 5, jmax, periodic = F, metric = "Riema
 #' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
 #'
 #' @export
-InvWavTransf2D <- function(D, M0, order = c(5, 5), jmax, metric = "Riemannian", progress = T, ...) {
+InvWavTransf2D <- function(D, M0, order = c(3, 3), jmax, metric = "Riemannian", progress = T, ...) {
 
   ## Set variables
   dots = list(...)
@@ -194,7 +194,7 @@ InvWavTransf2D <- function(D, M0, order = c(5, 5), jmax, metric = "Riemannian", 
   chol.bias = (if(is.null(dots$chol.bias)) F else dots$chol.bias)
   if (!isTRUE((order[1] %% 2 == 1) & (order[2] %% 2 == 1))) {
     warning("Refinement orders in both directions should be odd integers, by default set to c(5,5).")
-    order = c(5, 5)
+    order = c(3, 3)
   }
   metric = match.arg(metric, c("Riemannian", "logEuclidean", "Cholesky", "rootEuclidean", "Euclidean"))
   L = (order - 1) / 2
@@ -233,9 +233,9 @@ InvWavTransf2D <- function(D, M0, order = c(5, 5), jmax, metric = "Riemannian", 
         if(any(c(D[[j + 1]][, , i1, i2]) != 0)){
           if(metric == "Riemannian"){
             m1_i <- Expm(tm1[, , i1, i2], ifelse(any(dim(D[[j + 1]]) == 1),
-                                                 2^(j/2), 2^j) * D[[j + 1]][, , i1, i2])
+                                        2^((J0_2D + j)/2), 2^j)  * D[[j + 1]][, , i1, i2])
           } else{
-            m1_i <- ifelse(any(dim(D[[j + 1]]) == 1), 2^(j/2), 2^j) *
+            m1_i <- ifelse(any(dim(D[[j + 1]]) == 1), 2^((J0_2D + j)/2), 2^j) *
               D[[j + 1]][, , i1, i2] + tm1[, , i1, i2]
           }
         } else{

@@ -87,10 +87,11 @@ rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
 #'
 #' \code{rExamples()} generates stationary time series observations from several example HPD spectral matrices
 #' for testing and simulation purposes. For more details, we refer to the simulation studies in (Chau and von Sachs, 2017).
+#'
 #' The examples include: (i) a \eqn{(3 \times 3)} heaviSine HPD spectral matrix consisting of smooth sinosoids with a break,
 #' (ii) a \eqn{(3 \times 3)} bumps HPD spectral matrix containing peaks and bumps of various smoothness degrees, (iii) a
 #' \eqn{(3 \times 3)} two-cats HPD spectral matrix visualizing the contour of two side-by-side cats, with inhomogeneous
-#' smoothness across frequency, and (iv) a \eqn{(3 \times 3)} Gaussian HPD spectral matrix consisting of smooth random Gaussian
+#' smoothness across frequency, and (iv) a \eqn{(2 \times 2)} Gaussian HPD spectral matrix consisting of smooth random Gaussian
 #' functions. The time series observations are generated via the Cram\'er representation based on the transfer function of
 #' the example spectral matrix and complex normal random variates.
 #'
@@ -197,6 +198,7 @@ rExamples <- function(n, example = c("heaviSine", "bumps", "two-cats", "gaussian
 #' Several example time-varying spectral matrices
 #'
 #' \code{rExamples2D()} generates several example HPD time-varying spectral matrices for testing and simulation purposes.
+#'
 #' The examples include: (i) a \eqn{(d \times d)} smiley HPD spectral matrix consisting of constant surfaces of random HPD matrices in
 #' the shape of a smiley face, (ii) a \eqn{(d \times d)} tvar HPD spectral matrix generated from a time-varying vector auto-
 #' regressive process of order 1 with a random time-varying coefficient matrix (\eqn{\Phi}), (iii) a \eqn{(d \times d)} generally smooth

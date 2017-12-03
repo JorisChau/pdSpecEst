@@ -48,7 +48,7 @@
 #' ## Integrated depth
 #' X2 <- replicate(50, replicate(5, Expm(diag(2), H.coeff(rnorm(4), inverse = TRUE))))
 #' pdDepth(y = replicate(5, diag(2)), X2, method = "zonoid", metric = "logEuclidean')
-#' pdDepth(X = X2, method = "zonoid", metric = "logEuclidean)
+#' pdDepth(X = X2, method = "zonoid", metric = "logEuclidean")
 #'
 #' @seealso \code{\link{pdDist}}, \code{\link{pdRankTests}}
 #'
@@ -95,19 +95,19 @@ pdDepth <- function(y = NULL, X, method = c("zonoid", "gdd", "spatial"), metric 
       point <- ifelse(length(dim(y)) == 2, T, F)
       if(metric == "Riemannian" & point){
         y.coeff <- as.matrix(rep(0, d^2))
-        X.coeff <- apply(X, 3, function(X) pdSpecEst:::E_coeff(Logm(y, X)))
+        X.coeff <- apply(X, 3, function(X) E_coeff(Logm(y, X)))
       } else if(metric == "logEuclidean"){
-        X.coeff <- apply(X, 3, function(X) pdSpecEst:::E_coeff(Logm(diag(d), X)))
-        y.coeff <- (if(point) pdSpecEst:::E_coeff(Logm(diag(d), y)) else X.coeff)
+        X.coeff <- apply(X, 3, function(X) E_coeff(Logm(diag(d), X)))
+        y.coeff <- (if(point) E_coeff(Logm(diag(d), y)) else X.coeff)
       } else if(metric == "Cholesky"){
-        X.coeff <- apply(X, 3, function(X) pdSpecEst:::E_chol(t(Conj(pdSpecEst:::Chol(X)))))
-        y.coeff <- (if(point) pdSpecEst:::E_chol(t(Conj(pdSpecEst:::Chol(y)))) else X.coeff)
+        X.coeff <- apply(X, 3, function(X) E_chol(t(Conj(Chol(X)))))
+        y.coeff <- (if(point) E_chol(t(Conj(Chol(y)))) else X.coeff)
       } else if(metric == "Euclidean"){
-        X.coeff <- apply(X, 3, function(X) pdSpecEst:::E_coeff(X))
-        y.coeff <- (if(point) pdSpecEst:::E_coeff(y) else X.coeff)
+        X.coeff <- apply(X, 3, function(X) E_coeff(X))
+        y.coeff <- (if(point) E_coeff(y) else X.coeff)
       } else if(metric == "rootEuclidean"){
-        X.coeff <- apply(X, 3, function(X) pdSpecEst:::E_coeff(pdSpecEst:::Sqrt(X)))
-        y.coeff <- (if(point) pdSpecEst:::E_coeff(pdSpecEst:::Sqrt(y)) else X.coeff)
+        X.coeff <- apply(X, 3, function(X) E_coeff(Sqrt(X)))
+        y.coeff <- (if(point) E_coeff(Sqrt(y)) else X.coeff)
       }
       ddalpha::depth.zonoid(t(y.coeff), t(X.coeff))
     }
@@ -172,24 +172,24 @@ pdDepth <- function(y = NULL, X, method = c("zonoid", "gdd", "spatial"), metric 
     SD <- function(y, X) {
       point <- ifelse(length(dim(y)) == 2, T, F)
       if(metric == "Riemannian"){
-        y.isqrt <- pdSpecEst:::iSqrt(y)
+        y.isqrt <- iSqrt(y)
         log.yx <- sapply(1:S, function(s) Logm(diag(d), (y.isqrt %*% X[, , s]) %*% y.isqrt), simplify = "array")
-        dd <- 1 - pdSpecEst:::NormF(apply(sapply(1:S,
-                                                 function(s) log.yx[, , s]/max(pdSpecEst:::NormF(log.yx[, , s]), .Machine$double.eps),
+        dd <- 1 - NormF(apply(sapply(1:S,
+                                                 function(s) log.yx[, , s]/max(NormF(log.yx[, , s]), .Machine$double.eps),
                                                  simplify = "array"), c(1, 2), mean))
       } else {
         if(metric == "logEuclidean"){
-          X.coeff <- apply(X, 3, function(X) pdSpecEst:::E_coeff(Logm(diag(d), X)))
-          y.coeff <- (if(point) pdSpecEst:::E_coeff(Logm(diag(d), y)) else X.coeff)
+          X.coeff <- apply(X, 3, function(X) E_coeff(Logm(diag(d), X)))
+          y.coeff <- (if(point) E_coeff(Logm(diag(d), y)) else X.coeff)
         } else if(metric == "Cholesky"){
-          X.coeff <- apply(X, 3, function(X) pdSpecEst:::E_chol(t(Conj(pdSpecEst:::Chol(X)))))
-          y.coeff <- (if(point) pdSpecEst:::E_chol(t(Conj(pdSpecEst:::Chol(y)))) else X.coeff)
+          X.coeff <- apply(X, 3, function(X) E_chol(t(Conj(Chol(X)))))
+          y.coeff <- (if(point) E_chol(t(Conj(Chol(y)))) else X.coeff)
         } else if(metric == "Euclidean"){
-          X.coeff <- apply(X, 3, function(X) pdSpecEst:::E_coeff(X))
-          y.coeff <- (if(point) pdSpecEst:::E_coeff(y) else X.coeff)
+          X.coeff <- apply(X, 3, function(X) E_coeff(X))
+          y.coeff <- (if(point) E_coeff(y) else X.coeff)
         } else if(metric == "rootEuclidean"){
-          X.coeff <- apply(X, 3, function(X) pdSpecEst:::E_coeff(pdSpecEst:::Sqrt(X)))
-          y.coeff <- (if(point) pdSpecEst:::E_coeff(pdSpecEst:::Sqrt(y)) else X.coeff)
+          X.coeff <- apply(X, 3, function(X) E_coeff(Sqrt(X)))
+          y.coeff <- (if(point) E_coeff(Sqrt(y)) else X.coeff)
         }
         dd <- ddalpha::depth.spatial(t(y.coeff), t(X.coeff), mah.estimate = "none")
       }

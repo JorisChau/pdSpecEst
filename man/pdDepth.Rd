@@ -58,18 +58,6 @@ Note that the data depth computations in the metric space equipped with the Riem
 metric may be significantly slower than the depth computations based on one of the alternative
 metrics.
 }
-\examples{
-## Pointwise depth
-X1 <- replicate(50, Expm(diag(2), H.coeff(rnorm(4), inverse = TRUE)))
-pdDepth(y = diag(2), X1, method = "gdd") ## depth of one point
-pdDepth(X = X1, method = "gdd") ## depth of each point in the data cloud
-
-## Integrated depth
-X2 <- replicate(50, replicate(5, Expm(diag(2), H.coeff(rnorm(4), inverse = TRUE))))
-pdDepth(y = replicate(5, diag(2)), X2, method = "zonoid", metric = "logEuclidean')
-pdDepth(X = X2, method = "zonoid", metric = "logEuclidean)
-
-}
 \references{
 Chau, J., Ombao, H., and von Sachs, R. (2017b). \emph{Data depth and rank-based
 tests for covariance and spectral density matrices}. Available at \url{http://arxiv.org/abs/1706.08289}.

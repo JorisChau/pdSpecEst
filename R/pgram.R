@@ -157,7 +157,7 @@ pdPgram2D <- function(X, B, tf.grid, method = c("dpss", "hermite"), nw = pi, bia
   if(missing(method)) {
     method = "dpss"
   }
-  method = match.arg(method, c("bartlett", "dpss", "hermite"))
+  method = match.arg(method, c("dpss", "hermite"))
   if (missing(B)) {
     B = d
   }
@@ -166,10 +166,10 @@ pdPgram2D <- function(X, B, tf.grid, method = c("dpss", "hermite"), nw = pi, bia
             is not positive definite!")
   }
   if(missing(tf.grid)){
-    tf.grid = list(time = seq((2^round(log2(sqrt(n))) + 1)/2, n - (2^round(log2(sqrt(n))) - 1)/2,
+    tf.grid = list(time = seq(2^round(log2(sqrt(n))) + 1, n - 2^round(log2(sqrt(n))) - 1,
                               length = 2^round(log2(sqrt(n))))/n,
-                   freq = seq((2^round(log2(sqrt(n))) + 1)/2, n - (2^round(log2(sqrt(n))) - 1)/2,
-                       length = 2^round(log2(sqrt(n))))/(2*n))
+                   freq = seq(2^round(log2(sqrt(n))) + 1, n - 2^round(log2(sqrt(n))) - 1,
+                              length = 2^round(log2(sqrt(n))))/(2*n))
   }
   L = length(tf.grid$time)
   x = head(seq(0, 1, len = n + 1), -1)
@@ -181,7 +181,10 @@ pdPgram2D <- function(X, B, tf.grid, method = c("dpss", "hermite"), nw = pi, bia
     return(sapply(ceiling(tf.grid$freq * nrow(Y)), function(i) dft[i, ] %*% t(Conj(dft[i, ])), simplify = "array"))
   }
 
-  if(method == "hermite"){
+  ## Taper weights
+  if(method == "dpss"){
+    h <- multitaper::dpss(2 * floor(n / (2 * L)), B, nw, returnEigenvalues = F)$v * sqrt(2 * floor(n / (2 * L)))
+  } else if(method == "hermite"){
 
     ## Hermite functions
     Hermite <- function(k, t){
@@ -200,22 +203,16 @@ pdPgram2D <- function(X, B, tf.grid, method = c("dpss", "hermite"), nw = pi, bia
       }
       sapply(t, function(ti) exp(-ti^2 / 2) * Herm_poly(ti) / sqrt(sqrt(pi) * 2^k * factorial(k)))
     }
+
+    h0 <- sapply(0:(B-1), function(b) Hermite(b, seq(-nw, nw, length = 2 * floor(n / (2 * L)))))
+    norm.h0 <- sqrt(mean(h0[, 1]^2))
+    h <- apply(h0, 2, function(h.col) h.col / norm.h0)
   }
 
-    ## Taper weights
-    if(method == "dpss"){
-            h <- multitaper::dpss(2 * floor(n / (2 * L)), B, nw, returnEigenvalues = F)$v * sqrt(2 * floor(n / (2 * L)))
-      } else if(method == "hermite"){
-            h0 <- sapply(1:B, function(b) Hermite(b, seq(-nw, nw, length = 2 * floor(n / (2 * L)))))
-            norm.h0 <- sqrt(mean(h0[, 1]^2))
-            h <- apply(h, 2, function(h.col) h.col / norm.h0)
-      }
-
-    ## Sliding dpss or hermite multitaper
-    Per <- sapply(tf.grid$time, function(ti) bias.corr * apply(sapply(1:B, function(b) 1/(2 * pi) *
-                  Per_t(h[, b] * X[(round(ti * n)  - floor(n / (2 * L) - 1)):(round(ti * n) + floor(n / (2 * L))),]),
-                  simplify = "array"), c(1, 2, 3), mean), simplify = "array")
+  ## Sliding dpss or hermite multitaper
+  Per <- sapply(tf.grid$time, function(ti) bias.corr * apply(sapply(1:B, function(b) 1/(2 * pi) *
+                Per_t(h[, b] * X[(round(ti * n)  - floor(n / (2 * L) - 1)):(round(ti * n) + floor(n / (2 * L))),]),
+                simplify = "array"), c(1, 2, 3), mean), simplify = "array")
 
   return(list(tf.grid = tf.grid, P = aperm(Per, c(1, 2, 4, 3))))
-
 }

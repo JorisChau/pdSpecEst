@@ -26,10 +26,12 @@ Returns a list with four components:
 \description{
 \code{rExamples()} generates stationary time series observations from several example HPD spectral matrices
 for testing and simulation purposes. For more details, we refer to the simulation studies in (Chau and von Sachs, 2017).
+}
+\details{
 The examples include: (i) a \eqn{(3 \times 3)} heaviSine HPD spectral matrix consisting of smooth sinosoids with a break,
 (ii) a \eqn{(3 \times 3)} bumps HPD spectral matrix containing peaks and bumps of various smoothness degrees, (iii) a
 \eqn{(3 \times 3)} two-cats HPD spectral matrix visualizing the contour of two side-by-side cats, with inhomogeneous
-smoothness across frequency, and (iv) a \eqn{(3 \times 3)} Gaussian HPD spectral matrix consisting of smooth random Gaussian
+smoothness across frequency, and (iv) a \eqn{(2 \times 2)} Gaussian HPD spectral matrix consisting of smooth random Gaussian
 functions. The time series observations are generated via the Cram\'er representation based on the transfer function of
 the example spectral matrix and complex normal random variates.
 }

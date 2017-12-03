@@ -49,7 +49,7 @@ wavelet scale \code{j = 0}.}
 by: (i) applying an intrinsic 1D AI wavelet transform (\code{\link{WavTransf1D}}) to an initial noisy
 HPD spectral estimate, (ii) (tree-structured) thresholding of the wavelet coefficients (\code{\link{pdCART}})
 and (iii) applying an intrinsic inverse 1D AI wavelet transform (\code{\link{InvWavTransf1D}}). The complete
-estimation procedure is described in detail (Chau and von Sachs, 2017a).
+estimation procedure is described in detail in (Chau and von Sachs, 2017a).
 }
 \details{
 The input array \code{P} corresponds to an initial noisy HPD spectral estimate of the (\eqn{d, d})-dimensional

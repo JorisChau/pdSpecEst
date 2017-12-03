@@ -4,12 +4,14 @@
 \alias{pdCART}
 \title{Tree-structured trace thresholding of wavelet coefficients}
 \usage{
-pdCART(D, D.white, alpha = 1, tree = T, ...)
+pdCART(D, D.white, order, alpha = 1, tree = T, ...)
 }
 \arguments{
 \item{D}{a list of wavelet coefficients as obtained from \code{\link{WavTransf1D}} or \code{\link{WavTransf2D}}.}
 
 \item{D.white}{a list of whitened wavelet coefficients as obtained from \code{\link{WavTransf1D}} or \code{\link{WavTransf2D}}.}
+
+\item{order}{the order(s) of the intrinsic 1D or 2D AI refinement scheme as in \code{\link{WavTransf1D}} and \code{\link{WavTransf2D}}.}
 
 \item{alpha}{tuning parameter specifying the sparsity parameter as \code{alpha} times the universal threshold.}
 
@@ -35,17 +37,26 @@ The optimal tree of wavelet coefficients is found by minimization of the \emph{c
 in (Donoho, 1997), via a fast tree-pruning algorithm. By default, the sparsity parameter is set equal to \code{alpha} times
 the universal threshold \eqn{\sigma_w\sqrt(2\log(n))}, where \eqn{\sigma_w^2} is the noise variance of the traces of the whitened wavelet
 coefficients determined from the finest wavelet scale and \eqn{n} is the total number of coefficients. By default, \code{alpha = 1},
-with \code{alpha = 0}, the sparsity parameter is zero and we do not threshold any coefficients. For 2D thresholding of wavelet coefficients, the first
-\code{abs(J1 - J2)} wavelet scales are not thresholded, where \eqn{J_1 = \log_2(n_1)} and \eqn{J_2 = \log_2(n_2)} with \eqn{n_1} and \eqn{n_2}
-the dyadic number of observations in each marginal direction of the 2D rectangular tensor grid. The reason for this is that the variances of the
-traces of the whitened coefficients are not homogeneous between scales at which we apply the 1D wavelet refinement scheme and scales at which we apply
-the 2D wavelet refinement scheme. Note however that if the 2D grid of observations is a square tensor grid, i.e. \eqn{n_1 = n_2}, the variances of the
-traces of the whitened are again homogeneous across scales and the function takes into account all wavelet scales in the thresholding procedure.
+with \code{alpha = 0}, the sparsity parameter is zero and we do not threshold any coefficients.
+}
+\note{
+For thresholding of 1D wavelet coefficients, the noise
+variance of the traces of the whitened wavelet coefficients is constant across scales as shown in (Chau and von Sachs, 2017a). For thresholding of 2D
+wavelet coefficients, there is a discrepancy between the constant noise variance of the traces of the whitened wavelet coefficients of the first
+\code{abs(J1 - J2)} scales and the remaining scales, where \eqn{J_1 = \log_2(n_1)} and \eqn{J_2 = \log_2(n_2)} with \eqn{n_1} and \eqn{n_2}
+the dyadic number of observations in each marginal direction of the 2D rectangular tensor grid.  The reason is that the variances of the traces of
+the whitened coefficients are not homogeneous between: (i) scales at which the 1D wavelet refinement scheme is applied and (ii) scales at which the
+2D wavelet refinement scheme is applied. To correct for this discrepancy, the variances of the coefficients at the 2D wavelet scales are normalized
+by the noise variance determined from the finest wavelet scale. The variances of the coefficients at the 1D wavelet scales are normalized using the
+analytic noise variance of the traces of the whitened coefficients for a grid of complex random Wishart matrices, which corresponds to the distributional
+behavior of the pseudo HPD periodogram matrices, or the asymptotic distributional behavior of the actual HPD periodogram matrices. Note that if the
+2D time-frequency grid of is a square grid, i.e. \eqn{n_1 = n_2}, the variances of the traces of the whitened coefficients are again homogeneous across
+all wavelet scales.
 }
 \examples{
 X <- rExamples(256, example = "bumps")
 Coeffs <- WavTransf1D(X$per)
-pdCART(Coeffs$D, Coeffs$D.white)$w ## logical tree of non-zero coefficients
+pdCART(Coeffs$D, Coeffs$D.white, order = 5)$w ## logical tree of non-zero coefficients
 
 }
 \references{

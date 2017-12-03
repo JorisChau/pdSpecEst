@@ -37,6 +37,8 @@ Returns a list with two components:
 }
 \description{
 \code{rExamples2D()} generates several example HPD time-varying spectral matrices for testing and simulation purposes.
+}
+\details{
 The examples include: (i) a \eqn{(d \times d)} smiley HPD spectral matrix consisting of constant surfaces of random HPD matrices in
 the shape of a smiley face, (ii) a \eqn{(d \times d)} tvar HPD spectral matrix generated from a time-varying vector auto-
 regressive process of order 1 with a random time-varying coefficient matrix (\eqn{\Phi}), (iii) a \eqn{(d \times d)} generally smooth

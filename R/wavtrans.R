@@ -287,12 +287,12 @@ WavTransf2D <- function(P, order = c(3, 3), jmax, metric = "Riemannian", progres
 
       ## Construct (correctly scaled) wavelet coefficients
       if(!(metric == "Riemannian")){
-        D[[j + 1]] <- D.white[[j + 1]] <- array(c(sapply(1:2^(j + 1), function(i) ifelse(any(dim(M[[min(length(M), j + 2)]]) == 1),
-                                            2^(-j/2), 2^(-j)) * (M[[j + 2]][, , 1, i] - tm1[, , 1, i]))), dim = c(d, d, 1, 2^(j + 1)))
+        D[[j + 1]] <- D.white[[j + 1]] <- array(c(sapply(1:2^(j + 1), function(i) 2^((-J0_2D - j)/2) *
+                                                  (M[[j + 2]][, , 1, i] - tm1[, , 1, i]))), dim = c(d, d, 1, 2^(j + 1)))
       } else{
         iSqrt_tm1 <- sapply(1:2^(j + 1), function(i) iSqrt(tm1[, , 1, i]), simplify = "array")
-        D[[j + 1]] <- array(c(sapply(1:2^(j + 1), function(i) ifelse(any(dim(M[[min(length(M), j + 2)]]) == 1),
-                              2^(-j/2), 2^(-j)) * Logm(tm1[, , 1, i], M[[j + 2]][, , 1, i]))), dim = c(d, d, 1, 2^(j + 1)))
+        D[[j + 1]] <- array(c(sapply(1:2^(j + 1), function(i) 2^((-J0_2D - j)/2) *
+                                       Logm(tm1[, , 1, i], M[[j + 2]][, , 1, i]))), dim = c(d, d, 1, 2^(j + 1)))
         D.white[[j + 1]] <- array(c(sapply(1:2^(j + 1), function(i) (iSqrt_tm1[, , i] %*% D[[j + 1]][, , 1, i]) %*%
                                              iSqrt_tm1[, , i])), dim = c(d, d, 1, 2^(j + 1)))
       }
@@ -304,12 +304,12 @@ WavTransf2D <- function(P, order = c(3, 3), jmax, metric = "Riemannian", progres
 
       ## Construct (correctly scaled) wavelet coefficients
       if(!(metric == "Riemannian")){
-        D[[j + 1]] <- D.white[[j + 1]] <- array(c(sapply(1:2^(j + 1), function(i) ifelse(any(dim(M[[min(length(M), j + 2)]]) == 1),
-                                            2^(-j/2), 2^(-j)) * (M[[j + 2]][, , i, 1] - tm1[, , i, 1]))), dim = c(d, d, 2^(j + 1), 1))
+        D[[j + 1]] <- D.white[[j + 1]] <- array(c(sapply(1:2^(j + 1), function(i) 2^((-J0_2D - j)/2) *
+                                                           (M[[j + 2]][, , i, 1] - tm1[, , i, 1]))), dim = c(d, d, 2^(j + 1), 1))
       } else{
         iSqrt_tm1 <- sapply(1:2^(j + 1), function(i) iSqrt(tm1[, , i, 1]), simplify = "array")
-        D[[j + 1]] <- array(c(sapply(1:2^(j + 1), function(i) ifelse(any(dim(M[[min(length(M), j + 2)]]) == 1),
-                              2^(-j/2), 2^(-j)) * Logm(tm1[, , i, 1], M[[j + 2]][, , i, 1]))), dim = c(d, d, 2^(j + 1), 1))
+        D[[j + 1]] <- array(c(sapply(1:2^(j + 1), function(i) 2^((-J0_2D - j)/2) *
+                                       Logm(tm1[, , i, 1], M[[j + 2]][, , i, 1]))), dim = c(d, d, 2^(j + 1), 1))
         D.white[[j + 1]] <- array(c(sapply(1:2^(j + 1), function(i) (iSqrt_tm1[, , i] %*% D[[j + 1]][, , i, 1]) %*%
                                              iSqrt_tm1[, , i])), dim = c(d, d, 2^(j + 1), 1))
       }

@@ -4,7 +4,7 @@
 \alias{InvWavTransf2D}
 \title{Inverse average-interpolation 2D wavelet transform}
 \usage{
-InvWavTransf2D(D, M0, order = c(5, 5), jmax, metric = "Riemannian",
+InvWavTransf2D(D, M0, order = c(3, 3), jmax, metric = "Riemannian",
   progress = T, ...)
 }
 \arguments{

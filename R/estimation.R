@@ -4,7 +4,7 @@
 #' by: (i) applying an intrinsic 1D AI wavelet transform (\code{\link{WavTransf1D}}) to an initial noisy
 #' HPD spectral estimate, (ii) (tree-structured) thresholding of the wavelet coefficients (\code{\link{pdCART}})
 #' and (iii) applying an intrinsic inverse 1D AI wavelet transform (\code{\link{InvWavTransf1D}}). The complete
-#' estimation procedure is described in detail (Chau and von Sachs, 2017a).
+#' estimation procedure is described in detail in (Chau and von Sachs, 2017a).
 #'
 #' The input array \code{P} corresponds to an initial noisy HPD spectral estimate of the (\eqn{d, d})-dimensional
 #' spectral matrix at \code{m} different frequencies, with \eqn{m = 2^J} for some \eqn{J > 0}. This can be e.g.
@@ -118,8 +118,10 @@ pdSpecEst1D <- function(P, order = 5, policy = "universal", metric = "Riemannian
 
     cv <- function(alpha){
 
-      D <- list(odd = pdCART(coeff.odd$D, coeff.odd$D.white, tree = F, alpha = alpha, periodic = periodic)$D_w,
-                even = pdCART(coeff.even$D, coeff.even$D.white, tree = F, alpha = alpha, periodic = periodic)$D_w)
+      D <- list(odd = pdCART(coeff.odd$D, coeff.odd$D.white, order = order, B = B, tree = F,
+                             alpha = alpha, periodic = periodic)$D_w,
+                even = pdCART(coeff.even$D, coeff.even$D.white, order = order, B = B, tree = F,
+                              alpha = alpha, periodic = periodic)$D_w)
 
       f.hat <- list(odd = InvWavTransf1D(D$odd, coeff.odd$M0, order,
                                          periodic = periodic, metric = "Euclidean", return_val = "tangent"),
@@ -129,10 +131,10 @@ pdSpecEst1D <- function(P, order = 5, policy = "universal", metric = "Riemannian
       f.pred <- list(even = array(c(sapply(1:(dim(f.hat$odd)[3] - 1), function(k) 0.5 * (f.hat$odd[, , k] + f.hat$odd[, , k + 1]),
                                            simplify = "array"), f.hat$odd[, , dim(f.hat$odd)[3]]), dim = dim(f.hat$odd)),
                      odd = array(c(f.hat$even[, , 1], sapply(1:(dim(f.hat$even)[3] - 1), function(k) 0.5 * (f.hat$even[, , k] +
-                                                  f.hat$even[, , k + 1]), simplify = "array")), dim = dim(f.hat$even)))
+                                                                                                              f.hat$even[, , k + 1]), simplify = "array")), dim = dim(f.hat$even)))
 
       return(mean(sapply(1:dim(f.hat$odd)[3], function(k) NormF(f.pred$even[, , k] - P1$even[, , k])^2 +
-                                                          NormF(f.pred$odd[, , k] - P1$odd[, , k])^2)))
+                           NormF(f.pred$odd[, , k] - P1$odd[, , k])^2)))
     }
 
     ## Find minimum and rescale twice number of data points
@@ -148,7 +150,7 @@ pdSpecEst1D <- function(P, order = 5, policy = "universal", metric = "Riemannian
   } else WavTransf1D(P, order, jmax = jmax, periodic = periodic, metric = metric, progress = progress))
 
   coeff.opt <- pdCART(coeff$D, coeff$D.white, alpha = alpha.opt, tree = tree, periodic = periodic,
-                      return.D = return.D)
+                      order = order, B = B, return.D = return.D)
 
   ## Return 'f' or not
   f <- (if(return == "f"){
@@ -246,14 +248,14 @@ pdSpecEst2D <- function(P, order = c(3, 3), metric = "Riemannian", alpha = 1, re
 
   ## Threshold full data using 'alpha'
   coeff <- WavTransf2D(P, order = order, jmax = jmax, metric = metric, progress = progress)
-  coeff.opt <- pdCART(coeff$D, coeff$D.white, alpha = alpha, tree = tree,
+  coeff.opt <- pdCART(coeff$D, coeff$D.white, alpha = alpha, tree = tree, order = order, B = B,
                       return.D = return.D)
 
   ## Return 'f' or not
   f <- (if(return == "f"){
-          InvWavTransf2D(coeff.opt$D_w, coeff$M0, order = order, jmax = J.out, metric = metric,
-                         progress = progress, chol.bias = T)
-        } else NULL)
+    InvWavTransf2D(coeff.opt$D_w, coeff$M0, order = order, jmax = J.out, metric = metric,
+                   progress = progress, chol.bias = T)
+  } else NULL)
 
   ## Return whitened coeff's or not
   if(!isTRUE(return.D == "D.white")){
@@ -276,18 +278,27 @@ pdSpecEst2D <- function(P, order = c(3, 3), metric = "Riemannian", alpha = 1, re
 #' in (Donoho, 1997), via a fast tree-pruning algorithm. By default, the sparsity parameter is set equal to \code{alpha} times
 #' the universal threshold \eqn{\sigma_w\sqrt(2\log(n))}, where \eqn{\sigma_w^2} is the noise variance of the traces of the whitened wavelet
 #' coefficients determined from the finest wavelet scale and \eqn{n} is the total number of coefficients. By default, \code{alpha = 1},
-#' with \code{alpha = 0}, the sparsity parameter is zero and we do not threshold any coefficients. For 2D thresholding of wavelet coefficients, the first
-#' \code{abs(J1 - J2)} wavelet scales are not thresholded, where \eqn{J_1 = \log_2(n_1)} and \eqn{J_2 = \log_2(n_2)} with \eqn{n_1} and \eqn{n_2}
-#' the dyadic number of observations in each marginal direction of the 2D rectangular tensor grid. The reason for this is that the variances of the
-#' traces of the whitened coefficients are not homogeneous between scales at which we apply the 1D wavelet refinement scheme and scales at which we apply
-#' the 2D wavelet refinement scheme. Note however that if the 2D grid of observations is a square tensor grid, i.e. \eqn{n_1 = n_2}, the variances of the
-#' traces of the whitened are again homogeneous across scales and the function takes into account all wavelet scales in the thresholding procedure.
+#' with \code{alpha = 0}, the sparsity parameter is zero and we do not threshold any coefficients.
+#'
+#' @note For thresholding of 1D wavelet coefficients, the noise
+#' variance of the traces of the whitened wavelet coefficients is constant across scales as shown in (Chau and von Sachs, 2017a). For thresholding of 2D
+#' wavelet coefficients, there is a discrepancy between the constant noise variance of the traces of the whitened wavelet coefficients of the first
+#' \code{abs(J1 - J2)} scales and the remaining scales, where \eqn{J_1 = \log_2(n_1)} and \eqn{J_2 = \log_2(n_2)} with \eqn{n_1} and \eqn{n_2}
+#' the dyadic number of observations in each marginal direction of the 2D rectangular tensor grid.  The reason is that the variances of the traces of
+#' the whitened coefficients are not homogeneous between: (i) scales at which the 1D wavelet refinement scheme is applied and (ii) scales at which the
+#' 2D wavelet refinement scheme is applied. To correct for this discrepancy, the variances of the coefficients at the 2D wavelet scales are normalized
+#' by the noise variance determined from the finest wavelet scale. The variances of the coefficients at the 1D wavelet scales are normalized using the
+#' analytic noise variance of the traces of the whitened coefficients for a grid of complex random Wishart matrices, which corresponds to the distributional
+#' behavior of the pseudo HPD periodogram matrices, or the asymptotic distributional behavior of the actual HPD periodogram matrices. Note that if the
+#' 2D time-frequency grid of is a square grid, i.e. \eqn{n_1 = n_2}, the variances of the traces of the whitened coefficients are again homogeneous across
+#' all wavelet scales.
 #'
 #' @param D a list of wavelet coefficients as obtained from \code{\link{WavTransf1D}} or \code{\link{WavTransf2D}}.
 #' @param D.white a list of whitened wavelet coefficients as obtained from \code{\link{WavTransf1D}} or \code{\link{WavTransf2D}}.
 #' @param alpha tuning parameter specifying the sparsity parameter as \code{alpha} times the universal threshold.
 #' @param tree logical value, if \code{tree = T} performs tree-structured thresholding, otherwise performs
 #'  non-tree-structered hard thresholding of the coefficients.
+#' @param order the order(s) of the intrinsic 1D or 2D AI refinement scheme as in \code{\link{WavTransf1D}} and \code{\link{WavTransf2D}}.
 #' @param ... additional parameters for internal use.
 #'
 #' @return Returns a list with two components:
@@ -299,7 +310,7 @@ pdSpecEst2D <- function(P, order = c(3, 3), metric = "Riemannian", alpha = 1, re
 #' @examples
 #' X <- rExamples(256, example = "bumps")
 #' Coeffs <- WavTransf1D(X$per)
-#' pdCART(Coeffs$D, Coeffs$D.white)$w ## logical tree of non-zero coefficients
+#' pdCART(Coeffs$D, Coeffs$D.white, order = 5)$w ## logical tree of non-zero coefficients
 #'
 #' @seealso \code{\link{WavTransf1D}}, \code{\link{InvWavTransf1D}}, \code{\link{WavTransf2D}}, \code{\link{InvWavTransf2D}}
 #'
@@ -310,18 +321,18 @@ pdSpecEst2D <- function(P, order = c(3, 3), metric = "Riemannian", alpha = 1, re
 #'
 #' @importFrom stats mad
 #' @export
-pdCART <- function(D, D.white, alpha = 1, tree = T, ...) {
+pdCART <- function(D, D.white, order, alpha = 1, tree = T, ...) {
 
   ## Set variables
   J = length(D)
   d = dim(D[[1]])[1]
   is_2D = ifelse(length(dim(D[[1]])) == 4, T, F)
   dots = list(...)
+  B = (if(is.null(dots$B)) d else dots$B)
   periodic = (if(is.null(dots$periodic) | is_2D) F else dots$periodic)
   return.D = (if(is.null(dots$return.D)) NA else dots$return.D)
   if(periodic){
-    N = dim(D[[1]])[3]
-    L = (N - 1) / 2
+    L = (order - 1) / 2
     L_b = ceiling(L / 2)
   } else{
     L_b = 0
@@ -329,27 +340,49 @@ pdCART <- function(D, D.white, alpha = 1, tree = T, ...) {
   lam = (if(is.null(dots$lam)) NA else dots$lam)
 
   if(is_2D){
-    J0_2D <- sum(sapply(1:J, function(j) any(dim(D[[j]]) == 1))) + 1
-    if(J0_2D > 3){
-      warning(paste0('The first ', J0_2D - 1, ' wavelet scales are not thresholded due to nonhomogeneous
-variances of coefficients between the 1D and 2D AI wavelet transform.'))
+    D_trace <- lapply(2:J, function(j) apply(D.white[[j]], c(3, 4), function(A) Re(sum(diag(A)))))
+    J_tr <- length(D_trace)
+    s_e2D <- mad(c(D_trace[[J_tr]]))
+
+    J0_2D <- sum(sapply(1:J, function(j) any(dim(D[[j]]) == 1)))
+    if(J0_2D > 1){
+      n_2D <- which.max(dim(D[[J0_2D]])[c(3,4)])
+      if((max(order > 9))){
+        warning(paste0('The first ', J0_2D[1], ' are not thresholded, since the maximum marginal
+                     refinement order is larger than 9. To include all wavelet scales in the
+                     thresholding procedure choose marginal refinement order smaller or equal to 9.'))
+      }
+      for(j in 1:length(D_trace)){
+        if(j < J0_2D){
+          n <- dim(D_trace[[j]])[n_2D]
+          N <- ifelse(order[n_2D] > n, 2 * floor((n - 1) / 2) + 1, order[n_2D])
+          L <- (N - 1) / 2
+          l <- sapply(1:n, function(k) if((k - L) < 1) 2 * k else if((k + L) >= n) 2 * (N - (n - k)) else N + 1)
+          s_e1D <- sqrt(sapply(1:n, function(k) 4^(-J) * sum(W_1D[[L + 1]][l[k], ]^2) * sum(trigamma(B - (d - 1:d)))))
+          D_trace[[j]] <- D_trace[[j]] / s_e1D
+        } else{
+          D_trace[[j]] <- D_trace[[j]] / s_e2D
+        }
+      }
+    } else {
+      D_trace <- lapply(1:J_tr, function(j) D_trace[[j]] / s_e2D)
     }
-    D_trace <- lapply(J0_2D:J, function(j) apply(D.white[[j]], c(3, 4), function(A) Re(sum(diag(A)))))
   } else {
     D_trace_full <- lapply(2:J, function(j) apply(D.white[[j]], 3, function(A) Re(sum(diag(A)))))
-    D_trace <- lapply(1:(J-1), function(j) D_trace_full[[j]][L_b + 1:2^j])
+    J_tr <- length(D_trace_full)
+    s_e <- max(mad(c(D_trace_full[[J_tr]])),
+               sqrt(2^(-J) * sum(W_1D[[(order + 1)/2]][order + 1, ]^2) * sum(trigamma(B - (d - 1:d)))))
+    D_trace <- lapply(1:J_tr, function(j) D_trace_full[[j]][L_b + 1:2^j] / s_e)
   }
-
-  J_tr = length(D_trace)
-  s_e = mad(c(D_trace[[J_tr]]))
   if(is.na(lam)){
-    lam = alpha * s_e * sqrt(2 * log(length(unlist(D_trace))))
+    lam <- alpha * sqrt(2 * log(length(unlist(D_trace))))
   }
 
   if(tree){
 
     ## Dyadic CART
     w <- D_trace
+
     for(j in J_tr:1){
       if(j == J_tr){
         w[[j]] <- ifelse(abs(D_trace[[j]]) > lam, T, F)
@@ -358,13 +391,21 @@ variances of coefficients between the 1D and 2D AI wavelet transform.'))
       } else{
         if(is_2D){
           dims <- dim(D_trace[[j]])
-          l1 <- t(sapply(1:dims[1], function(i) c(1, 2) + 2 * (i - 1)))
-          l2 <- t(sapply(1:dims[2], function(i) c(1, 2) + 2 * (i - 1)))
-          grid <- expand.grid(1:dims[1], 1:dims[2])
-          V <- array(c(mapply(function(i1, i2) sum(V[l1[i1, ], l2[i2, ]]), grid$Var1, grid$Var2)),
+          if(all(dim(D_trace[[min(j + 1, J_tr)]]) > 1)){
+            l1 <- t(sapply(1:dims[1], function(i) c(1, 2) + 2 * (i - 1)))
+            l2 <- t(sapply(1:dims[2], function(i) c(1, 2) + 2 * (i - 1)))
+            grid <- expand.grid(1:dims[1], 1:dims[2])
+            V <- array(c(mapply(function(i1, i2) sum(V[l1[i1, ], l2[i2, ]]), grid$Var1, grid$Var2)),
                      dim = dims) + D_trace[[j]]^2
-          R <- array(c(mapply(function(i1, i2) sum(R[l1[i1, ], l2[i2, ]]), grid$Var1, grid$Var2)),
+            R <- array(c(mapply(function(i1, i2) sum(R[l1[i1, ], l2[i2, ]]), grid$Var1, grid$Var2)),
                      dim = dims) + lam^2
+          } else if(dim(D_trace[[j + 1]])[1] == 1){
+            V <- sapply(1:dims[2], function(i) V[1, 2 * i - 1] + V[1, 2 * i]) + D_trace[[j]]^2
+            R <- sapply(1:dims[2], function(i) R[1, 2 * i - 1] + R[1, 2 * i]) + lam^2
+          } else if(dim(D_trace[[j + 1]])[2] == 1){
+            V <- sapply(1:dims[1], function(i) V[2 * i - 1, 1] + V[2 * i, 1]) + D_trace[[j]]^2
+            R <- sapply(1:dims[1], function(i) R[2 * i - 1, 1] + R[2 * i, 1]) + lam^2
+          }
         } else {
           dims <- length(D_trace[[j]])
           V <- sapply(1:dims, function(i) V[2 * i - 1] + V[2 * i]) + D_trace[[j]]^2
@@ -385,19 +426,22 @@ variances of coefficients between the 1D and 2D AI wavelet transform.'))
   }
   if(is_2D){
     ## 2D
-    for(j in J0_2D:J){
-      dims <- dim(w[[j - J0_2D + 1]])
-      if(tree & (j > J0_2D)){
-        roots <- matrix(rep(matrix(rep(t(w[[j - J0_2D]]), each = 2), byrow = T, ncol = dims[2]),
-                            each = 2), nrow = dims[1])
-        w[[j - J0_2D + 1]] <- w[[j - J0_2D + 1]] & roots
+    for(j in 2:J){
+      if(tree){
+        if(j > 2){
+          dims <- dim(w[[j - 1]])
+          roots <- matrix(rep(matrix(rep(t(w[[j - 2]]), each = ifelse(dims[2] > 1, 2, 1)),
+                              byrow = T, ncol = dims[2]), each = ifelse(dims[1] > 1, 2, 1)), nrow = dims[1])
+          w[[j - 1]] <- w[[j - 1]] & roots
+        }
       }
       D0 <- array(D_w[[j]], dim = c(d, d, dim(D_w[[j]])[3] * dim(D_w[[j]])[4]))
-      D0[, , !(w[[j - J0_2D + 1]])] <- 0
+      D0[, , !(w[[j - 1]])] <- 0
       D_w[[j]] <- array(D0, dim = c(d, d, dim(D_w[[j]])[3], dim(D_w[[j]])[4]))
+
       if(isTRUE(return.D == "D.white")){
         D0 <- array(D.white[[j]], dim = c(d, d, dim(D.white_w[[j]])[3] * dim(D.white_w[[j]])[4]))
-        D0[, , !(w[[j - J0_2D + 1]])] <- 0
+        D0[, , !(w[[j - 1]])] <- 0
         D.white_w[[j]] <- array(D0, dim = c(d, d, dim(D.white_w[[j]])[3], dim(D.white_w[[j]])[4]))
       }
     }

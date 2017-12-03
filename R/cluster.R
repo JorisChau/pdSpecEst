@@ -82,7 +82,7 @@
 #'
 #' ## Generate periodogram data for 10 subjects
 #' pgram <- function(Phi) pdPgram(rARMA(2^9, 2, Phi, Theta, Sigma)$X)$P
-#' P <- array(c(replicate(5, pgram(Phi1)), replicate(5, pgram(Phi2))), dim=c(2,2,2^7,10))
+#' P <- array(c(replicate(5, pgram(Phi1)), replicate(5, pgram(Phi2))), dim=c(2,2,2^8,10))
 #'
 #' cl <- pdSpecClust1D(P, K = 2)
 #'

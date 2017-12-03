@@ -16,6 +16,7 @@ Depends:
 License: CC0
 LazyData: TRUE
 Imports:
+    grid,
     multitaper,
     Rcpp,
     ddalpha,
@@ -26,5 +27,9 @@ SystemRequirements: GNU make, C++11
 Suggests:
     knitr,
     rmarkdown,
-    testthat
+    testthat,
+    ggplot2,
+    reshape2,
+    viridis,
+    ggthemes
 VignetteBuilder: knitr
