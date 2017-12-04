@@ -342,7 +342,11 @@ pdSpecClust1D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
 #' }
 #'
 #' @examples
-#' ## NEEDS TO BE UPDATED
+#' ## Generate periodogram date for 4 subjects
+#' pgram <- function(seed) rExamples2D(c(2^5, 2^5), 2, example = "smiley", seed = seed)$per
+#' P <- array(c(replicate(2, pgram(1)), replicate(2, pgram(2))), dim=c(2,2,2^5,2^5,4))
+#'
+#' cl <- pdSpecClust2D(P, K = 2, metric = "logEuclidean")
 #'
 #' @seealso \code{\link{pdSpecEst2D}}, \code{\link{WavTransf2D}}, \code{\link{pdDist}}, \code{\link{pdPgram2D}}
 #'

@@ -174,7 +174,10 @@ InvWavTransf1D <- function(D, M0, order = 5, jmax, periodic = F, metric = "Riema
 #' @param ... additional arguments for internal use.
 #'
 #' @examples
-#' ## NEEDS TO BE UPDATED
+#' P <- rExamples2D(c(2^4, 2^4), 2, example = "tvar")
+#' P.wt <- WavTransf2D(P$f) ## forward transform
+#' P.f <- InvWavTransf2D(P.wt$D, P.wt$M0) ## backward transform
+#' all.equal(P.f, P$f)
 #'
 #' @return Returns a (\eqn{d, d, n_1, n_2})-dimensional array corresponding to a rectangular surface of size \eqn{n_1} by
 #' \eqn{n_2} of (\eqn{d,d})-dimensional HPD matrices.

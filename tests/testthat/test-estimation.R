@@ -64,21 +64,26 @@ test_that("Correctly working 1D spectral estimation and clustering", {
   expect_equal(dim(ci$depth.CI$spatial), c(1,3,1))
   expect_null(ci$f.CI)
   expect_type(ci$cover.f$spatial, "logical")
-  expect_is(ci$depth.f$spatial, "numeric")
+  expect_type(ci$depth.f$spatial, "double")
 
   ## pdSpecClust1D
   P_s <- replicate(S, pgram$P)
   cl <- pdSpecClust1D(P_s, K = 2, metric = "logEuclidean")
 
-  expect_is(cl$cl.prob, c("matrix", "numeric"))
   expect_equal(sum(cl$cl.prob), S)
   expect_length(cl$cl.centers.D, 2)
   expect_length(unlist(cl$cl.centers.D[[1]]), 300)
   expect_length(unlist(cl$cl.centers.D[[2]]), 300)
   expect_equal(dim(cl$cl.centers.M0[[1]]), dim(wt1$M0))
   expect_equal(dim(cl$cl.centers.M0[[2]]), dim(wt1$M0))
-  expect_is(cl$cl.jmax, "numeric")
+  expect_type(cl$cl.jmax, "double")
   expect_length(cl$iters, 2)
+
+  ## pdSplineReg
+  f3 <- pdSplineReg(example$f, example$f, lam = 0.1, Nd = 10, max.iter = 10)
+  expect_equal(dim(f3$f), c(d,d,10))
+  expect_type(f3$cost, "double")
+  expect_type(f3$total.iter, "double")
 
 })
 

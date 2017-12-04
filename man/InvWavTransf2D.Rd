@@ -57,7 +57,10 @@ equipped with one of the following metrics; (ii) log-Euclidean metric, the Eucli
 other metrics, see (Chau and von Sachs, 2017a) for more details.
 }
 \examples{
-## NEEDS TO BE UPDATED
+P <- rExamples2D(c(2^4, 2^4), 2, example = "tvar")
+P.wt <- WavTransf2D(P$f) ## forward transform
+P.f <- InvWavTransf2D(P.wt$D, P.wt$M0) ## backward transform
+all.equal(P.f, P$f)
 
 }
 \references{

@@ -63,7 +63,10 @@ the inverse intrinsic 2D AI wavelet transform via \code{\link{InvWavTransf2D}} g
 HPD time-varying spectral estimate.
 }
 \examples{
-## NEEDS TO BE UPDATED
+\dontrun{
+ P <- rExamples2D(c(2^7, 2^7), 3, example = "tvar")$per
+ f <- pdSpecEst2D(P)
+}
 
 }
 \references{

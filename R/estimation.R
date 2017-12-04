@@ -217,7 +217,10 @@ pdSpecEst1D <- function(P, order = 5, policy = "universal", metric = "Riemannian
 #' \item{D.raw }{the 2D pyramid of non-thresholded wavelet coefficients in the same format as the component \code{$D}.}
 #'
 #' @examples
-#' ## NEEDS TO BE UPDATED
+#' \dontrun{
+#'  P <- rExamples2D(c(2^7, 2^7), 3, example = "tvar")$per
+#'  f <- pdSpecEst2D(P)
+#' }
 #'
 #' @seealso \code{\link{pdPgram2D}}, \code{\link{WavTransf2D}}, \code{\link{InvWavTransf2D}}, \code{\link{pdCART}}
 #'
@@ -308,9 +311,17 @@ pdSpecEst2D <- function(P, order = c(3, 3), metric = "Riemannian", alpha = 1, re
 #'    to an individual wavelet scale.}
 #'
 #' @examples
+#' ## 1D
 #' X <- rExamples(256, example = "bumps")
 #' Coeffs <- WavTransf1D(X$per)
 #' pdCART(Coeffs$D, Coeffs$D.white, order = 5)$w ## logical tree of non-zero coefficients
+#'
+#' \dontrun{
+#' ## 2D
+#' P <- rExamples2D(c(2^7, 2^7), 3, example = "tvar")$per
+#' Coeffs <- WavTransf2D(P, jmax = 5)
+#' pdCART(Coeffs$D, Coeffs$D.white, order = c(3, 3))$w
+#' }
 #'
 #' @seealso \code{\link{WavTransf1D}}, \code{\link{InvWavTransf1D}}, \code{\link{WavTransf2D}}, \code{\link{InvWavTransf2D}}
 #'

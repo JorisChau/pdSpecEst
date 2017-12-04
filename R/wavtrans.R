@@ -182,7 +182,8 @@ WavTransf1D <- function(P, order = 5, jmax, periodic = F, metric = "Riemannian",
 #' @param ... additional arguments for internal use.
 #'
 #' @examples
-#' ## NEEDS TO BE UPDATED
+#' P <- rExamples2D(c(2^4, 2^4), 2, example = "tvar")
+#' P.wt <- WavTransf2D(P$f)
 #'
 #' @return The function returns a list with three components:
 #' \item{D }{the 2D pyramid of wavelet coefficients. This is a list of arrays, where each 4-dimensional array contains the

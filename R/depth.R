@@ -47,7 +47,7 @@
 #'
 #' ## Integrated depth
 #' X2 <- replicate(50, replicate(5, Expm(diag(2), H.coeff(rnorm(4), inverse = TRUE))))
-#' pdDepth(y = replicate(5, diag(2)), X2, method = "zonoid", metric = "logEuclidean')
+#' pdDepth(y = replicate(5, diag(2)), X2, method = "zonoid", metric = "logEuclidean")
 #' pdDepth(X = X2, method = "zonoid", metric = "logEuclidean")
 #'
 #' @seealso \code{\link{pdDist}}, \code{\link{pdRankTests}}

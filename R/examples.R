@@ -253,6 +253,7 @@ rExamples2D <- function(n, d = 3, B, example = c("smiley", "tvar", "peak", "face
   bias.inv = (if(bias.corr) 1 else 1/bias)
   grid.n <- expand.grid(1:n[1], 1:n[2])
   ast <- function(A, B) (A %*% B) %*% t(Conj(A))
+  if(!is.null(dots$seed)) set.seed(dots$seed)
 
   ## Create spectrum
   if(example == "smiley"){
@@ -338,6 +339,7 @@ rExamples2D <- function(n, d = 3, B, example = c("smiley", "tvar", "peak", "face
     }
 
     ## Create iid Wishart periodogram
+    if(!is.null(dots$seed)) set.seed(seed = NULL)
     tf.grid <- list(time = (1:n[1])/n[1], frequency = (1:n[2])/(2*n[2]))
     f.sqrt <- array(c(apply(f, c(3, 4), function(f) Sqrt(f))), dim = dim(f))
     X0 <- array(c(replicate(n[1] * n[2] * B, complex(d, rnorm(d, sd = sqrt(1/2)), rnorm(d, sd = sqrt(1/2))))),
