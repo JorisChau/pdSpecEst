@@ -5,5 +5,4 @@
 ^cran-comments\.md$
 ^\.travis\.yml$
 ^\.RDataTmp$
-^data$
 ^inst/docs/$

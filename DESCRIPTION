@@ -1,7 +1,7 @@
 Package: pdSpecEst
 Type: Package
 Title: An Analysis Toolbox for Hermitian Positive Definite Matrices
-Version: 1.1.2
+Version: 1.2.0
 Authors@R: person("Joris", "Chau", email = "j.chau@uclouvain.be", role = c("aut", "cre"))
 Description: An implementation of data analysis tools for samples of symmetric or 
   Hermitian positive definite matrices, such as collections of covariance matrices 
@@ -10,10 +10,10 @@ Description: An implementation of data analysis tools for samples of symmetric o
   of Hermitian positive definite matrices, and (ii) exploratory data analysis and inference 
   for samples of (curves of) Hermitian positive definite matrices by means of intrinsic manifold 
   data depth and manifold rank-based hypothesis tests.
-URL: https://github.com/JorisChau/pdSpecEst, https://jchau.shinyapps.io/pdSpecEst_app/
+URL: https://github.com/JorisChau/pdSpecEst, https://jchau.shinyapps.io/pdSpecEst/
 Depends:
     R (>= 3.3.1)
-License: CC0
+License: GPL-2
 LazyData: TRUE
 Imports:
     grid,

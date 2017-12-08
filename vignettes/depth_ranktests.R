@@ -104,17 +104,17 @@ pdRankTests(array(c(X3, Y3a), dim = c(2, 2, 100)), test = "signed.rank")[2] ## n
 
 ## ------------------------------------------------------------------------
 ## Signed-rank test for equivalence of spectra
-## ARMA(1,1) process: Example 11.4.1 in (Brockwell and Davis, 1991)
+## vARMA(1,1) process: Example 11.4.1 in (Brockwell and Davis, 1991)
 Phi <- array(c(0.7, 0, 0, 0.6, rep(0, 4)), dim = c(2, 2, 2))
 Theta <- array(c(0.5, -0.7, 0.6, 0.8, rep(0, 4)), dim = c(2, 2, 2))
 Sigma <- matrix(c(1, 0.71, 0.71, 2), nrow = 2)
-pgram <- function(Sigma) pdPgram(rARMA(2^9, 2, Phi, Theta, Sigma)$X)$P ## HPD periodogram
+pgram <- function(Sigma) pdPgram(rARMA(2^10, 2, Phi, Theta, Sigma)$X)$P ## HPD periodogram
 
 ## Null is true
-pdRankTests(array(c(pgram(Sigma), pgram(Sigma)), dim = c(2, 2, 2^9)), test = "signed.rank")[2]
+pdRankTests(array(c(pgram(Sigma), pgram(Sigma)), dim = c(2, 2, 2^10)), test = "signed.rank")[2]
 
 ## Null is false
-pdRankTests(array(c(pgram(Sigma), pgram(0.5 * Sigma)), dim = c(2, 2, 2^9)), test = "signed.rank")[2]
+pdRankTests(array(c(pgram(Sigma), pgram(0.5 * Sigma)), dim = c(2, 2, 2^10)), test = "signed.rank")[2]
 
 ## ------------------------------------------------------------------------
 ## Null is true

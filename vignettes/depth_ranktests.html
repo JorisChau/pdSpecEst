@@ -12,7 +12,7 @@
 
 <meta name="author" content="Joris Chau" />
 
-<meta name="date" content="2017-12-07" />
+<meta name="date" content="2017-12-08" />
 
 <title>Data depth and rank-based tests for HPD matrices</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Data depth and rank-based tests for HPD matrices</h1>
 <h4 class="author"><em>Joris Chau</em></h4>
-<h4 class="date"><em>2017-12-07</em></h4>
+<h4 class="date"><em>2017-12-08</em></h4>
 
 
 <div id="TOC">
@@ -284,21 +284,21 @@ Y3a &lt;-<span class="st"> </span><span class="kw">make_sample</span>(<span clas
 <span class="co">#&gt; [1] 0.001444632</span></code></pre></div>
 <p>The manifold signed-rank test also provides a valid procedure to test for equivalence of spectral matrices of two (independent) multivariate stationary time series based on the HPD periodogram matrices obtained via <code>pdPgram()</code>. In contrast to other available tests in the literature, this asymptotic test does not require consistent spectral estimators or resampling/bootstrapping of test statistics, and therefore remains computationally efficient for higher-dimensional spectral matrices or a large number of sampled Fourier frequencies.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Signed-rank test for equivalence of spectra
-## ARMA(1,1) process: Example 11.4.1 in (Brockwell and Davis, 1991)
+## vARMA(1,1) process: Example 11.4.1 in (Brockwell and Davis, 1991)
 Phi &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(<span class="fl">0.7</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="fl">0.6</span>, <span class="kw">rep</span>(<span class="dv">0</span>, <span class="dv">4</span>)), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>))
 Theta &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="kw">c</span>(<span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.7</span>, <span class="fl">0.6</span>, <span class="fl">0.8</span>, <span class="kw">rep</span>(<span class="dv">0</span>, <span class="dv">4</span>)), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>))
 Sigma &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">1</span>, <span class="fl">0.71</span>, <span class="fl">0.71</span>, <span class="dv">2</span>), <span class="dt">nrow =</span> <span class="dv">2</span>)
-pgram &lt;-<span class="st"> </span><span class="cf">function</span>(Sigma) <span class="kw">pdPgram</span>(<span class="kw">rARMA</span>(<span class="dv">2</span><span class="op">^</span><span class="dv">9</span>, <span class="dv">2</span>, Phi, Theta, Sigma)<span class="op">$</span>X)<span class="op">$</span>P ## HPD periodogram
+pgram &lt;-<span class="st"> </span><span class="cf">function</span>(Sigma) <span class="kw">pdPgram</span>(<span class="kw">rARMA</span>(<span class="dv">2</span><span class="op">^</span><span class="dv">10</span>, <span class="dv">2</span>, Phi, Theta, Sigma)<span class="op">$</span>X)<span class="op">$</span>P ## HPD periodogram
 
 ## Null is true
-<span class="kw">pdRankTests</span>(<span class="kw">array</span>(<span class="kw">c</span>(<span class="kw">pgram</span>(Sigma), <span class="kw">pgram</span>(Sigma)), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span><span class="op">^</span><span class="dv">9</span>)), <span class="dt">test =</span> <span class="st">&quot;signed.rank&quot;</span>)[<span class="dv">2</span>]
+<span class="kw">pdRankTests</span>(<span class="kw">array</span>(<span class="kw">c</span>(<span class="kw">pgram</span>(Sigma), <span class="kw">pgram</span>(Sigma)), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span><span class="op">^</span><span class="dv">10</span>)), <span class="dt">test =</span> <span class="st">&quot;signed.rank&quot;</span>)[<span class="dv">2</span>]
 <span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 0.06044773</span>
+<span class="co">#&gt; [1] 0.3846862</span>
 
 ## Null is false
-<span class="kw">pdRankTests</span>(<span class="kw">array</span>(<span class="kw">c</span>(<span class="kw">pgram</span>(Sigma), <span class="kw">pgram</span>(<span class="fl">0.5</span> <span class="op">*</span><span class="st"> </span>Sigma)), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span><span class="op">^</span><span class="dv">9</span>)), <span class="dt">test =</span> <span class="st">&quot;signed.rank&quot;</span>)[<span class="dv">2</span>]
+<span class="kw">pdRankTests</span>(<span class="kw">array</span>(<span class="kw">c</span>(<span class="kw">pgram</span>(Sigma), <span class="kw">pgram</span>(<span class="fl">0.5</span> <span class="op">*</span><span class="st"> </span>Sigma)), <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span><span class="op">^</span><span class="dv">10</span>)), <span class="dt">test =</span> <span class="st">&quot;signed.rank&quot;</span>)[<span class="dv">2</span>]
 <span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 1.33129e-22</span></code></pre></div>
+<span class="co">#&gt; [1] 1.03424e-38</span></code></pre></div>
 <p>To apply the manifold Bartels-von Neumman test (<code>&quot;bartels&quot;</code>), we generate an independent non-identically distributed sample with a trend in the scale of the distribution across observations, such that the null hypothesis of randomness breaks down.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Null is true
 data3 &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">200</span>, <span class="kw">Expm</span>(<span class="kw">diag</span>(<span class="dv">2</span>), <span class="kw">H.coeff</span>(<span class="kw">rnorm</span>(<span class="dv">4</span>), <span class="dt">inverse =</span> T))) ## pointwise samples
@@ -314,22 +314,22 @@ data4a &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class=
 <span class="co">#&gt; [1] &quot;Manifold Bartels-von Neumann&quot;</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 0.8931316</span>
+<span class="co">#&gt; [1] 0.2641266</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $statistic</span>
-<span class="co">#&gt; [1] 0.1343427</span>
+<span class="co">#&gt; [1] 1.116691</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $null.distr</span>
 <span class="co">#&gt; [1] &quot;Standard normal distribution&quot;</span>
 <span class="kw">pdRankTests</span>(data4, <span class="dt">test =</span> <span class="st">&quot;bartels&quot;</span>)[<span class="dv">2</span>] ## null true (curve)
 <span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 0.260438</span>
+<span class="co">#&gt; [1] 0.7612759</span>
 <span class="kw">pdRankTests</span>(data3a, <span class="dt">test =</span> <span class="st">&quot;bartels&quot;</span>)[<span class="dv">2</span>] ## null false (pointwise)
 <span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 0.0005847046</span>
+<span class="co">#&gt; [1] 1.612058e-05</span>
 <span class="kw">pdRankTests</span>(data4a, <span class="dt">test =</span> <span class="st">&quot;bartels&quot;</span>)[<span class="dv">2</span>] ## null false (curve)
 <span class="co">#&gt; $p.value</span>
-<span class="co">#&gt; [1] 0.0001358793</span></code></pre></div>
+<span class="co">#&gt; [1] 0.000732231</span></code></pre></div>
 <div id="computation-times-1" class="section level3">
 <h3>Computation times</h3>
 <p>The figures below display average computation times in milliseconds (single core, Intel Xeon E5-2650) of the rank-based hypothesis tests based on the Riemannian metric in terms of the dimension of the matrix-valued data and the size of the samples considered in the tests. The computation times based on the Log-Euclidean metric are either similar or significantly faster (in particular for the rank-based tests based on the manifold zonoid or spatial depth) than the times displayed below.</p>

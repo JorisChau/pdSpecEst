@@ -37,7 +37,7 @@ the example spectral matrix and complex normal random variates.
 }
 \examples{
 example <- rExamples(100, example = "bumps")
-ts.plot(example$ts) # plot generated time series.
+ts.plot(Re(example$ts)) # plot generated time series.
 
 }
 \references{

@@ -13,10 +13,10 @@ such as collections of (non-degenerate) covariance matrices or spectral density 
 \details{
 The tools in this package can be used to perform:
 \itemize{
-   \item \emph{Intrinsic wavelet regression} and \emph{clustering} for curves of Hermitian positive definite matrices.
-   These implementations are based on the paper (Chau and von Sachs, 2017a).
+   \item \emph{Intrinsic manifold wavelet regression} and \emph{clustering} for curves (1D) and surfaces (2D)
+   of Hermitian positive definite matrices. These implementations are based in part on the paper (Chau and von Sachs, 2017a).
    \item \emph{Exploratory data analysis} and \emph{inference} for samples of Hermitian positive definite matrices by
-   means of intrinsic data depth and intrinsic rank-based hypothesis tests. These implementations are based on the paper
+   means of intrinsic manifold data depth and rank-based hypothesis tests. These implementations are based on the paper
    (Chau, Ombao and von Sachs, 2017b).
  }
 For more details and examples on how to use the package see the accompanying vignettes in the vignettes folder.

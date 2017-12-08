@@ -330,7 +330,6 @@ pdSpecEst2D <- function(P, order = c(3, 3), metric = "Riemannian", alpha = 1, re
 #' @references Donoho, D.L. (1997). \emph{CART and best-ortho-basis: a connection}. Annals of Statistics,
 #' 25(5), 1870-1911.
 #'
-#' @importFrom stats mad
 #' @export
 pdCART <- function(D, D.white, order, alpha = 1, tree = T, ...) {
 
@@ -353,7 +352,7 @@ pdCART <- function(D, D.white, order, alpha = 1, tree = T, ...) {
   if(is_2D){
     D_trace <- lapply(2:J, function(j) apply(D.white[[j]], c(3, 4), function(A) Re(sum(diag(A)))))
     J_tr <- length(D_trace)
-    s_e2D <- mad(c(D_trace[[J_tr]]))
+    s_e2D <- stats::mad(c(D_trace[[J_tr]]))
 
     J0_2D <- sum(sapply(1:J, function(j) any(dim(D[[j]]) == 1)))
     if(J0_2D > 1){
@@ -381,7 +380,7 @@ pdCART <- function(D, D.white, order, alpha = 1, tree = T, ...) {
   } else {
     D_trace_full <- lapply(2:J, function(j) apply(D.white[[j]], 3, function(A) Re(sum(diag(A)))))
     J_tr <- length(D_trace_full)
-    s_e <- max(mad(c(D_trace_full[[J_tr]])),
+    s_e <- max(stats::mad(c(D_trace_full[[J_tr]])),
                sqrt(2^(-J) * sum(W_1D[[(order + 1)/2]][order + 1, ]^2) * sum(trigamma(B - (d - 1:d)))))
     D_trace <- lapply(1:J_tr, function(j) D_trace_full[[j]][L_b + 1:2^j] / s_e)
   }

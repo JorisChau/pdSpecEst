@@ -9,13 +9,13 @@ The `pdSpecEst` (**p**ositive **d**efinite **Spec**tral **Est**imation) package 
 
 The tools in this package can be used to perform:
 
--   *Manifold wavelet regression* and *clustering* for curves of Hermitian positive definite matrices. These implementations are based on the paper (Chau and von Sachs 2017).
+-   *Intrinsic manifold wavelet regression* and *clustering* for curves (1D) or surfaces (2D) of Hermitian positive definite matrices. These implementations are based in part on the paper (Chau and von Sachs 2017).
 
--   Exploratory data analysis and inference for samples of Hermitian positive definite matrices by means of *generalized data depth* and *generalized rank-based hypothesis tests*. These implementations are based on the paper (Chau, Ombao, and von Sachs 2017).
+-   Exploratory data analysis and inference for samples of Hermitian positive definite matrices by means of *intrinsic manifold data depth* and *manifold rank-based hypothesis tests*. These implementations are based on the paper (Chau, Ombao, and von Sachs 2017).
 
 For more details and examples on how to use the package see the accompanying vignettes in the vignettes folder.
 
-A demo Shiny app to test out the implemented functions in the package is available [here](https://jchau.shinyapps.io/pdspecest/).
+A demo Shiny app to test out the implemented functions in the package is available [here](https://jchau.shinyapps.io/pdSpecEst/).
 
 *Author and maintainer:* Joris Chau (<j.chau@uclouvain.be>).
 

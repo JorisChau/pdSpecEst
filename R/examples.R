@@ -110,7 +110,7 @@ rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
 #'
 #' @examples
 #' example <- rExamples(100, example = "bumps")
-#' ts.plot(example$ts) # plot generated time series.
+#' ts.plot(Re(example$ts)) # plot generated time series.
 #'
 #' @seealso \code{\link{pdPgram}}
 #'

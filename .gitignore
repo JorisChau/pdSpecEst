@@ -4,11 +4,3 @@
 .Ruserdata
 .RDataTmp
 inst/doc
-data/eeg.rda
-data/eeg_full.rda
-data/lfp.rda
-data/lfp_bart.rda
-data/monkey_full.rda
-data/monkey.rda
-src-i386/
-src-x64/
