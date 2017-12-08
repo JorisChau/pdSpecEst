@@ -111,10 +111,10 @@ Sigma <- matrix(c(1, 0.71, 0.71, 2), nrow = 2)
 pgram <- function(Sigma) pdPgram(rARMA(2^9, 2, Phi, Theta, Sigma)$X)$P ## HPD periodogram
 
 ## Null is true
-pdRankTests(array(c(pgram(Sigma), pgram(Sigma)), dim = c(2, 2, 2^8)), test = "signed.rank")[2]
+pdRankTests(array(c(pgram(Sigma), pgram(Sigma)), dim = c(2, 2, 2^9)), test = "signed.rank")[2]
 
 ## Null is false
-pdRankTests(array(c(pgram(Sigma), pgram(0.5 * Sigma)), dim = c(2, 2, 2^8)), test = "signed.rank")[2]
+pdRankTests(array(c(pgram(Sigma), pgram(0.5 * Sigma)), dim = c(2, 2, 2^9)), test = "signed.rank")[2]
 
 ## ------------------------------------------------------------------------
 ## Null is true
