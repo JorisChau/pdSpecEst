@@ -1,8 +1,3 @@
-## Resubmission
-This is a resubmission. In this version I have:
-
-* changed all C++ calls 'std::sqrt(x)' to 'std::sqrt((double)x)' removing the ERROR `call of overloaded ‘std::sqrt(int)’ is ambiguous` on Solarix-x86. This in response to Brian Ripley: 'the recent updates contain C++ errors warned about in §1.6.4 of the manual. Please re-read it and correct ASAP'. 
-
 ## Test environments
 
 * local windows 7 install, R 3.3.1, pass
