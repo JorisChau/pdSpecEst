@@ -19,7 +19,7 @@ on pre-determined weights.}
 but this can also be one of: \code{"logEuclidean"}, \code{"Cholesky"}, \code{"rootEuclidean"} or
 \code{"Euclidean"}. The intrinsic AI wavelet transform fundamentally relies on the chosen metric.}
 
-\item{alpha}{an opional tuning parameter in the wavelet the thresholding procedure. If \code{policy = "universal"},
+\item{alpha}{an optional tuning parameter in the wavelet the thresholding procedure. If \code{policy = "universal"},
 the sparsity parameter in the tree-structured wavelet thresholding procedure is set to \code{alpha} times the
 universal threshold, defaults to \code{alpha = 1}.}
 

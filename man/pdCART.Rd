@@ -16,7 +16,7 @@ pdCART(D, D.white, order, alpha = 1, tree = T, ...)
 \item{alpha}{tuning parameter specifying the sparsity parameter as \code{alpha} times the universal threshold.}
 
 \item{tree}{logical value, if \code{tree = T} performs tree-structured thresholding, otherwise performs
-non-tree-structered hard thresholding of the coefficients.}
+non-tree-structured hard thresholding of the coefficients.}
 
 \item{...}{additional parameters for internal use.}
 }
@@ -32,7 +32,7 @@ Returns a list with two components:
 or \code{\link{WavTransf2D}} based on the trace of the whitened wavelet coefficients, see e.g. (Chau and von Sachs, 2017).
 }
 \details{
-Depending on the structure of the input list of arrays \code{D} the function performs 1D or 2D tree-structured tresholding of wavelet coefficients.
+Depending on the structure of the input list of arrays \code{D} the function performs 1D or 2D tree-structured thresholding of wavelet coefficients.
 The optimal tree of wavelet coefficients is found by minimization of the \emph{complexity penalized residual sum of squares} (CPRESS) criterion
 in (Donoho, 1997), via a fast tree-pruning algorithm. By default, the sparsity parameter is set equal to \code{alpha} times
 the universal threshold \eqn{\sigma_w\sqrt(2\log(n))}, where \eqn{\sigma_w^2} is the noise variance of the traces of the whitened wavelet

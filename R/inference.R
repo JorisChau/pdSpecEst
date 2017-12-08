@@ -1,8 +1,8 @@
 #' Intrinsic depth-based bootstrap confidence regions
 #'
-#' \code{pdConfInt1D} constructs depth-based parametric bootstrap confidence regsions as explained in
+#' \code{pdConfInt1D} constructs depth-based parametric bootstrap confidence regions as explained in
 #' (Chau and von Sachs, 2017a) for a wavelet-based spectral matrix estimator obtained with \code{\link{pdSpecEst1D}}
-#' based onintrinsic manifold data depths  as in \code{\link{pdDepth}}.
+#' based on intrinsic manifold data depths  as in \code{\link{pdDepth}}.
 #'
 #' The parametric bootstrap procedure exploits the data generating process of a stationary time series
 #' via its Cramer representation, and is equivalent to e.g. (Fiecas and Ombao, 2016) among others.

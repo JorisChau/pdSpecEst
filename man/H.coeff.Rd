@@ -32,7 +32,7 @@ the following matrix elements: let  \eqn{1 \le n \le d} and
   \item{If \code{n < m}}{ the complex matrix element \eqn{2i/\sqrt 2 E_{nm}}}
   \item{If \code{n > m}}{ the real matrix element \eqn{2/\sqrt 2 E_{nm}}}
 }
-The orthonomal basis coefficients are ordered by scanning through the matrix \code{H} in a row-by-row
+The orthonormal basis coefficients are ordered by scanning through the matrix \code{H} in a row-by-row
 fashion.
 }
 \examples{

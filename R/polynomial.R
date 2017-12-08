@@ -23,7 +23,7 @@
 #' @param x for polynomial curve interpolation, a numeric vector specifying the time grid (resolution) at which the
 #' interpolated polynomial is estimated. For polynomial surface interpolation, a list with as elements two numeric vectors
 #' \code{x} and \code{y} specifying the time tensor product grid (resolution) \code{expand.grid(x$x, x$y)} at which the
-#' intepolated polynomial surface is estimated.
+#' interpolated polynomial surface is estimated.
 #' @param metric the metric the space of HPD gets equipped with, by default \code{metric = "Riemannian"}, but instead
 #' this can also be set to \code{metric = "Euclidean"} to perform (standard) Euclidean polynomial interpolation of curves or
 #' surfaces in the space of HPD matrices.

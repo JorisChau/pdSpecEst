@@ -31,7 +31,7 @@
 #' @param metric the metric that the space of HPD matrices is equipped with. The default choice is \code{"Riemannian"},
 #' but this can also be one of: \code{"logEuclidean"}, \code{"Cholesky"}, \code{"rootEuclidean"} or
 #' \code{"Euclidean"}. The intrinsic AI wavelet transform fundamentally relies on the chosen metric.
-#' @param alpha an opional tuning parameter in the wavelet the thresholding procedure. If \code{policy = "universal"},
+#' @param alpha an optional tuning parameter in the wavelet the thresholding procedure. If \code{policy = "universal"},
 #' the sparsity parameter in the tree-structured wavelet thresholding procedure is set to \code{alpha} times the
 #' universal threshold, defaults to \code{alpha = 1}.
 #' @param return an optional argument that specifies whether the denoised spectral estimator
@@ -197,7 +197,7 @@ pdSpecEst1D <- function(P, order = 5, policy = "universal", metric = "Riemannian
 #' @param metric the metric that the space of HPD matrices is equipped with. The default choice is \code{"Riemannian"},
 #' but this can also be one of: \code{"logEuclidean"}, \code{"Cholesky"}, \code{"rootEuclidean"} or
 #' \code{"Euclidean"}. The intrinsic AI wavelet transform fundamentally relies on the chosen metric.
-#' @param alpha an opional tuning parameter in the wavelet the thresholding procedure. If \code{policy = "universal"},
+#' @param alpha an optional tuning parameter in the wavelet the thresholding procedure. If \code{policy = "universal"},
 #' the sparsity parameter in the tree-structured wavelet thresholding procedure is set to \code{alpha} times the
 #' universal threshold, defaults to \code{alpha = 1}.
 #' @param return an optional argument that specifies whether the denoised spectral estimator
@@ -276,7 +276,7 @@ pdSpecEst2D <- function(P, order = c(3, 3), metric = "Riemannian", alpha = 1, re
 #' \code{pdCart()} performs hard tree-structured thresholding of the wavelet coefficients obtained with \code{\link{WavTransf1D}}
 #' or \code{\link{WavTransf2D}} based on the trace of the whitened wavelet coefficients, see e.g. (Chau and von Sachs, 2017).
 #'
-#' Depending on the structure of the input list of arrays \code{D} the function performs 1D or 2D tree-structured tresholding of wavelet coefficients.
+#' Depending on the structure of the input list of arrays \code{D} the function performs 1D or 2D tree-structured thresholding of wavelet coefficients.
 #' The optimal tree of wavelet coefficients is found by minimization of the \emph{complexity penalized residual sum of squares} (CPRESS) criterion
 #' in (Donoho, 1997), via a fast tree-pruning algorithm. By default, the sparsity parameter is set equal to \code{alpha} times
 #' the universal threshold \eqn{\sigma_w\sqrt(2\log(n))}, where \eqn{\sigma_w^2} is the noise variance of the traces of the whitened wavelet
@@ -300,7 +300,7 @@ pdSpecEst2D <- function(P, order = c(3, 3), metric = "Riemannian", alpha = 1, re
 #' @param D.white a list of whitened wavelet coefficients as obtained from \code{\link{WavTransf1D}} or \code{\link{WavTransf2D}}.
 #' @param alpha tuning parameter specifying the sparsity parameter as \code{alpha} times the universal threshold.
 #' @param tree logical value, if \code{tree = T} performs tree-structured thresholding, otherwise performs
-#'  non-tree-structered hard thresholding of the coefficients.
+#'  non-tree-structured hard thresholding of the coefficients.
 #' @param order the order(s) of the intrinsic 1D or 2D AI refinement scheme as in \code{\link{WavTransf1D}} and \code{\link{WavTransf2D}}.
 #' @param ... additional parameters for internal use.
 #'

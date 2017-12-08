@@ -82,7 +82,7 @@ across subjects) is smaller than \code{d.jmax}.\cr
 The \eqn{S} subjects are assigned to \eqn{K} different clusters in a probabilistic fashion according to a
 two-step procedure:
 \enumerate{
-\item In the first step, an intrinsic fuzzy c-medoids algorithm, with fuziness parameter \eqn{m} is applied to the
+\item In the first step, an intrinsic fuzzy c-medoids algorithm, with fuzziness parameter \eqn{m} is applied to the
 \eqn{S} coarsest midpoints at scale \code{j = 0} in the subject-specific midpoints pyramids. Note that the intrinsic
 c-medoids algorithm crucially relies on the metric that the space of HPD matrices gets equipped with.
 \item In the second step, a weighted fuzzy c-means algorithm based on the Euclidean

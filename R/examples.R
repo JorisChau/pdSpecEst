@@ -211,7 +211,7 @@ rExamples <- function(n, example = c("heaviSine", "bumps", "two-cats", "gaussian
 #'
 #' @param n numeric vector with two components corresponding to the size of the discretized time-frequency grid at which the spectral matrix
 #' is generated.
-#' @param d row- (resp. colum-)dimension of the generated spectral matrix.
+#' @param d row- (resp. column-)dimension of the generated spectral matrix.
 #' @param B complex Wishart distribution degrees of freedom, defaults to \code{B = d}, such that the generated pseudo periodogram matrix
 #' observations are positive definite. Note that \code{B} coincides with the number of tapering functions in the (time-varying) multitaper
 #' periodogram in \code{\link{pdPgram2D}}.

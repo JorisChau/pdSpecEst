@@ -105,7 +105,7 @@ pdPgram <- function(X, B, method = c("multitaper", "bartlett"), bias.corr = F, n
 #' computes a multitaper periodogram matrix (as in \code{\link{pdPgram}}) in each of a number of non-overlapping time series
 #' segments of \code{X}, with the time series segments centered around the (rescaled) time points in \code{tf.grid$time}.
 #' If \code{method == "hermite"}, the function calculates a multitaper time-varying periodogram matrix replacing the Slepian
-#' tapers by ortogonal Hermite tapering functions. \cr
+#' tapers by orthogonal Hermite tapering functions. \cr
 #' If we perform additional periodogram matrix denoising in the space of HPD matrices equipped with the
 #' Riemannian metric or the Log-Euclidean metric, we should set \code{bias.corr = T}, which corrects for the asymptotic
 #' bias of the periodogram matrix on the manifold of HPD matrices equipped with the Riemannian or Log-Euclidean metric

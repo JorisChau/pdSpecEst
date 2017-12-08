@@ -1,6 +1,6 @@
 #' Cubic smoothing spline regression for HPD matrices
 #'
-#' \code{pdSplineReg()} performs cubic smoothing spline regression on the Riemannan manifold of
+#' \code{pdSplineReg()} performs cubic smoothing spline regression on the Riemannian manifold of
 #' HPD matrices equipped with the Riemannian metric through minimization of a penalized regression
 #' objective function using a geometric conjugate gradient descent method as outlined in (Boumal and Absil, 2011).
 #' In contrast to (Boumal and Absil, 2011), we set the term in the objective function based on the
@@ -23,7 +23,7 @@
 #' @param ... additional arguments for internal usage.
 #'
 #' @return A list with three components:
-#' \item{f }{a \eqn{(d, d, N_d)}-dimensional array containing the HPD cubic smoothing spling regression estimator.}
+#' \item{f }{a \eqn{(d, d, N_d)}-dimensional array containing the HPD cubic smoothing spline regression estimator.}
 #' \item{cost }{a numeric vector containing the costs of the objective function after each gradient descent iteration.}
 #' \item{total.iter }{total number of gradient descent iterations.}
 #'
@@ -166,7 +166,7 @@ pdSplineReg <- function(P, f0, lam = 1, Nd, ini.step = 1, max.iter = 100, eps = 
 #'   \item{If \code{n < m}}{ the complex matrix element \eqn{2i/\sqrt 2 E_{nm}}}
 #'   \item{If \code{n > m}}{ the real matrix element \eqn{2/\sqrt 2 E_{nm}}}
 #' }
-#' The orthonomal basis coefficients are ordered by scanning through the matrix \code{H} in a row-by-row
+#' The orthonormal basis coefficients are ordered by scanning through the matrix \code{H} in a row-by-row
 #' fashion.
 #'
 #' @param H if \code{!isTRUE(inverse)}, a \eqn{(d,d)}-dimensional Hermitian matrix; if \code{isTRUE(inverse)}, a numeric

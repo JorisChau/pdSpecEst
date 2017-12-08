@@ -73,7 +73,7 @@ equipped with a metric, e.g. the Riemannian metric, specified by the user. This 
 \details{
 The input array \code{P} corresponds to initial noisy HPD time-varying spectral estimates of the (\eqn{d, d})-
 dimensional spectral matrices at \eqn{m_1 \times m_2} different time-frequency points for \eqn{S} different
-subects, with \eqn{m_1, m_2} dyadic numbers. The initial spectral estimates can be e.g. the tapered HPD
+subjects, with \eqn{m_1, m_2} dyadic numbers. The initial spectral estimates can be e.g. the tapered HPD
 time-varying  periodograms given as output by \code{\link{pdPgram2D}}. \cr
 For each subject \eqn{s}, thresholded wavelet coefficients in the intrinsic 2D manifold wavelet domain are
 calculated by \code{\link{pdSpecEst2D}}.\cr
@@ -84,7 +84,7 @@ across subjects) is smaller than \code{d.jmax}.\cr
 The \eqn{S} subjects are assigned to \eqn{K} different clusters in a probabilistic fashion according to a
 two-step procedure:
 \enumerate{
-\item In the first step, an intrinsic fuzzy c-medoids algorithm, with fuziness parameter \eqn{m} is applied to the
+\item In the first step, an intrinsic fuzzy c-medoids algorithm, with fuzziness parameter \eqn{m} is applied to the
 \eqn{S} coarsest midpoints at scale \code{j = 0} in the subject-specific 2D midpoints pyramids. Note that the intrinsic
 c-medoids algorithm crucially relies on the metric that the space of HPD matrices gets equipped with.
 \item In the second step, a weighted fuzzy c-means algorithm based on the Euclidean
