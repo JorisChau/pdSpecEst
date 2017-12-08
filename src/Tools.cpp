@@ -69,7 +69,7 @@ arma::cx_mat iSqrt(arma::cx_mat M) {
 
 double NormF(arma::cx_mat M) {
 
-  return norm(M, "fro");
+  return arma::norm(M, "fro");
 
 }
 
@@ -78,7 +78,7 @@ double NormF(arma::cx_mat M) {
 
 arma::cx_mat Chol(arma::cx_mat M) {
 
-  return arma::sqrtmat_sympd(M);
+  return arma::chol(M, "lower");
 
 }
 
@@ -93,7 +93,7 @@ double RiemmDist(arma::cx_mat A, arma::cx_mat B) {
 
   arma::cx_mat A3 = arma::logmat_sympd(A2 * B * A2);
 
-  return norm(A3, "fro");
+  return arma::norm(A3, "fro");
 
 }
 

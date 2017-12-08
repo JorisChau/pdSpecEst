@@ -1,8 +1,9 @@
 ## Test environments
 
 * Windows 7, R 3.3.1, pass
-* Linux Ubuntu 17.04 install, R 3.4.3, 1 note
+* Linux Ubuntu 17.04, R 3.4.3, 1 note
 * Linux CentOS 6.9, R 3.3.1, pass
+* Linux Ubuntu 14.04 (on travis-ci), R 3.4.2, pass
 * MacOS Sierra 10.12.6 (on travis-ci), R 3.4.3, pass
 * Win-builder (oldrelease, release and devel), 1 note
 
