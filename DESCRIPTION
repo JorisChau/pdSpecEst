@@ -20,7 +20,8 @@ Imports:
     multitaper,
     Rcpp,
     ddalpha,
-    R.utils
+    R.utils,
+    RcppArmadillo (>= 0.7.500.0.0)
 RoxygenNote: 6.0.1
 LinkingTo: Rcpp, RcppArmadillo (>= 0.7.500.0.0)
 SystemRequirements: GNU make, C++11

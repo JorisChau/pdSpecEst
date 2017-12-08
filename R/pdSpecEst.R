@@ -28,6 +28,7 @@
 #' @docType package
 #' @useDynLib pdSpecEst, .registration = TRUE
 #' @importFrom Rcpp evalCpp
+#' @import RcppArmadillo
 #' @import utils
 #' @import stats
 #' @name pdSpecEst

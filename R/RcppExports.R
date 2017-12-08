@@ -39,8 +39,8 @@ NormF <- function(M) {
     .Call(`_pdSpecEst_NormF`, M)
 }
 
-Chol <- function(M) {
-    .Call(`_pdSpecEst_Chol`, M)
+Chol2 <- function(M) {
+    .Call(`_pdSpecEst_Chol2`, M)
 }
 
 RiemmDist <- function(A, B) {
