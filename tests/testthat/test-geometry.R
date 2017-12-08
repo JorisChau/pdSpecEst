@@ -7,14 +7,14 @@ test_that("Correctly working geometric tools", {
   p2 <- matrix(complex(real = rnorm(d^2), imaginary = rnorm(d^2)), nrow = d)
   P1 <- t(Conj(p1)) %*% p1
   P2 <- t(Conj(p2)) %*% p2
-  P_chol <- t(Conj(Chol(P1)))
+  # P_chol <- t(Conj(Chol(P1)))
 
   expect_equal(Expm(P1, Logm(P1, P2)), P2)
   expect_equal(c(Sqrt(P1) %*% iSqrt(P1)), as.complex(diag(d)))
   expect_equal(H.coeff(H.coeff(P1), inverse = T), P1)
   expect_equal(T_coeff_inv(T_coeff(P1, P2), P2), P1)
-  expect_equal(Chol_inv(P_chol, bias.corr = F), P1)
-  expect_equal(E_chol(E_chol(P_chol), inverse = T), P_chol)
+  # expect_equal(Chol_inv(P_chol, bias.corr = F), P1)
+  # expect_equal(E_chol(E_chol(P_chol), inverse = T), P_chol)
 
   expect_equal(pdMean(array(c(P1, P2), dim = c(d, d, 2))), Mid(P1, P2))
   expect_type(pdDist(P1, P2), "double")

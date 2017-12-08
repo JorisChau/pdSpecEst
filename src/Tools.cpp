@@ -78,7 +78,7 @@ double NormF(arma::cx_mat M) {
 
 arma::cx_mat Chol(arma::cx_mat M) {
 
-  return arma::chol(M);
+  return arma::sqrtmat_sympd(M);
 
 }
 
