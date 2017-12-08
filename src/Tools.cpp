@@ -1,6 +1,4 @@
 #define ARMA_DONT_PRINT_ERRORS
-#define ARMA_DONT_USE_WRAPPER
-#define ARMA_USE_LAPACK
 #include <RcppArmadillo.h>
 
 // [[Rcpp::depends(RcppArmadillo)]]
@@ -75,12 +73,15 @@ double NormF(arma::cx_mat M) {
 
 }
 
-// [[Rcpp::depends("RcppArmadillo")]]
-// [[Rcpp::export]]
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export()]]
 
-arma::cx_mat Chol(arma::cx_mat M) {
+arma::cx_mat pdChol(arma::cx_mat M) {
 
-  return(arma::chol(M, "lower"));
+  arma::cx_mat R;
+  arma::chol(R, M, "lower");
+
+  return R;
 
 }
 

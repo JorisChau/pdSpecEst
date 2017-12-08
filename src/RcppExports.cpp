@@ -63,14 +63,14 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// Chol
-arma::cx_mat Chol(arma::cx_mat M);
-RcppExport SEXP _pdSpecEst_Chol(SEXP MSEXP) {
+// pdChol
+arma::cx_mat pdChol(arma::cx_mat M);
+RcppExport SEXP _pdSpecEst_pdChol(SEXP MSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::cx_mat >::type M(MSEXP);
-    rcpp_result_gen = Rcpp::wrap(Chol(M));
+    rcpp_result_gen = Rcpp::wrap(pdChol(M));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -202,7 +202,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pdSpecEst_Sqrt", (DL_FUNC) &_pdSpecEst_Sqrt, 1},
     {"_pdSpecEst_iSqrt", (DL_FUNC) &_pdSpecEst_iSqrt, 1},
     {"_pdSpecEst_NormF", (DL_FUNC) &_pdSpecEst_NormF, 1},
-    {"_pdSpecEst_Chol", (DL_FUNC) &_pdSpecEst_Chol, 1},
+    {"_pdSpecEst_pdChol", (DL_FUNC) &_pdSpecEst_pdChol, 1},
     {"_pdSpecEst_RiemmDist", (DL_FUNC) &_pdSpecEst_RiemmDist, 2},
     {"_pdSpecEst_Expm", (DL_FUNC) &_pdSpecEst_Expm, 2},
     {"_pdSpecEst_Logm", (DL_FUNC) &_pdSpecEst_Logm, 2},
