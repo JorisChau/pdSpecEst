@@ -76,14 +76,15 @@ double NormF(arma::cx_mat M) {
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export()]]
 
-arma::cx_mat pdChol(arma::cx_mat M) {
+arma::cx_mat Chol(arma::cx_mat M) {
 
-  arma::cx_mat R;
-  arma::chol(R, M, "lower");
+  arma::cx_mat L, U, P;
+  arma::lu(L, U, P, M);
 
-  return R;
+  return L;
 
 }
+
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export()]]
