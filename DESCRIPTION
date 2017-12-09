@@ -16,7 +16,6 @@ Depends:
 License: GPL-2
 LazyData: TRUE
 Imports:
-    utils,
     multitaper,
     Rcpp,
     ddalpha

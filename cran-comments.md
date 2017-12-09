@@ -1,9 +1,17 @@
+## Resubmission
+
+This is a resubmission. In this version I have resolved the note:
+* checking dependencies in R code ... NOTE
+Namespaces in Imports field not imported from:
+  ‘R.utils’ ‘grid’
+  All declared Imports should be used.
+
 ## Test environments
 
 * Windows 7, R 3.3.1, pass
 * Linux Ubuntu 17.04, R 3.4.3, 1 note
 * Linux CentOS 6.9, R 3.3.1, pass
-* Linux Ubuntu 14.04 (on travis-ci), R 3.4.2, pass
+* Linux Ubuntu 14.04 (on travis-ci), R 3.4.2, 1 note
 * MacOS Sierra 10.12.6 (on travis-ci), R 3.4.3, pass
 * Win-builder (oldrelease, release and devel), 1 note
 
@@ -27,9 +35,9 @@ Possibly mis-spelled words in DESCRIPTION:
 **Ubuntu 17.04 and 14.04 note:**
 
 * checking installed package size ... NOTE
-  installed size is  5.4Mb
+  installed size is  5.3Mb
   sub-directories of 1Mb or more:
-    libs  4.3Mb
+    libs  4.2Mb
       
 My understanding is that the inflation of the libs subdirectory is due to the use of `Rcpp` and `RcppArmadillo`. 
 
