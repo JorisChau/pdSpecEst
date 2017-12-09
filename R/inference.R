@@ -133,9 +133,9 @@ pdConfInt1D <- function(f, alpha = 0.05, ci.region, boot.samples = 1000, metric 
       f.0.J <- sapply(1:2^J, function(i) Logm(diag(d), f.0[, , i]), simplify = "array")
     }
   } else if(metric == "Cholesky"){
-    f.hat.J <- sapply(1:2^J, function(i) t(Conj(Chol(f[, , i]))), simplify = "array")
+    f.hat.J <- sapply(1:2^J, function(i) Chol(f[, , i]), simplify = "array")
     if(!is.null(f.0)){
-      f.0.J <- sapply(1:2^J, function(i) t(Conj(Chol(f.0[, , i]))), simplify = "array")
+      f.0.J <- sapply(1:2^J, function(i) Chol(f.0[, , i]), simplify = "array")
     }
   } else if(metric == "rootEuclidean"){
     f.hat.J <- sapply(1:2^J, function(i) Sqrt(f[, , i]), simplify = "array")
@@ -171,9 +171,9 @@ pdConfInt1D <- function(f, alpha = 0.05, ci.region, boot.samples = 1000, metric 
       f.0.J <- array(apply(f.0.J, 3, function(f) Expm(diag(d), f)), dim = dim(f.0.J))
     }
   } else if(metric == "Cholesky"){
-    f.hat.J <- array(apply(f.hat.J, 3, function(f) Chol_inv(f, bias.corr = T)), dim = dim(f.hat.J))
+    f.hat.J <- array(apply(f.hat.J, 3, function(f) Chol(f, inverse = T, bias.corr = T)), dim = dim(f.hat.J))
     if(!is.null(f.0)){
-      f.0.J <- array(apply(f.0.J, 3, function(f) Chol_inv(f, bias.corr = T)), dim = dim(f.0.J))
+      f.0.J <- array(apply(f.0.J, 3, function(f) Chol(f, inverse = T, bias.corr = T)), dim = dim(f.0.J))
     }
   } else if(metric == "rootEuclidean"){
     f.hat.J <- array(apply(f.hat.J, 3, function(f) t(Conj(f)) %*% f), dim = dim(f.hat.J))

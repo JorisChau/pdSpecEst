@@ -126,7 +126,7 @@ InvWavTransf1D <- function(D, M0, order = 5, jmax, periodic = F, metric = "Riema
     m1 <- (if(metric == "logEuclidean"){
       sapply(1:dim(m1)[3], function(i) Expm(diag(d), m1[, , i]), simplify = "array")
     } else if(metric == "Cholesky"){
-      sapply(1:dim(m1)[3], function(i) Chol_inv(m1[, , i], bias.corr = chol.bias), simplify = "array")
+      sapply(1:dim(m1)[3], function(i) Chol(m1[, , i], inverse = T, bias.corr = chol.bias), simplify = "array")
     } else if(metric == "rootEuclidean") {
       sapply(1:dim(m1)[3], function(i) t(Conj(m1[, , i])) %*% m1[, , i], simplify = "array")
     } else m1)
@@ -273,7 +273,7 @@ InvWavTransf2D <- function(D, M0, order = c(3, 3), jmax, metric = "Riemannian", 
       array(apply(m1, c(3, 4), function(M) Expm(diag(d), M)),
             dim = c(d, d, dim(m1)[3], dim(m1)[4]))
     } else if(metric == "Cholesky"){
-      array(apply(m1, c(3, 4), function(M) Chol_inv(M, bias.corr = chol.bias)),
+      array(apply(m1, c(3, 4), function(M) Chol(M, inverse = T, bias.corr = chol.bias)),
             dim = c(d, d, dim(m1)[3], dim(m1)[4]))
     } else if(metric == "rootEuclidean") {
       array(apply(m1, c(3, 4), function(M) t(Conj(M)) %*% M),

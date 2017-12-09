@@ -76,15 +76,6 @@ double NormF(arma::cx_mat M) {
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export()]]
 
-arma::cx_mat Chol2(arma::cx_mat M) {
-
-  return arma::chol(M);
-}
-
-
-// [[Rcpp::depends(RcppArmadillo)]]
-// [[Rcpp::export()]]
-
 double RiemmDist(arma::cx_mat A, arma::cx_mat B) {
 
   arma::cx_mat A1 = arma::sqrtmat_sympd(A);

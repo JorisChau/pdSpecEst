@@ -94,7 +94,7 @@ pdSpecEst1D <- function(P, order = 5, policy = "universal", metric = "Riemannian
     Pmid <- (if(metric == "logEuclidean") {
       sapply(1:2^J, function(i) Logm(diag(d), P[, , i]), simplify = "array")
     } else if(metric == "Cholesky") {
-      sapply(1:2^J, function(i) t(Conj(Chol(P[, , i]))), simplify = "array")
+      sapply(1:2^J, function(i) Chol(P[, , i]), simplify = "array")
     } else if(metric == "rootEuclidean"){
       sapply(1:2^J, function(i) Sqrt(P[, , i]), simplify = "array")
     } else P)

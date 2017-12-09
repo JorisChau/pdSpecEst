@@ -100,8 +100,8 @@ pdDepth <- function(y = NULL, X, method = c("zonoid", "gdd", "spatial"), metric 
         X.coeff <- apply(X, 3, function(X) E_coeff(Logm(diag(d), X)))
         y.coeff <- (if(point) E_coeff(Logm(diag(d), y)) else X.coeff)
       } else if(metric == "Cholesky"){
-        X.coeff <- apply(X, 3, function(X) E_chol(t(Conj(Chol(X)))))
-        y.coeff <- (if(point) E_chol(t(Conj(Chol(y)))) else X.coeff)
+        X.coeff <- apply(X, 3, function(X) E_chol(Chol(X)))
+        y.coeff <- (if(point) E_chol(Chol(y)) else X.coeff)
       } else if(metric == "Euclidean"){
         X.coeff <- apply(X, 3, function(X) E_coeff(X))
         y.coeff <- (if(point) E_coeff(y) else X.coeff)
@@ -182,8 +182,8 @@ pdDepth <- function(y = NULL, X, method = c("zonoid", "gdd", "spatial"), metric 
           X.coeff <- apply(X, 3, function(X) E_coeff(Logm(diag(d), X)))
           y.coeff <- (if(point) E_coeff(Logm(diag(d), y)) else X.coeff)
         } else if(metric == "Cholesky"){
-          X.coeff <- apply(X, 3, function(X) E_chol(t(Conj(Chol(X)))))
-          y.coeff <- (if(point) E_chol(t(Conj(Chol(y)))) else X.coeff)
+          X.coeff <- apply(X, 3, function(X) E_chol(Chol(X)))
+          y.coeff <- (if(point) E_chol(Chol(y)) else X.coeff)
         } else if(metric == "Euclidean"){
           X.coeff <- apply(X, 3, function(X) E_coeff(X))
           y.coeff <- (if(point) E_coeff(y) else X.coeff)

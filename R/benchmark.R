@@ -89,22 +89,22 @@ pdSplineReg <- function(P, f0, lam = 1, Nd, ini.step = 1, max.iter = 100, eps = 
 
   grad_E <- function(gamma){
     sapply(1:Nd, function(k) 0.5 * apply(sapply(which(Nd.ind == k),
-                                                      function(ki) grad_fA(gamma[, , k], P[, , ki]), simplify = "array"),
-                                               c(1, 2), sum) + delta.t^3  * lam / 2 * (if(k %in% 2:(Nd-1)){
-                                                 2 * grad_fA(gamma[, , k], gamma[, , k + 1]) +
-                                                   2 * grad_fA(gamma[, , k], gamma[, , k - 1])  +
-                                                   2 * grad_gA(gamma[, , k], gamma[, , k + 1], gamma[, , k - 1]) +
-                                                   (if(k > 2) 2 * grad_gB(gamma[, , k - 1], gamma[, , k], gamma[, , k - 2]) else 0) +
-                                                   (if(k < Nd-1) 2 * grad_gB(gamma[, , k + 1], gamma[, , k], gamma[, , k + 2]) else 0)
-                                               } else 0), simplify = "array")
+                                                function(ki) grad_fA(gamma[, , k], P[, , ki]), simplify = "array"),
+                                         c(1, 2), sum) + delta.t^3  * lam / 2 * (if(k %in% 2:(Nd-1)){
+                                           2 * grad_fA(gamma[, , k], gamma[, , k + 1]) +
+                                             2 * grad_fA(gamma[, , k], gamma[, , k - 1])  +
+                                             2 * grad_gA(gamma[, , k], gamma[, , k + 1], gamma[, , k - 1]) +
+                                             (if(k > 2) 2 * grad_gB(gamma[, , k - 1], gamma[, , k], gamma[, , k - 2]) else 0) +
+                                             (if(k < Nd-1) 2 * grad_gB(gamma[, , k + 1], gamma[, , k], gamma[, , k + 2]) else 0)
+                                         } else 0), simplify = "array")
   }
 
   ## Cost objective function
   E <- function(gamma){
     gamma.isqrt <- sapply(1:Nd, function(k) iSqrt(gamma[, , k]), simplify = "array")
     return(0.5 * sum(sapply(1:n, function(i) pdDist(P[, , i], gamma[, , which.min(abs(Nd.seq - i))])^2)) +
-              delta.t^3 * lam / 2 * sum(sapply(2:(Nd - 1), function(k) NormF(ast(gamma.isqrt[, , k],
-                 Logm(gamma[, , k], gamma[, , k + 1]) + Logm(gamma[, , k], gamma[, , k - 1])))^2)))
+             delta.t^3 * lam / 2 * sum(sapply(2:(Nd - 1), function(k) NormF(ast(gamma.isqrt[, , k],
+                                                                                Logm(gamma[, , k], gamma[, , k + 1]) + Logm(gamma[, , k], gamma[, , k - 1])))^2)))
   }
 
   ## Backtrack line search to determine optimal step size
@@ -206,17 +206,25 @@ H.coeff <- function(H, inverse = F){
   return(HH)
 }
 
-## Iterative inverse Cholesky with bias-correction (Dai & Guo, 2004)
-Chol_inv <- function(R, bias.corr = T){
+## Iterative Cholesky with inverse bias-correction (Dai & Guo, 2004)
+Chol <- function(R, inverse = F, bias.corr = T){
   d <- dim(R)[1]
-  b <- (if(bias.corr) gamma(d - 1:d + 3/2) / (sqrt(d) * gamma(d - 1:d + 1)) else rep(1, d))
-  S <- matrix(nrow = d, ncol = d)
-  S[1, 1] <- R[1, 1]^2 / b[1]^2
-  for(k in 1:(d - 1)){
-    S[k + 1, 1:k] <- (t(R[k + 1, 1:k]) %*% solve(R[1:k, 1:k])) %*% S[1:k, 1:k]
-    S[1:k, k + 1] <- Conj(S[k + 1, 1:k])
-    S[k + 1, k + 1] <- R[k + 1, k + 1]^2 / b[k + 1]^2 + (t(S[k + 1, 1:k]) %*%
-                                        solve(S[1:k, 1:k])) %*% Conj(S[k + 1, 1:k])
+  S <- matrix(0, nrow = d, ncol = d)
+  if(!inverse){
+    S[1, 1] <- sqrt(R[1, 1])
+    for(k in 1:(d - 1)){
+      S[k + 1, 1:k] <- t(R[k + 1, 1:k]) %*% solve(t(Conj(S[1:k, 1:k])))
+      S[k + 1, k + 1] <- sqrt(R[k + 1, k + 1] - t(R[k + 1, 1:k]) %*% solve(R[1:k, 1:k]) %*% Conj(R[k + 1, 1:k]))
+    }
+  } else {
+    b <- (if(bias.corr) gamma(d - 1:d + 3/2) / (sqrt(d) * gamma(d - 1:d + 1)) else rep(1, d))
+    S[1, 1] <- R[1, 1]^2 / b[1]^2
+    for(k in 1:(d - 1)){
+      S[k + 1, 1:k] <- (t(R[k + 1, 1:k]) %*% solve(R[1:k, 1:k])) %*% S[1:k, 1:k]
+      S[1:k, k + 1] <- Conj(S[k + 1, 1:k])
+      S[k + 1, k + 1] <- R[k + 1, k + 1]^2 / b[k + 1]^2 + (t(S[k + 1, 1:k]) %*%
+                                                             solve(S[1:k, 1:k])) %*% Conj(S[k + 1, 1:k])
+    }
   }
   return(S)
 }

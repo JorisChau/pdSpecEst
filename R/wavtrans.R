@@ -75,7 +75,7 @@ WavTransf1D <- function(P, order = 5, jmax, periodic = F, metric = "Riemannian",
   P <- (if(metric == "logEuclidean"){
     sapply(1:2^J, function(i) Logm(diag(d), P[, , i]), simplify = "array")
   } else if(metric == "Cholesky"){
-    sapply(1:2^J, function(i) t(Conj(Chol(P[, , i]))), simplify = "array")
+    sapply(1:2^J, function(i) Chol(P[, , i]), simplify = "array")
   } else if(metric == "rootEuclidean"){
     sapply(1:2^J, function(i) Sqrt(P[, , i]), simplify = "array")
   } else P)
@@ -224,7 +224,7 @@ WavTransf2D <- function(P, order = c(3, 3), jmax, metric = "Riemannian", progres
   P <- (if(metric == "logEuclidean"){
     array(apply(P, c(3, 4), function(Pi) Logm(diag(d), Pi)), dim = c(d, d, 2^J1, 2^J2))
   } else if(metric == "Cholesky"){
-    array(apply(P, c(3, 4), function(Pi) t(Conj(Chol(Pi)))), dim = c(d, d, 2^J1, 2^J2))
+    array(apply(P, c(3, 4), function(Pi) Chol(Pi)), dim = c(d, d, 2^J1, 2^J2))
   } else if(metric == "rootEuclidean"){
     array(apply(P, c(3, 4), function(Pi) Sqrt(Pi)), dim = c(d, d, 2^J1, 2^J2))
   } else P)
