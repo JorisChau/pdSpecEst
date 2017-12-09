@@ -16,11 +16,10 @@ Depends:
 License: GPL-2
 LazyData: TRUE
 Imports:
-    grid,
+    utils,
     multitaper,
     Rcpp,
-    ddalpha,
-    R.utils
+    ddalpha
 RoxygenNote: 6.0.1
 LinkingTo: Rcpp, RcppArmadillo (>= 0.7.500.0.0)
 SystemRequirements: GNU make, C++11
@@ -28,6 +27,7 @@ Suggests:
     knitr,
     rmarkdown,
     testthat,
+    grid,
     ggplot2,
     reshape2,
     viridis,
