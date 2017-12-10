@@ -1,4 +1,4 @@
-# pdSpecEst 1.2.01
+# pdSpecEst 1.2.1
 
 * Removed unnecessary package imports
 
