@@ -70,6 +70,7 @@ pdSpecEst1D <- function(P, order = 5, policy = "universal", metric = "Riemannian
   tol = (if(is.null(dots$tol)) 0.01 else dots$tol)
   alpha.range = (if(is.null(dots$alpha.range)) c(0.5, 2) else dots$alpha.range)
   tree = (if(is.null(dots$tree)) T else dots$tree)
+  w.tree = (if(is.null(dots$w.tree)) NULL else dots$w.tree)
   periodic = (if(is.null(dots$periodic)) T else dots$periodic)
 
   policy = match.arg(policy, c("universal", "cv"))
@@ -150,7 +151,7 @@ pdSpecEst1D <- function(P, order = 5, policy = "universal", metric = "Riemannian
   } else WavTransf1D(P, order, jmax = jmax, periodic = periodic, metric = metric, progress = progress))
 
   coeff.opt <- pdCART(coeff$D, coeff$D.white, alpha = alpha.opt, tree = tree, periodic = periodic,
-                      order = order, B = B, return.D = return.D)
+                      w.tree = w.tree, order = order, B = B, return.D = return.D)
 
   ## Return 'f' or not
   f <- (if(return == "f"){
@@ -233,6 +234,7 @@ pdSpecEst2D <- function(P, order = c(3, 3), metric = "Riemannian", alpha = 1, re
   ## Set variables
   dots = list(...)
   tree = (if(is.null(dots$tree)) T else dots$tree)
+  w.tree = (if(is.null(dots$w.tree)) NULL else dots$w.tree)
   metric = match.arg(metric, c("Riemannian", "logEuclidean", "Cholesky", "rootEuclidean", "Euclidean"))
   J1 = log2(dim(P)[3])
   J2 = log2(dim(P)[4])
@@ -249,10 +251,10 @@ pdSpecEst2D <- function(P, order = c(3, 3), metric = "Riemannian", alpha = 1, re
   P <- (if((metric == "Riemannian" | metric == "logEuclidean") & bias.corr) {
     B * exp(-1/d * sum(digamma(B - (d - 1:d)))) * P } else P)
 
-  ## Threshold full data using 'alpha'
+  ## Threshold full data using 'alpha' (nonlinear) or 'tree.w' (linear)
   coeff <- WavTransf2D(P, order = order, jmax = jmax, metric = metric, progress = progress)
-  coeff.opt <- pdCART(coeff$D, coeff$D.white, alpha = alpha, tree = tree, order = order, B = B,
-                      return.D = return.D)
+  coeff.opt <- pdCART(coeff$D, coeff$D.white, alpha = alpha, tree = tree, w.tree = w.tree,
+                      order = order, B = B, return.D = return.D)
 
   ## Return 'f' or not
   f <- (if(return == "f"){
@@ -341,6 +343,8 @@ pdCART <- function(D, D.white, order, alpha = 1, tree = T, ...) {
   B = (if(is.null(dots$B)) d else dots$B)
   periodic = (if(is.null(dots$periodic) | is_2D) F else dots$periodic)
   return.D = (if(is.null(dots$return.D)) NA else dots$return.D)
+  w.tree = (if(is.null(dots$w.tree)) NULL else dots$w.tree)
+
   if(periodic){
     L = (order - 1) / 2
     L_b = ceiling(L / 2)
@@ -388,7 +392,7 @@ pdCART <- function(D, D.white, order, alpha = 1, tree = T, ...) {
     lam <- alpha * sqrt(2 * log(length(unlist(D_trace))))
   }
 
-  if(tree){
+  if(tree && is.null(w.tree)){
 
     ## Dyadic CART
     w <- D_trace
@@ -425,8 +429,10 @@ pdCART <- function(D, D.white, order, alpha = 1, tree = T, ...) {
         R <- pmin(V, R)
       }
     }
-  } else{
+  } else if(!isTRUE(tree) && is.null(w.tree))  {
     w <- lapply(1:J_tr, function(j) abs(D_trace[[j]]) > lam)
+  } else if(!is.null(w.tree)){
+    w <- w.tree
   }
 
   ## Threshold wavelet coefficients with weights 'w'
@@ -437,7 +443,7 @@ pdCART <- function(D, D.white, order, alpha = 1, tree = T, ...) {
   if(is_2D){
     ## 2D
     for(j in 2:J){
-      if(tree){
+      if(isTRUE(tree)){
         if(j > 2){
           dims <- dim(w[[j - 1]])
           roots <- matrix(rep(matrix(rep(t(w[[j - 2]]), each = ifelse(dims[2] > 1, 2, 1)),
@@ -458,7 +464,7 @@ pdCART <- function(D, D.white, order, alpha = 1, tree = T, ...) {
   } else {
     ## 1D
     for(j in 2:J){
-      w[[j - 1]] <- (if(tree) w[[j - 1]] & rep((if(j == 2) T else w[[j - 2]]), each = 2) else w[[j - 1]])
+      w[[j - 1]] <- (if(isTRUE(tree)) w[[j - 1]] & rep((if(j == 2) T else w[[j - 2]]), each = 2) else w[[j - 1]])
       if(periodic & (L_b > 0)){
         zeros <- !(c(abs(D_trace_full[[j - 1]][1:L_b]) > lam, w[[j - 1]], abs(D_trace_full[[j - 1]][2^(j - 1) + L_b + 1:L_b]) > lam))
       } else{
@@ -475,5 +481,4 @@ pdCART <- function(D, D.white, order, alpha = 1, tree = T, ...) {
 
   return(res)
 }
-
 
