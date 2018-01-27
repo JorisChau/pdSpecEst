@@ -92,10 +92,12 @@ pdDepth <- function(y = NULL, X, method = c("zonoid", "gdd", "spatial"), metric 
   ## Manifold zonoid depth
   if (method == "zonoid") {
     ZD <- function(y, X) {
-      point <- ifelse(length(dim(y)) == 2, T, F)
+      point <- ifelse(isTRUE(length(dim(y)) == 2), T, F)
       if(metric == "Riemannian" & point){
-        y.coeff <- as.matrix(rep(0, d^2))
         X.coeff <- apply(X, 3, function(X) E_coeff(Logm(y, X)))
+        X.coeff <- matrix(X.coeff[apply(X.coeff, 1, function(X){isTRUE(diff(range(X)) > .Machine$double.eps)}),],
+                          ncol = dim(X)[3])
+        y.coeff <- as.matrix(rep(0, nrow(X.coeff)))
       } else if(metric == "logEuclidean"){
         X.coeff <- apply(X, 3, function(X) E_coeff(Logm(diag(d), X)))
         y.coeff <- (if(point) E_coeff(Logm(diag(d), y)) else X.coeff)
