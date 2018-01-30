@@ -100,15 +100,23 @@ pdDepth <- function(y = NULL, X, method = c("zonoid", "gdd", "spatial"), metric 
         y.coeff <- as.matrix(rep(0, nrow(X.coeff)))
       } else if(metric == "logEuclidean"){
         X.coeff <- apply(X, 3, function(X) E_coeff(Logm(diag(d), X)))
+        X.coeff <- matrix(X.coeff[apply(X.coeff, 1, function(X){isTRUE(diff(range(X)) > .Machine$double.eps)}),],
+                          ncol = dim(X)[3])
         y.coeff <- (if(point) E_coeff(Logm(diag(d), y)) else X.coeff)
       } else if(metric == "Cholesky"){
         X.coeff <- apply(X, 3, function(X) E_chol(Chol(X)))
+        X.coeff <- matrix(X.coeff[apply(X.coeff, 1, function(X){isTRUE(diff(range(X)) > .Machine$double.eps)}),],
+                          ncol = dim(X)[3])
         y.coeff <- (if(point) E_chol(Chol(y)) else X.coeff)
       } else if(metric == "Euclidean"){
         X.coeff <- apply(X, 3, function(X) E_coeff(X))
+        X.coeff <- matrix(X.coeff[apply(X.coeff, 1, function(X){isTRUE(diff(range(X)) > .Machine$double.eps)}),],
+                          ncol = dim(X)[3])
         y.coeff <- (if(point) E_coeff(y) else X.coeff)
       } else if(metric == "rootEuclidean"){
         X.coeff <- apply(X, 3, function(X) E_coeff(Sqrt(X)))
+        X.coeff <- matrix(X.coeff[apply(X.coeff, 1, function(X){isTRUE(diff(range(X)) > .Machine$double.eps)}),],
+                          ncol = dim(X)[3])
         y.coeff <- (if(point) E_coeff(Sqrt(y)) else X.coeff)
       }
       ddalpha::depth.zonoid(t(y.coeff), t(X.coeff))
