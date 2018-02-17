@@ -246,6 +246,7 @@ pdSpecEst2D <- function(P, order = c(3, 3), metric = "Riemannian", alpha = 1, re
   jmax = min((if(is.null(dots$jmax)) J - 2 else dots$jmax), J.out - 1)
   bias.corr = (if(is.null(dots$bias.corr)) T else dots$bias.corr)
   return.D = (if(is.null(dots$return.D)) NA else dots$return.D)
+  return_val = (if(is.null(dots$return_val)) "manifold" else dots$return_val)
 
   # Manifold bias-correction
   P <- (if((metric == "Riemannian" | metric == "logEuclidean") & bias.corr) {
@@ -259,7 +260,7 @@ pdSpecEst2D <- function(P, order = c(3, 3), metric = "Riemannian", alpha = 1, re
   ## Return 'f' or not
   f <- (if(return == "f"){
     InvWavTransf2D(coeff.opt$D_w, coeff$M0, order = order, jmax = J.out, metric = metric,
-                   progress = progress, chol.bias = T)
+                   progress = progress, return_val = return_val, chol.bias = T)
   } else NULL)
 
   ## Return whitened coeff's or not
