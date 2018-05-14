@@ -5,8 +5,36 @@ ARMA <- function(Phi, Theta, Z, len) {
     .Call(`_pdSpecEst_ARMA`, Phi, Theta, Z, len)
 }
 
-kMean <- function(M, mu) {
-    .Call(`_pdSpecEst_kMean`, M, mu)
+pgram_C <- function(X, B, h, method) {
+    .Call(`_pdSpecEst_pgram_C`, X, B, h, method)
+}
+
+Mid_w <- function(A, B, w) {
+    .Call(`_pdSpecEst_Mid_w`, A, B, w)
+}
+
+pdMean_C_approx <- function(M, mu) {
+    .Call(`_pdSpecEst_pdMean_C_approx`, M, mu)
+}
+
+pdMean_C <- function(M0, M, mu, maxit, reltol) {
+    .Call(`_pdSpecEst_pdMean_C`, M0, M, mu, maxit, reltol)
+}
+
+pdMedian_C <- function(M0, M, mu, maxit, reltol) {
+    .Call(`_pdSpecEst_pdMedian_C`, M0, M, mu, maxit, reltol)
+}
+
+Euclid_Median_C <- function(M0, M, mu, maxit, reltol) {
+    .Call(`_pdSpecEst_Euclid_Median_C`, M0, M, mu, maxit, reltol)
+}
+
+pdNeville_C <- function(P, X, x, method) {
+    .Call(`_pdSpecEst_pdNeville_C`, P, X, x, method)
+}
+
+impute_C <- function(M0, W, L, inverse, metric, method) {
+    .Call(`_pdSpecEst_impute_C`, M0, W, L, inverse, metric, method)
 }
 
 #' Geodesic midpoint between HPD-matrices
@@ -31,12 +59,12 @@ Mid <- function(A, B) {
     .Call(`_pdSpecEst_Mid`, A, B)
 }
 
-solveMid <- function(B, C) {
-    .Call(`_pdSpecEst_solveMid`, B, C)
-}
-
 Sqrt <- function(M) {
     .Call(`_pdSpecEst_Sqrt`, M)
+}
+
+Chol_C <- function(M) {
+    .Call(`_pdSpecEst_Chol_C`, M)
 }
 
 iSqrt <- function(M) {
@@ -47,8 +75,20 @@ NormF <- function(M) {
     .Call(`_pdSpecEst_NormF`, M)
 }
 
-RiemmDist <- function(A, B) {
-    .Call(`_pdSpecEst_RiemmDist`, A, B)
+wavPyr_C <- function(P, L, J, Nj, metric) {
+    .Call(`_pdSpecEst_wavPyr_C`, P, L, J, Nj, metric)
+}
+
+wavCoeff_C <- function(M1, M0, j, metric) {
+    .Call(`_pdSpecEst_wavCoeff_C`, M1, M0, j, metric)
+}
+
+reconstr_C <- function(M1, M0, Dj, j, nj, in_sample, L1, metric) {
+    .Call(`_pdSpecEst_reconstr_C`, M1, M0, Dj, j, nj, in_sample, L1, metric)
+}
+
+pdDist_C <- function(A, B, method) {
+    .Call(`_pdSpecEst_pdDist_C`, A, B, method)
 }
 
 #' Exponential map

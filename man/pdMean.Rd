@@ -2,31 +2,34 @@
 % Please edit documentation in R/dist.R
 \name{pdMean}
 \alias{pdMean}
-\title{Weighted geometric mean of HPD matrices}
+\title{Weighted Karcher mean of HPD matrices}
 \usage{
-pdMean(M, w, grad_desc = F, max_iter = 1000, tol, ...)
+pdMean(M, w, metric = "Riemannian", grad_desc = F, maxit = 1000, reltol,
+  ...)
 }
 \arguments{
 \item{M}{a \eqn{(d,d,S)}-dimensional array of Hermitian PD matrices.}
 
 \item{w}{an \eqn{S}-dimensional nonnegative weight vector, such that \code{sum(w) = 1}.}
 
-\item{grad_desc}{a logical value deciding if the gradient descent algorithm be used, defaults to
-\code{FALSE}.}
+\item{metric}{the distance measure, one of \code{'Riemannian'}, \code{'logEuclidean'},
+\code{'Cholesky'}, \code{'Euclidean'} or \code{'rootEuclidean'}. Defaults to \code{'Riemannian'}.}
+
+\item{grad_desc}{if \code{metric == "Riemannian"}, a logical value indicating if the
+gradient descent algorithm should be used, defaults to \code{FALSE}.}
+
+\item{reltol}{optional tolerance parameter in gradient descent algorithm, only used if
+\code{isTRUE(grad_desc & metric == "Riemannian")}. Defaults to \code{1E-10}.}
 
 \item{max_iter}{maximum number of iterations in gradient descent algorithm, only used if
-\code{isTRUE(grad_desc)}.}
-
-\item{tol}{optional tolerance parameter in gradient descent algorithm, only used if
-\code{isTRUE(grad_desc)}, defaults to \code{.Machine$double.eps}.}
-
-\item{...}{additional arguments for internal usage.}
+\code{isTRUE(grad_desc & metric == "Riemannian")}. Defaults to \code{1000}}
 }
 \description{
-\code{pdMean} calculates an (approximate) weighted geometric mean of \eqn{S} different
-\eqn{(d \times d)}-dimensional Hermitian PD matrices based on the Riemannian metric by
-the fast recursive algorithm in (Chau and von Sachs, 2017) or the slower but more accurate
-gradient descent algorithm in (Pennec, 2006). By default, the unweighted geometric mean is computed.
+\code{pdMean} calculates an (approximate) weighted Karcher or Frechet mean of \eqn{S} different
+\eqn{(d \times d)}-dimensional Hermitian PD matrices intrinsic to a specific metric. For the
+affine-invariant Riemannian metric, the weighted Karcher mean is either approximated via
+the fast recursive algorithm in (Ho et al., 2016) or computed via the slower, but more accurate,
+gradient descent algorithm in (Pennec, 2006). By default, the unweighted Karcher mean is computed.
 }
 \examples{
 m <- function(){
@@ -40,8 +43,8 @@ pdMean(M, w)
 
 }
 \references{
-Chau, J. and von Sachs, R. (2017). \emph{Positive definite multivariate spectral
-estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
+Chau, J. and von Sachs, R. (2017). \emph{Intrinsic wavelet regression for curves of
+Hermitian positive definite matrices}. Available at \url{http://arxiv.org/abs/1701.03314}.
 
 Pennec, X. (2006). Intrinsic statistics on Riemannian manifolds: Basic tools for geometric
 measurements. \emph{Journal of Mathematical Imaging and Vision} 25(1), 127-154.

@@ -4,19 +4,20 @@
 \alias{pdDist}
 \title{Compute distance between two HPD matrices}
 \usage{
-pdDist(A, B, method = "Riemannian")
+pdDist(A, B, metric = "Riemannian")
 }
 \arguments{
 \item{A, B}{Hermitian positive definite matrices (of equal dimension).}
 
-\item{method}{the distance measure, one of \code{'Riemannian'},
-\code{'logEuclidean'}, \code{'Cholesky'}, \code{'Euclidean'}, \code{'squareRoot'} or \code{'Procrustes'}. Defaults to \code{'Riemannian'}.}
+\item{metric}{the distance measure, one of \code{'Riemannian'},
+\code{'logEuclidean'}, \code{'Cholesky'}, \code{'Euclidean'}, \code{'rootEuclidean'} or \code{'Procrustes'}.
+Defaults to \code{'Riemannian'}.}
 }
 \description{
 \code{pdDist} calculates a distance between two Hermitian PD matrices.
 }
 \details{
-Available distance measures between two Hermitian PD matrices are (i) Riemannian distance (default) as in
+Available distance measures between two Hermitian PD matrices are (i) affine-invariant Riemannian distance (default) as in
 (Bhatia, 2009, Chapter 6), (ii) log-Euclidean distance, the Euclidean distance between matrix logarithms,
 (iii) Cholesky distance, the Euclidean distance between Cholesky decompositions, (iv) Euclidean distance,
 (v) root-Euclidean distance and (vi) Procrustes distance as in (Dryden et al., 2009). In particular, \code{pdDist} generalizes the function

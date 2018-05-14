@@ -4,23 +4,25 @@
 \alias{pdMedian}
 \title{Weighted intrinsic median of HPD matrices}
 \usage{
-pdMedian(M, w, max_iter = 1000, tol, ...)
+pdMedian(M, w, metric = "Riemannian", max_iter = 1000, reltol)
 }
 \arguments{
 \item{M}{a \eqn{(d,d,S)}-dimensional array of Hermitian PD matrices.}
 
 \item{w}{an \eqn{S}-dimensional nonnegative weight vector, such that \code{sum(w) = 1}.}
 
-\item{max_iter}{maximum number of iterations in the steepest descent algorithm.}
+\item{metric}{the distance measure, one of \code{'Riemannian'}, \code{'logEuclidean'},
+\code{'Cholesky'}, \code{'Euclidean'} or \code{'rootEuclidean'}. Defaults to \code{'Riemannian'}.}
 
-\item{tol}{optional tolerance parameter in the steepest descent algorithm, defaults to \code{.Machine$double.eps}.}
+\item{max_iter}{maximum number of iterations in gradient descent algorithm. Defaults to \code{1000}}
 
-\item{...}{additional arguments for internal usage.}
+\item{reltol}{optional tolerance parameter in gradient descent algorithm. Defaults to \code{1E-10}.}
 }
 \description{
-\code{pdMedian} calculates an (approximate) weighted intrinsic of \eqn{S} different
-\eqn{(d \times d)}-dimensional Hermitian PD matrices based on the Riemannian metric by the
-intrinsic Weiszfeld algorithm in (Fletcher et al., 2009). By default, the unweighted intrinsic median is computed.
+\code{pdMedian} calculates a weighted intrinsic median of \eqn{S} different
+\eqn{(d \times d)}-dimensional Hermitian PD matrices based on a Weiszfeld algorithm intrinsic
+to the chosen metric. For the affine-invariant Riemannian metric, the intrinsic Weisfeld algorithm in
+(Fletcher et al., 2009) is used. By default, the unweighted intrinsic median is computed.
 }
 \examples{
 m <- function(){

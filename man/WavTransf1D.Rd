@@ -4,8 +4,7 @@
 \alias{WavTransf1D}
 \title{Forward average-interpolation 1D wavelet transform}
 \usage{
-WavTransf1D(P, order = 5, jmax, periodic = F, metric = "Riemannian",
-  progress = F, ...)
+WavTransf1D(P, order = 5, jmax, periodic = F, metric = "Riemannian", ...)
 }
 \arguments{
 \item{P}{a (\eqn{d,d,m})-dimensional array of HPD matrices, with \eqn{m = 2^J} for some \eqn{J > 0}.}
@@ -26,9 +25,9 @@ where the spectral matrix is a symmetric and periodic curve in the frequency dom
 but this can also be one of: \code{"logEuclidean"}, \code{"Cholesky"}, \code{"rootEuclidean"} or
 \code{"Euclidean"}. The intrinsic AI wavelet transform fundamentally relies on the chosen metric.}
 
-\item{progress}{should a console progress bar be displayed? Defaults to \code{progress = F}.}
-
 \item{...}{additional arguments for internal use.}
+
+\item{progress}{should a console progress bar be displayed? Defaults to \code{progress = F}.}
 }
 \value{
 The function returns a list with three components:

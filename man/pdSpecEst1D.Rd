@@ -4,8 +4,8 @@
 \alias{pdSpecEst1D}
 \title{Intrinsic 1D wavelet-based spectral matrix estimation}
 \usage{
-pdSpecEst1D(P, order = 5, policy = "universal", metric = "Riemannian",
-  alpha = 1, return = "f", ...)
+pdSpecEst1D(P, order = 5, metric = "Riemannian", alpha = 1,
+  return = "f", ...)
 }
 \arguments{
 \item{P}{a (\eqn{d,d,m})-dimensional array of HPD matrices, with \eqn{m} a dyadic number.}
@@ -14,8 +14,6 @@ pdSpecEst1D(P, order = 5, policy = "universal", metric = "Riemannian",
 defaults to \code{order = 5}. Note that if \code{order > 9}, the computational cost
 significantly increases as the wavelet transform no longer uses a fast wavelet refinement scheme based
 on pre-determined weights.}
-
-\item{policy}{a character, one of \code{"universal"} or \code{"cv"}, defaults to \code{policy = "universal"}.}
 
 \item{metric}{the metric that the space of HPD matrices is equipped with. The default choice is \code{"Riemannian"},
 but this can also be one of: \code{"logEuclidean"}, \code{"Cholesky"}, \code{"rootEuclidean"} or
@@ -29,6 +27,8 @@ universal threshold, defaults to \code{alpha = 1}.}
 is returned or not.}
 
 \item{...}{additional arguments for internal use.}
+
+\item{policy}{a character, one of \code{"universal"} or \code{"cv"}, defaults to \code{policy = "universal"}.}
 }
 \value{
 The function returns a list with four components:

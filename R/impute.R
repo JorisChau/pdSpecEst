@@ -64,29 +64,29 @@ AIRefine1D <- function(M_j0, D, method, inverse = T, metric) {
           ## At the left boundary
           tm1 <- (if(metric == "Riemannian"){
             Expm(M.bar[, , k], -(2 * k - 1) * Logm(M.bar[, , k],
-                                                   pdNeville(P = M.bar, X = 1:N, x = k - 0.5)))
+                                                   pdNeville(P = M.bar, X = 1:N, x = k - 0.5)[,,1]))
           } else {
             M.bar[, , k] - (2 * k - 1) * (pdNeville(P = M.bar, X = 1:N,
-                                                    x = k - 0.5, metric = "Euclidean") - M.bar[, , k])
+                                                    x = k - 0.5, metric = "Euclidean")[,,1] - M.bar[, , k])
           })
         } else if ((k + D) >= n){
           ## At the right boundary
           k1 <- N - (n - k)
           tm1 <- (if(metric == "Riemannian"){
             Expm(M.bar[, , k1], -(2 * k1 - 1) * Logm(M.bar[, , k1],
-                                                     pdNeville(P = M.bar, X = 1:N, x = k1 - 0.5)))
+                                                     pdNeville(P = M.bar, X = 1:N, x = k1 - 0.5)[,,1]))
           } else {
             M.bar[, , k1] - (2 * k1 - 1) * (pdNeville(P = M.bar, X = 1:N,
-                                                      x = k1 - 0.5, metric = "Euclidean") - M.bar[, , k1])
+                                                      x = k1 - 0.5, metric = "Euclidean")[,,1] - M.bar[, , k1])
           })
         } else{
           ## Away from the boundary
           tm1 <- (if(metric == "Riemannian"){
             Expm(M.bar[, , D + 1], -N * Logm(M.bar[, , D + 1],
-                                             pdNeville(P = M.bar, X = 1:N, x = D + 0.5)))
+                                             pdNeville(P = M.bar, X = 1:N, x = D + 0.5)[,,1]))
           } else {
             M.bar[, , D + 1] - N * (pdNeville(P = M.bar, X = 1:N,
-                                              x = D + 0.5, metric = "Euclidean") - M.bar[, , D + 1])
+                                              x = D + 0.5, metric = "Euclidean")[,,1] - M.bar[, , D + 1])
           })
         }
         if(inverse){

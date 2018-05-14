@@ -53,12 +53,13 @@
 #' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
 #'
 #' @export
-WavTransf1D <- function(P, order = 5, jmax, periodic = F, metric = "Riemannian", progress = F, ...) {
+WavTransf1D <- function(P, order = 5, jmax, periodic = F, metric = "Riemannian", ...) {
 
-  ## Set variables
-  J = log2(dim(P)[3])
+  ## Initialize parameters
+  n = dim(P)[3]
+  J = log2(n)
   if (!isTRUE(all.equal(as.integer(J), J))) {
-    stop(paste0("Input length is non-dyadic, please change length ", dim(P)[3],
+    stop(paste0("Input length is non-dyadic, please change length ", n,
                 " to dyadic number."))
   }
   if (!isTRUE(order %% 2 == 1)) {
@@ -67,50 +68,28 @@ WavTransf1D <- function(P, order = 5, jmax, periodic = F, metric = "Riemannian",
   }
   metric = match.arg(metric, c("Riemannian", "logEuclidean", "Cholesky", "rootEuclidean", "Euclidean"))
   dots = list(...)
-  method = (if(is.null(dots$method)) ifelse(order <= 9, "weights", "neville") else dots$method)
+  method = (if(is.null(dots$method)) "fast" else dots$method)
   d = dim(P)[1]
   L = (order - 1) / 2
   L_round = 2 * ceiling(L / 2)
+  N = (2 * L + 1) * n
+  Nj = as.integer(ifelse(periodic & (order > 1), N, n) / (2^(0:J)))
 
-  P <- (if(metric == "logEuclidean"){
-    sapply(1:2^J, function(i) Logm(diag(d), P[, , i]), simplify = "array")
-  } else if(metric == "Cholesky"){
-    sapply(1:2^J, function(i) Chol(P[, , i]), simplify = "array")
-  } else if(metric == "rootEuclidean"){
-    sapply(1:2^J, function(i) Sqrt(P[, , i]), simplify = "array")
-  } else P)
-
-  if(periodic & (order > 1)){
-    P_per <- array(if(L %% 2 == 0) {
-      c(rep(c(P, P[, , c(2^J, 2^J:2)]), times = L), P)
-    } else {
-      c(P[, , c(2^J, 2^J:2)], rep(c(P, P[, , c(2^J, 2^J:2)]), times = L))
-    }, dim = c(d, d, (2 * L + 1) * 2^J))
-  } else{
-    P_per <- P
-  }
-
+  ## Compute midpoint pyramid
+  Mper <- pdSpecEst:::wavPyr_C(P, ifelse(periodic & (order > 1), L, 0), J, Nj, metric)
   M <- list()
-  for (j in J:0) {
-    if (j == J) {
-      Mper <- P_per
+  M[[1]] <- Mper[, , sum(head(Nj, J)) + 1:Nj[J + 1], drop = F]
+  for(j in 1:J) {
+    if(periodic & (order > 1)) {
+      M[[j + 1]] <- Mper[, , ifelse(j < J, sum(Nj[1:(J - j)]), 0) + L * 2^j -
+                         L_round + 1:(2^j + 2 * L_round), drop = F]
     } else {
-      if(!(metric == "Riemannian")){
-        Mper <- sapply(1:(dim(Mper)[3]/2), function(i) 0.5 * (Mper[, , 2 * i - 1] +  Mper[, , 2 * i]),
-                       simplify = "array")
-      } else {
-        Mper <- sapply(1:(dim(Mper)[3]/2), function(i) Mid(Mper[, , 2 * i - 1], Mper[, , 2 * i]),
-                       simplify = "array")
-      }
-    }
-    M[[j + 1]] <- if(periodic & (j > 0)){
-      Mper[, , L * (2^j) - L_round + 1:(2^j + 2 * L_round)]
-    } else{
-      Mper
+      M[[j + 1]] <- Mper[, , ifelse(j < J, sum(Nj[1:(J - j)]), 0) + 1:2^j, drop = F]
     }
   }
 
-  D <- tM <- D.white <- list()
+  ## Create empty lists for predicted midpoints and wav. coeff's
+  D <- tM <- Dw <- list()
   if (missing(jmax)) {
     jmax <- J - 1
   }
@@ -119,32 +98,21 @@ WavTransf1D <- function(P, order = 5, jmax, periodic = F, metric = "Riemannian",
     jmax <- J - 1
   }
 
-  ## Compute wavelet transform
-  if(progress){
-    pb <- utils::txtProgressBar(1, 100, style = 3)
-  }
   for (j in 0:jmax) {
-    tm1 <- AIRefine1D(M[[j + 1]], L, method, inverse = F, metric = metric)
-    tM[[j + 1]] <- (if(periodic) tm1[, , L_round / 2 + ifelse(j > 0 | L %% 2 == 0, 0, -1) + 1:(2^j + L_round), drop = F] else tm1)
-    if(!(metric == "Riemannian")){
-      D[[j + 1]] <- D.white[[j + 1]] <- sapply(1:dim(tM[[j + 1]])[3], function(l) 2^(-j/2) * (M[[j + 2]][, , 2 * l] - tM[[j + 1]][, , l]),
-                                               simplify = "array")
-    } else{
-      iSqrt_tm1 <- sapply(1:dim(tM[[j + 1]])[3], function(l) iSqrt(tM[[j + 1]][, , l]), simplify = "array")
-      D[[j + 1]] <- sapply(1:dim(tM[[j + 1]])[3], function(l) 2^(-j/2) * Logm(tM[[j + 1]][, , l], M[[j + 2]][, , 2 * l]),
-                           simplify = "array")
-      D.white[[j + 1]] <- sapply(1:dim(D[[j + 1]])[3], function(l) (iSqrt_tm1[, , l] %*% D[[j + 1]][, , l]) %*%
-                                   iSqrt_tm1[, , l], simplify = "array")
-    }
-    names(D)[j + 1] <- names(D.white)[j + 1] <- paste0("D.scale", j)
-    if(progress){
-      utils::setTxtProgressBar(pb, round(100 * (j + 1) / (jmax + 1)))
-    }
+    ## Compute predicted midpoints
+    n_M <- dim(M[[j + 1]])[3]
+    L1 <- ifelse(order > n_M, floor((n_M - 1) / 2), L)
+    tm1 <- impute_C(M[[j + 1]], W_1D[[min(L1 + 1, 5)]], L1, F, metric, method)[, , 2 * (1:n_M), drop = F]
+    tM[[j + 1]] <- (if(periodic){ tm1[, , L_round / 2 + ifelse(j > 0 | L %% 2 == 0, 0, -1) +
+                            1:(2^j + L_round), drop = F] } else tm1)
+    ## Compute wavelet coefficients
+    n_W <- dim(tM[[j + 1]])[3]
+    W <- wavCoeff_C(tM[[j + 1]], M[[j + 2]][, , 2 * (1:n_W), drop = F], j, metric)
+    Dw[[j + 1]] <- W[, , 1:n_W, drop = F]
+    D[[j + 1]] <- W[, , n_W + 1:n_W, drop = F]
+    names(D)[j + 1] <- names(Dw)[j + 1] <- paste0("D.scale", j)
   }
-  if(progress){
-    close(pb)
-  }
-  return(list(D = D, D.white = D.white, M0 = M[[1]]))
+  return(list(D = D, D.white = Dw, M0 = M[[1]]))
 }
 
 #' Forward average-interpolation 2D wavelet transform

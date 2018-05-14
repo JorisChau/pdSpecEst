@@ -2,7 +2,7 @@
 #'
 #' \code{pdDist} calculates a distance between two Hermitian PD matrices.
 #'
-#' Available distance measures between two Hermitian PD matrices are (i) Riemannian distance (default) as in
+#' Available distance measures between two Hermitian PD matrices are (i) affine-invariant Riemannian distance (default) as in
 #' (Bhatia, 2009, Chapter 6), (ii) log-Euclidean distance, the Euclidean distance between matrix logarithms,
 #' (iii) Cholesky distance, the Euclidean distance between Cholesky decompositions, (iv) Euclidean distance,
 #' (v) root-Euclidean distance and (vi) Procrustes distance as in (Dryden et al., 2009). In particular, \code{pdDist} generalizes the function
@@ -10,8 +10,9 @@
 #' distance between two Hermitian positive definite matrices.
 #'
 #' @param A,B Hermitian positive definite matrices (of equal dimension).
-#' @param method the distance measure, one of \code{'Riemannian'},
-#' \code{'logEuclidean'}, \code{'Cholesky'}, \code{'Euclidean'}, \code{'squareRoot'} or \code{'Procrustes'}. Defaults to \code{'Riemannian'}.
+#' @param metric the distance measure, one of \code{'Riemannian'},
+#' \code{'logEuclidean'}, \code{'Cholesky'}, \code{'Euclidean'}, \code{'rootEuclidean'} or \code{'Procrustes'}.
+#' Defaults to \code{'Riemannian'}.
 #'
 #' @examples
 #'  a <- matrix(complex(real = rnorm(9), imaginary = rnorm(9)), nrow = 3)
@@ -25,31 +26,17 @@
 #' with applications to diffusion tensor imaging. \emph{Annals of Applied Statistics}, 3(3), 1102-1123.
 #'
 #' @export
-pdDist <- function(A, B, method = "Riemannian") {
+pdDist <- function(A, B, metric = "Riemannian") {
 
   if (!(isTRUE(all.equal(dim(A), dim(B)) & (dim(A)[1] == dim(A)[2]) & (length(dim(A)) == 2)))) {
     stop("Incorrect input dimensions for arguments: 'A' and/or 'B',
          consult the function documentation for the requested inputs.")
   }
-  method <- match.arg(method, c("Riemannian", "logEuclidean", "Cholesky", "Euclidean", "rootEuclidean", "Procrustes"))
-  d <- nrow(A)
+  metric <- match.arg(metric, c("Riemannian", "logEuclidean", "Cholesky", "Euclidean", "rootEuclidean", "Procrustes"))
 
-  if (method == "Riemannian") {
-    dd <- RiemmDist(A, B)
-  }
-  if (method == "logEuclidean") {
-    dd <- NormF(Logm(diag(d), A) - Logm(diag(d), B))
-  }
-  if (method == "Cholesky") {
-    dd <- NormF(Chol(A) - Chol(B))
-  }
-  if (method == "Euclidean") {
-    dd <- NormF(A - B)
-  }
-  if (method == "rootEuclidean") {
-    dd <- NormF(Sqrt(A) - Sqrt(B))
-  }
-  if (method == "Procrustes") {
+  if (metric != "Procrustes") {
+    dd <- pdDist_C(A, B, metric)
+  } else {
     l1 <- Sqrt(A)
     l2 <- Sqrt(B)
     dd <- sqrt(NormF(l1)^2 + NormF(l2)^2 - 2 * sum(svd(t(Conj(l2)) %*% l1)$d))
@@ -57,22 +44,24 @@ pdDist <- function(A, B, method = "Riemannian") {
   return(dd)
 }
 
-#' Weighted geometric mean of HPD matrices
+#' Weighted Karcher mean of HPD matrices
 #'
-#' \code{pdMean} calculates an (approximate) weighted geometric mean of \eqn{S} different
-#' \eqn{(d \times d)}-dimensional Hermitian PD matrices based on the Riemannian metric by
-#' the fast recursive algorithm in (Chau and von Sachs, 2017) or the slower but more accurate
-#' gradient descent algorithm in (Pennec, 2006). By default, the unweighted geometric mean is computed.
+#' \code{pdMean} calculates an (approximate) weighted Karcher or Frechet mean of \eqn{S} different
+#' \eqn{(d \times d)}-dimensional Hermitian PD matrices intrinsic to a specific metric. For the
+#' affine-invariant Riemannian metric, the weighted Karcher mean is either approximated via
+#' the fast recursive algorithm in (Ho et al., 2016) or computed via the slower, but more accurate,
+#' gradient descent algorithm in (Pennec, 2006). By default, the unweighted Karcher mean is computed.
 #'
 #' @param M a \eqn{(d,d,S)}-dimensional array of Hermitian PD matrices.
 #' @param w an \eqn{S}-dimensional nonnegative weight vector, such that \code{sum(w) = 1}.
-#' @param grad_desc a logical value deciding if the gradient descent algorithm be used, defaults to
-#' \code{FALSE}.
+#' @param metric the distance measure, one of \code{'Riemannian'}, \code{'logEuclidean'},
+#' \code{'Cholesky'}, \code{'Euclidean'} or \code{'rootEuclidean'}. Defaults to \code{'Riemannian'}.
+#' @param grad_desc if \code{metric == "Riemannian"}, a logical value indicating if the
+#' gradient descent algorithm should be used, defaults to \code{FALSE}.
 #' @param max_iter maximum number of iterations in gradient descent algorithm, only used if
-#' \code{isTRUE(grad_desc)}.
-#' @param tol optional tolerance parameter in gradient descent algorithm, only used if
-#' \code{isTRUE(grad_desc)}, defaults to \code{.Machine$double.eps}.
-#' @param ... additional arguments for internal usage.
+#' \code{isTRUE(grad_desc & metric == "Riemannian")}. Defaults to \code{1000}
+#' @param reltol optional tolerance parameter in gradient descent algorithm, only used if
+#' \code{isTRUE(grad_desc & metric == "Riemannian")}. Defaults to \code{1E-10}.
 #'
 #' @examples
 #' m <- function(){
@@ -84,20 +73,22 @@ pdDist <- function(A, B, method = "Riemannian") {
 #' w <- abs(z)/sum(abs(z))
 #' pdMean(M, w)
 #'
-#' @references Chau, J. and von Sachs, R. (2017). \emph{Positive definite multivariate spectral
-#' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
+#' @references Chau, J. and von Sachs, R. (2017). \emph{Intrinsic wavelet regression for curves of
+#' Hermitian positive definite matrices}. Available at \url{http://arxiv.org/abs/1701.03314}.
 #' @references Pennec, X. (2006). Intrinsic statistics on Riemannian manifolds: Basic tools for geometric
 #' measurements. \emph{Journal of Mathematical Imaging and Vision} 25(1), 127-154.
 #'
 #' @seealso \code{\link{Mid}}, \code{\link{pdMedian}}
 #'
 #' @export
-pdMean <- function(M, w, grad_desc = F, max_iter = 1000, tol, ...) {
+pdMean <- function(M, w, metric = "Riemannian", grad_desc = F, maxit = 1000, reltol, ...) {
 
+  if (!(isTRUE(is.array(M) & (dim(M)[1] == dim(M)[2]) & (length(dim(M)) == 3)))) {
+    stop("Incorrect input dimensions for arguments: 'M',
+         consult the function documentation for the requested inputs.")
+  }
   ## Set parameters
-  dots = list(...)
-  metric = (if(is.null(dots$metric)) "Riemannian" else dots$metric)
-  tol = (if(missing(tol)) NA else tol)
+  metric = match.arg(metric, c("Riemannian", "logEuclidean", "Cholesky", "Euclidean", "rootEuclidean"))
   w = (if(missing(w)) rep(1/dim(M)[3], dim(M)[3]) else w)
   d = dim(M)[1]
 
@@ -106,30 +97,31 @@ pdMean <- function(M, w, grad_desc = F, max_iter = 1000, tol, ...) {
   } else{
 
     if(metric == "Riemannian"){
-
       ## Recursive algorithm
-      Mean <- kMean(do.call(rbind, lapply(1:dim(M)[3], function(s) M[, , s])), w)
-
+      Mean <- pdMean_C_approx(M, w)
       ## Gradient descent algorithm
       if(grad_desc){
-        tol <- (if(is.na(tol)) .Machine$double.eps else tol)
-        if(!isTRUE(is.numeric(tol))){
-          stop("'tol' should be NA (default) or a numeric value.")
+        reltol <- (if(missing(reltol)) 1E-10 else reltol)
+        if(!isTRUE(is.numeric(reltol) & is.numeric(maxit) & maxit > 0)){
+          stop("Incorrect input for arguments: 'reltol' or 'maxit'.")
         }
-        Mean_new <- Mean
-        i <- 0
-        while((pdDist(Mean_new, Mean) > tol) & (i < max_iter)){
-          Mean <- Mean_new
-          Mean_new <- Expm(Mean, apply(sapply(1:dim(M)[3], function(i) w[i] *
-                                                Logm(Mean, M[, , i]), simplify = "array"), c(1, 2), sum))
-          i <- i + 1
-        }
-        Mean <- Mean_new
+        Mean <- pdMean_C(Mean, M, w, round(maxit), reltol)
       }
-    } else if(metric == "Euclidean"){
-
-      ## Euclidean weighted mean
-      Mean <- apply(array(rep(w, each = d^2), dim = c(d, d, dim(M)[3])) * M, c(1, 2), sum)
+    } else {
+      ## Transform
+      M1 <- switch(metric,
+                   logEuclidean = sapply(1:dim(M)[3], function(i) Logm(diag(d), M[, , i]), simplify = "array"),
+                   Cholesky = sapply(1:dim(M)[3], function(i) Chol_C(M[, , i]), simplify = "array"),
+                   rootEuclidean = sapply(1:dim(M)[3], function(i) Sqrt(M[, , i]), simplify = "array"),
+                   Euclidean = M)
+      ## Euclidean mean
+      Mean0 <- apply(sweep(M1, 3, w, "*"), c(1, 2), sum)
+      ## Transform back
+      Mean <- switch(metric,
+                     logEuclidean = Expm(diag(d), Mean0),
+                     Cholesky = t(Conj(Mean0)) %*% Mean0,
+                     rootEuclidean = t(Conj(Mean0)) %*% Mean0,
+                     Euclidean = Mean0)
     }
   }
   return(Mean)
@@ -137,15 +129,17 @@ pdMean <- function(M, w, grad_desc = F, max_iter = 1000, tol, ...) {
 
 #' Weighted intrinsic median of HPD matrices
 #'
-#' \code{pdMedian} calculates an (approximate) weighted intrinsic of \eqn{S} different
-#' \eqn{(d \times d)}-dimensional Hermitian PD matrices based on the Riemannian metric by the
-#' intrinsic Weiszfeld algorithm in (Fletcher et al., 2009). By default, the unweighted intrinsic median is computed.
+#' \code{pdMedian} calculates a weighted intrinsic median of \eqn{S} different
+#' \eqn{(d \times d)}-dimensional Hermitian PD matrices based on a Weiszfeld algorithm intrinsic
+#' to the chosen metric. For the affine-invariant Riemannian metric, the intrinsic Weisfeld algorithm in
+#' (Fletcher et al., 2009) is used. By default, the unweighted intrinsic median is computed.
 #'
 #' @param M a \eqn{(d,d,S)}-dimensional array of Hermitian PD matrices.
 #' @param w an \eqn{S}-dimensional nonnegative weight vector, such that \code{sum(w) = 1}.
-#' @param max_iter maximum number of iterations in the steepest descent algorithm.
-#' @param tol optional tolerance parameter in the steepest descent algorithm, defaults to \code{.Machine$double.eps}.
-#' @param ... additional arguments for internal usage.
+#' @param metric the distance measure, one of \code{'Riemannian'}, \code{'logEuclidean'},
+#' \code{'Cholesky'}, \code{'Euclidean'} or \code{'rootEuclidean'}. Defaults to \code{'Riemannian'}.
+#' @param max_iter maximum number of iterations in gradient descent algorithm. Defaults to \code{1000}
+#' @param reltol optional tolerance parameter in gradient descent algorithm. Defaults to \code{1E-10}.
 #'
 #' @examples
 #' m <- function(){
@@ -164,16 +158,19 @@ pdMean <- function(M, w, grad_desc = F, max_iter = 1000, tol, ...) {
 #' @seealso \code{\link{pdMean}}
 #'
 #' @export
-pdMedian <- function(M, w, max_iter = 1000, tol, ...) {
+pdMedian <- function(M, w, metric = "Riemannian", max_iter = 1000, reltol) {
 
+  if (!(isTRUE(is.array(M) & (dim(M)[1] == dim(M)[2]) & (length(dim(M)) == 3)))) {
+    stop("Incorrect input dimensions for arguments: 'M',
+         consult the function documentation for the requested inputs.")
+  }
   ## Set parameters
-  dots = list(...)
-  metric = (if(is.null(dots$metric)) "Riemannian" else dots$metric)
+  metric = match.arg(metric, c("Riemannian", "logEuclidean", "Cholesky", "Euclidean", "rootEuclidean"))
   w = (if(missing(w)) rep(1/dim(M)[3], dim(M)[3]) else w)
   d = dim(M)[1]
-  tol = (if(missing(tol)) .Machine$double.eps else tol)
-  if(!isTRUE(is.numeric(tol))){
-    stop("'tol' should be NA (default) or a numeric value.")
+  reltol = (if(missing(reltol)) 1E-10 else reltol)
+  if(!isTRUE(is.numeric(reltol) & is.numeric(maxit) & maxit > 0)){
+    stop("Incorrect input for arguments: 'reltol' or 'maxit'.")
   }
 
   if(dim(M)[3] == 1){
@@ -181,43 +178,27 @@ pdMedian <- function(M, w, max_iter = 1000, tol, ...) {
   } else{
 
     if(metric == "Riemannian"){
-
-      ## Initatial estimate
-      Med <- pdSpecEst:::kMean(do.call(rbind, lapply(1:dim(M)[3], function(s) M[, , s])), w)
-
+      ## Initial estimate
+      Med0 <- pdMean_C_approx(M, w)
       ## Weiszfeld algorithm
-        Med_new <- Med
-        i <- 0
-        while((pdDist(Med_new, Med) > tol) & (i < max_iter)){
-          Med <- Med_new
-          dist <- apply(M, 3, function(M) pdDist(Med, M))
-          I <- which(dist > .Machine$double.eps)
-          W <- sum(w[I] / dist[I])
-          v <- apply(sapply(I, function(s) w[s] * Logm(Med, M[, , s]) / dist[s],
-                            simplify = "array"), c(1, 2), sum)
-          Med_new <- Expm(Med, v / W)
-          i <- i+1
-        }
-        Med <- Med_new
-
-    } else if(metric == "Euclidean"){
-
+      Med <- pdMedian_C(Med0, M, w, round(maxit), reltol)
+    } else {
+      ## Transform
+      M1 <- switch(metric,
+                   logEuclidean = sapply(1:dim(M)[3], function(i) Logm(diag(d), M[, , i]), simplify = "array"),
+                   Cholesky = sapply(1:dim(M)[3], function(i) Chol_C(M[, , i]), simplify = "array"),
+                   rootEuclidean = sapply(1:dim(M)[3], function(i) Sqrt(M[, , i]), simplify = "array"),
+                   Euclidean = M)
+      ## Initial estimate
+      Med0 <- apply(sweep(M1, 3, w, "*"), c(1, 2), sum)
       ## Euclidean Weiszfeld algorithm
-      Med <- apply(array(rep(w, each = d^2), dim = c(d, d, dim(M)[3])) * M, c(1, 2), sum)
-
-      ## Weiszfeld algorithm
-      Med_new <- Med
-      i <- 0
-      while((pdDist(Med_new, Med, method = "Euclidean") > tol) & (i < max_iter)){
-        Med <- Med_new
-        dist <- apply(M, 3, function(M) pdDist(Med, M, method = "Euclidean"))
-        I <- which(dist > .Machine$double.eps)
-        W <- sum(w[I] / dist[I])
-        v <- apply(sapply(I, function(s) w[s] * M[, , s]/dist[s], simplify = "array"), c(1, 2), sum)
-        Med_new <- Med - v/W
-        i <- i + 1
-      }
-      Med <- Med_new
+      Med1 <- Euclid_Median_C(Med0, M1, w, round(maxit), reltol)
+      ## Transform back
+      Med <- switch(metric,
+                    logEuclidean = Expm(diag(d), Med1),
+                    Cholesky = t(Conj(Med1)) %*% Med1,
+                    rootEuclidean = t(Conj(Med1)) %*% Med1,
+                    Euclidean = Med1)
     }
   }
   return(Med)

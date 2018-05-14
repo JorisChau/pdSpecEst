@@ -54,14 +54,12 @@
 #' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
 #'
 #' @export
-InvWavTransf1D <- function(D, M0, order = 5, jmax, periodic = F, metric = "Riemannian", progress = F, ...) {
+InvWavTransf1D <- function(D, M0, order = 5, jmax, periodic = F, metric = "Riemannian", ...) {
 
-  ## Set variables
+  ## Initialize variables
   dots = list(...)
   return_val = (if(is.null(dots$return_val)) "manifold" else dots$return_val)
-  method = (if(is.null(dots$method)) ifelse(order <= 9, "weights",  "neville") else dots$method)
-  chol.bias = (if(is.null(dots$chol.bias)) F else dots$chol.bias)
-
+  method = (if(is.null(dots$method)) "fast" else dots$method)
   if (!(order %% 2 == 1)) {
     warning("Refinement order should be an odd integer, by default set to 5")
     order = 5
@@ -71,67 +69,37 @@ InvWavTransf1D <- function(D, M0, order = 5, jmax, periodic = F, metric = "Riema
   L_round = 2 * ceiling(L / 2)
   d = nrow(D[[1]][, , 1])
   J = (if(missing(jmax)) length(D) else jmax)
+  if(!isTRUE((J > 0) & isTRUE(all.equal(as.integer(J), J)))) {
+    stop("'jmax' should be an integer larger than zero")
+  }
 
-  ## Reconstruct scaling coefficients
+  ## Reconstruct midpoints
   m1 <- M0
 
-  if(progress){
-    pb <- utils::txtProgressBar(1, 100, style = 3)
-  }
   for (j in 0:(J - 1)) {
-    tm1 <- AIRefine1D(m1, L, method = method, inverse = T, metric = metric)
+    n_M <- dim(m1)[3]
+    L1 <- ifelse(order > n_M, floor((n_M - 1) / 2), L)
+    ## Impute C++
+    tm1 <- impute_C(m1, W_1D[[min(L1 + 1, 5)]], L1, T, metric, method)
     if(periodic){
       tm1 <- tm1[, , ifelse(j > 0, L_round, 2 * floor(L / 2)) + 1:(2^(j + 1) + 2 * L_round), drop = F]
     }
-    reconstr_even <- function(i) {
-      if((j + 1) <= length(D)){
-        if (any(c(D[[j + 1]][, , i]) != 0)) {
-          if(metric == "Riemannian"){
-            m1_i <- Expm(tm1[, , 2 * i], 2^(j/2) * D[[j + 1]][, , i])
-          } else{
-            m1_i <- 2^(j/2) * D[[j + 1]][, , i] + tm1[, , 2 * i]
-          }
-        } else {
-          m1_i <- tm1[, , 2 * i]
-        }
-      } else {
-        m1_i <- tm1[, , 2 * i]
-      }
-      return(m1_i)
-    }
-
-    grid_j <- (if((j + 1) <= length(D)) 1:dim(D[[j + 1]])[3] else 1:(dim(tm1)[3]/2))
-    m2 <- array(dim = c(d, d, dim(tm1)[3]))
-    m2[, , c(F, T)] <- sapply(grid_j, reconstr_even, simplify = "array")
-    L_i <- ifelse(periodic, L_round / 2 + ifelse((j > 0) | (L %% 2 == 0), 0, -1), 0)
-
-    if(metric == "Riemannian"){
-      m2[, , c(T, F)] <- sapply(grid_j, function(i) (m1[, , i + L_i] %*%
-                                                       solve(m2[, , 2 * i])) %*% m1[, , i + L_i], simplify = "array")
-    } else{
-      m2[, , c(T, F)] <- sapply(grid_j, function(i) 2 * m1[, , i + L_i] - m2[, , 2 * i],
-                                simplify = "array")
-    }
-    m1 <- m2
-
-    if(progress){
-      utils::setTxtProgressBar(pb, round(100 * (j + 1) / J))
-    }
-  }
-  if(progress){
-    close(pb)
+    L1 <- ifelse(periodic, L_round / 2 + ifelse((j > 0) | (L %% 2 == 0), 0, -1), 0)
+    ## Reconstruct C++
+    Dj <- (if(j < length(D)) D[[j + 1]] else array(dim = c(d, d, as.integer(dim(tm1)[3]/2))))
+    m1 <- reconstr_C(tm1, m1, Dj, j, ifelse(j < length(D), dim(D[[j + 1]])[3], as.integer(dim(tm1)[3]/2)),
+                     isTRUE(j < length(D)), L1, metric)
   }
 
-  if(return_val == "manifold"){
-    m1 <- (if(metric == "logEuclidean"){
-      sapply(1:dim(m1)[3], function(i) Expm(diag(d), m1[, , i]), simplify = "array")
-    } else if(metric == "Cholesky"){
-      sapply(1:dim(m1)[3], function(i) Chol(m1[, , i], inverse = T, bias.corr = chol.bias), simplify = "array")
-    } else if(metric == "rootEuclidean") {
-      sapply(1:dim(m1)[3], function(i) t(Conj(m1[, , i])) %*% m1[, , i], simplify = "array")
-    } else m1)
+  ## Transform back to manifold
+  if(return_val == "manifold") {
+    m1 <- switch(metric,
+                 logEuclidean = sapply(1:dim(m1)[3], function(i) Expm(diag(d), m1[, , i]), simplify = "array"),
+                 Cholesky = sapply(1:dim(m1)[3], function(i) t(Conj(m1[, , i])) %*% m1[, , i], simplify = "array"),
+                 rootEuclidean =  sapply(1:dim(m1)[3], function(i) t(Conj(m1[, , i])) %*% m1[, , i], simplify = "array"),
+                 Euclidean = m1,
+                 Riemannian = m1)
   }
-
   return((if(periodic) m1[, , L_round + 1:2^J] else m1))
 }
 

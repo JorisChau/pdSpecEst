@@ -63,109 +63,48 @@
 #' Royal Statistical Society: Series B, 58, 463-479.
 #'
 #' @export
-pdSpecEst1D <- function(P, order = 5, policy = "universal", metric = "Riemannian", alpha = 1, return = "f", ...) {
+pdSpecEst1D <- function(P, order = 5, metric = "Riemannian", alpha = 1, return = "f", ...) {
 
   ## Set variables
   dots = list(...)
-  tol = (if(is.null(dots$tol)) 0.01 else dots$tol)
-  alpha.range = (if(is.null(dots$alpha.range)) c(0.5, 2) else dots$alpha.range)
   tree = (if(is.null(dots$tree)) T else dots$tree)
   w.tree = (if(is.null(dots$w.tree)) NULL else dots$w.tree)
   periodic = (if(is.null(dots$periodic)) T else dots$periodic)
+  method = (if(is.null(dots$method)) "fast" else dots$method)
 
-  policy = match.arg(policy, c("universal", "cv"))
   metric = match.arg(metric, c("Riemannian", "logEuclidean", "Cholesky", "rootEuclidean", "Euclidean"))
   J = log2(dim(P)[3])
   d = dim(P)[1]
   B = (if(is.null(dots$B)) d else dots$B)
-  progress = (if(is.null(dots$progress)) F else dots$progress)
   J.out = (if(is.null(dots$J.out)) J else dots$J.out)
   jmax = min((if(is.null(dots$jmax)) J - 3 else dots$jmax), J.out - 1)
-  jmax.cv = min((if(is.null(dots$jmax.cv)) J - 3 else dots$jmax.cv), J.out - 1)
   bias.corr = (if(is.null(dots$bias.corr)) T else dots$bias.corr)
   return.D = (if(is.null(dots$return.D)) NA else dots$return.D)
 
-  # Manifold bias-correction
-  P <- (if((metric == "Riemannian" | metric == "logEuclidean") & bias.corr) {
-    B * exp(-1/d * sum(digamma(B - (d - 1:d)))) * P } else P)
+  ## Wishart bias-correction
+  P <- (if(isTRUE((metric == "Riemannian" | metric == "logEuclidean") & bias.corr)) {
+          B * exp(-1/d * sum(digamma(B - (d - 1:d)))) * P } else P)
 
-  if(policy == "cv"){
+  ## (1) Transform data to wavelet domain
+  coeff <- WavTransf1D(P, order, jmax = jmax, periodic = periodic, metric = metric, method = method)
 
-    ## Two-fold cross-validation (Nason, 1996)
-    Pmid <- (if(metric == "logEuclidean") {
-      sapply(1:2^J, function(i) Logm(diag(d), P[, , i]), simplify = "array")
-    } else if(metric == "Cholesky") {
-      sapply(1:2^J, function(i) Chol(P[, , i]), simplify = "array")
-    } else if(metric == "rootEuclidean"){
-      sapply(1:2^J, function(i) Sqrt(P[, , i]), simplify = "array")
-    } else P)
-
-    for (j in J:(jmax.cv + 1)) {
-      Pmid <- sapply(1:(dim(Pmid)[3]/2), function(i) (if(metric == "Riemannian"){
-        Mid(Pmid[, , 2 * i - 1], Pmid[, , 2 * i]) } else { 0.5 * (Pmid[, , 2 * i - 1] +
-                                                                    Pmid[, , 2 * i]) }), simplify = "array")
-    }
-
-    P1 <- list(odd = Pmid[, , c(T, F)], even = Pmid[, , c(F, T)])
-
-    if(metric == "Riemannian"){
-      for(m in c(1,2)){
-        P1[[m]] <- array(apply(P1[[m]], 3, function(P) Logm(diag(d), P)), dim = dim(P1[[m]]))
-      }
-    }
-
-    coeff.odd <- WavTransf1D(P1$odd, order, periodic = periodic, metric = "Euclidean")
-    coeff.even <- WavTransf1D(P1$even, order, periodic = periodic, metric = "Euclidean")
-
-    cv <- function(alpha){
-
-      D <- list(odd = pdCART(coeff.odd$D, coeff.odd$D.white, order = order, B = B, tree = F,
-                             alpha = alpha, periodic = periodic)$D_w,
-                even = pdCART(coeff.even$D, coeff.even$D.white, order = order, B = B, tree = F,
-                              alpha = alpha, periodic = periodic)$D_w)
-
-      f.hat <- list(odd = InvWavTransf1D(D$odd, coeff.odd$M0, order,
-                                         periodic = periodic, metric = "Euclidean", return_val = "tangent"),
-                    even = InvWavTransf1D(D$even, coeff.even$M0, order,
-                                          periodic = periodic, metric = "Euclidean", return_val = "tangent"))
-      ## Predicted points
-      f.pred <- list(even = array(c(sapply(1:(dim(f.hat$odd)[3] - 1), function(k) 0.5 * (f.hat$odd[, , k] + f.hat$odd[, , k + 1]),
-                                           simplify = "array"), f.hat$odd[, , dim(f.hat$odd)[3]]), dim = dim(f.hat$odd)),
-                     odd = array(c(f.hat$even[, , 1], sapply(1:(dim(f.hat$even)[3] - 1), function(k) 0.5 * (f.hat$even[, , k] +
-                                                                                                              f.hat$even[, , k + 1]), simplify = "array")), dim = dim(f.hat$even)))
-
-      return(mean(sapply(1:dim(f.hat$odd)[3], function(k) NormF(f.pred$even[, , k] - P1$even[, , k])^2 +
-                           NormF(f.pred$odd[, , k] - P1$odd[, , k])^2)))
-    }
-
-    ## Find minimum and rescale twice number of data points
-    alpha.opt <- gss(alpha.range, cv, tol)
-
-  } else {
-    alpha.opt <- alpha
-  }
-
-  ## Threshold full data using 'alpha.opt'
-  coeff <- (if(policy == "cv"){
-    WavTransf1D(P, order, jmax = jmax.cv, periodic = periodic, metric = metric, progress = progress)
-  } else WavTransf1D(P, order, jmax = jmax, periodic = periodic, metric = metric, progress = progress))
-
-  coeff.opt <- pdCART(coeff$D, coeff$D.white, alpha = alpha.opt, tree = tree, periodic = periodic,
+  ## (2) Threshold coefficients in wavelet domain
+  coeff.thresh <- pdCART(coeff$D, coeff$D.white, alpha = alpha, tree = tree, periodic = periodic,
                       w.tree = w.tree, order = order, B = B, return.D = return.D)
 
-  ## Return 'f' or not
+  ## (3) Transform back to HPD space
   f <- (if(return == "f"){
-    InvWavTransf1D(coeff.opt$D_w, coeff$M0, order, jmax = J.out, periodic = periodic, metric = metric, progress = progress)
+    InvWavTransf1D(coeff.thresh$D_w, coeff$M0, order = order, jmax = J.out, periodic = periodic,
+                   metric = metric, method = method)
   } else NULL)
 
   ## Return whitened coeff's or not
   if(!isTRUE(return.D == "D.white")){
-    res <- list(f = f, D = coeff.opt$D_w, M0 = coeff$M0, tree.weights = coeff.opt$w, alpha.opt = alpha.opt)
+    res <- list(f = f, D = coeff.thresh$D_w, M0 = coeff$M0, tree.weights = coeff.thresh$w)
   } else{
-    res <- list(f = f, D = coeff.opt$D_w, M0 = coeff$M0, tree.weights = coeff.opt$w, alpha.opt = alpha.opt,
-                D.white = coeff.opt$D.white_w)
+    res <- list(f = f, D = coeff.thresh$D_w, M0 = coeff$M0, tree.weights = coeff.thresh$w,
+                D.white = coeff.thresh$D.white_w)
   }
-
   return(res)
 }
 
@@ -252,7 +191,7 @@ pdSpecEst2D <- function(P, order = c(3, 3), metric = "Riemannian", alpha = 1, re
   P <- (if((metric == "Riemannian" | metric == "logEuclidean") & bias.corr) {
     B * exp(-1/d * sum(digamma(B - (d - 1:d)))) * P } else P)
 
-  ## Threshold full data using 'alpha' (nonlinear) or 'tree.w' (linear)
+  ## Threshold full data using 'alpha' (nonlinear) or 'w.tree' (linear)
   coeff <- WavTransf2D(P, order = order, jmax = jmax, metric = metric, progress = progress)
   coeff.opt <- pdCART(coeff$D, coeff$D.white, alpha = alpha, tree = tree, w.tree = w.tree,
                       order = order, B = B, return.D = return.D)

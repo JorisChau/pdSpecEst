@@ -5,7 +5,7 @@
 \title{Inverse average-interpolation 1D wavelet transform}
 \usage{
 InvWavTransf1D(D, M0, order = 5, jmax, periodic = F,
-  metric = "Riemannian", progress = F, ...)
+  metric = "Riemannian", ...)
 }
 \arguments{
 \item{D}{a list of arrays containing the pyramid of wavelet coefficients, where each array contains the
@@ -32,9 +32,9 @@ where the spectral matrix is a symmetric and periodic curve in the frequency dom
 but this can also be one of: \code{"logEuclidean"}, \code{"Cholesky"}, \code{"rootEuclidean"} or
 \code{"Euclidean"}. The inverse intrinsic AI wavelet transform fundamentally relies on the chosen metric.}
 
-\item{progress}{should a console progress bar be displayed? Defaults to \code{progress = F}.}
-
 \item{...}{additional arguments for internal use.}
+
+\item{progress}{should a console progress bar be displayed? Defaults to \code{progress = F}.}
 }
 \value{
 Returns a (\eqn{d, d, m})-dimensional array corresponding to a curve of length \eqn{m} of

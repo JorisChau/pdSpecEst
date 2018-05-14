@@ -24,7 +24,7 @@ interpolated polynomial is estimated. For polynomial surface interpolation, a li
 \code{x} and \code{y} specifying the time tensor product grid (resolution) \code{expand.grid(x$x, x$y)} at which the
 interpolated polynomial surface is estimated.}
 
-\item{metric}{the metric the space of HPD gets equipped with, by default \code{metric = "Riemannian"}, but instead
+\item{metric}{the metric the space of HPD matrices gets equipped with, by default \code{metric = "Riemannian"}, but instead
 this can also be set to \code{metric = "Euclidean"} to perform (standard) Euclidean polynomial interpolation of curves or
 surfaces in the space of HPD matrices.}
 }
@@ -38,7 +38,7 @@ polynomial of bi-degree \eqn{N_1 - 1, N_2 - 1} at the time grid \code{expand.gri
 \description{
 \code{pdNeville()} performs intrinsic polynomial interpolation of curves or surfaces on the manifold of
 HPD matrices equipped with the Riemannian metric via iterative geodesic interpolation, see e.g.
-(Chau and von Sachs, 2017).
+(Chau and von Sachs, 2017a).
 }
 \details{
 For polynomial curve interpolation, given \eqn{N} control points (i.e. HPD
@@ -61,8 +61,8 @@ P.poly <- pdNeville(P.surf, list(x = c(0, 1), y = c(0, 1)), list(x = (0:10)/10, 
 
 }
 \references{
-Chau, J. and von Sachs, R. (2017a). \emph{Positive definite multivariate spectral
-estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
+Chau, J. and von Sachs, R. (2017a). \emph{Intrinsic wavelet regression for curves of
+Hermitian positive definite matrices}. Available at \url{http://arxiv.org/abs/1701.03314}.
 }
 \seealso{
 \code{\link{pdPolynomial}}

@@ -31,14 +31,16 @@
 
 arma::cx_mat Expm(arma::cx_mat P, arma::cx_mat H) {
 
-  arma::cx_mat P1 = arma::sqrtmat_sympd(P);
+  int d = P.n_cols;
 
-  arma::cx_mat P2 = arma::inv_sympd(P1);
-
-  arma::cx_mat P3 = arma::expmat_sym(P2 * H * P2);
-
-  return P1 * P3 * P1;
-
+  if(arma::norm(P - arma::eye<arma::mat>(d, d), "inf") < 1E-10) {
+    return arma::expmat_sym(H);
+  } else {
+    arma::cx_mat P1 = arma::sqrtmat_sympd(P);
+    arma::cx_mat P2 = arma::inv_sympd(P1);
+    arma::cx_mat P3 = arma::expmat_sym(P2 * H * P2);
+    return P1 * P3 * P1;
+  }
 }
 
 // [[Rcpp::depends(RcppArmadillo)]]
@@ -70,14 +72,16 @@ arma::cx_mat Expm(arma::cx_mat P, arma::cx_mat H) {
 
 arma::cx_mat Logm(arma::cx_mat P, arma::cx_mat Q) {
 
-  arma::cx_mat P1 = arma::sqrtmat_sympd(P);
+  int d = P.n_cols;
 
-  arma::cx_mat P2 = arma::inv_sympd(P1);
-
-  arma::cx_mat P3 = arma::logmat_sympd(P2 * Q * P2);
-
-  return P1 * P3 * P1;
-
+  if(arma::norm(P - arma::eye<arma::mat>(d, d), "inf") < 1E-10) {
+    return arma::logmat_sympd(Q);
+  } else {
+    arma::cx_mat P1 = arma::sqrtmat_sympd(P);
+    arma::cx_mat P2 = arma::inv_sympd(P1);
+    arma::cx_mat P3 = arma::logmat_sympd(P2 * Q * P2);
+    return P1 * P3 * P1;
+  }
 }
 
 // [[Rcpp::depends(RcppArmadillo)]]

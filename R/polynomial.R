@@ -2,7 +2,7 @@
 #'
 #' \code{pdNeville()} performs intrinsic polynomial interpolation of curves or surfaces on the manifold of
 #' HPD matrices equipped with the Riemannian metric via iterative geodesic interpolation, see e.g.
-#' (Chau and von Sachs, 2017).
+#' (Chau and von Sachs, 2017a).
 #'
 #' For polynomial curve interpolation, given \eqn{N} control points (i.e. HPD
 #' matrices), the degree of the interpolated polynomial is \eqn{N - 1}. For polynomial surface interpolation,
@@ -24,7 +24,7 @@
 #' interpolated polynomial is estimated. For polynomial surface interpolation, a list with as elements two numeric vectors
 #' \code{x} and \code{y} specifying the time tensor product grid (resolution) \code{expand.grid(x$x, x$y)} at which the
 #' interpolated polynomial surface is estimated.
-#' @param metric the metric the space of HPD gets equipped with, by default \code{metric = "Riemannian"}, but instead
+#' @param metric the metric the space of HPD matrices gets equipped with, by default \code{metric = "Riemannian"}, but instead
 #' this can also be set to \code{metric = "Euclidean"} to perform (standard) Euclidean polynomial interpolation of curves or
 #' surfaces in the space of HPD matrices.
 #'
@@ -48,8 +48,8 @@
 #'
 #' @seealso \code{\link{pdPolynomial}}
 #'
-#' @references Chau, J. and von Sachs, R. (2017a). \emph{Positive definite multivariate spectral
-#' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
+#' @references Chau, J. and von Sachs, R. (2017a). \emph{Intrinsic wavelet regression for curves of
+#' Hermitian positive definite matrices}. Available at \url{http://arxiv.org/abs/1701.03314}.
 #'
 #' @export
 pdNeville <- function(P, X, x, metric = "Riemannian"){
@@ -73,54 +73,24 @@ pdNeville <- function(P, X, x, metric = "Riemannian"){
   d = dim(P)[1]
   metric = match.arg(metric, match.arg(metric, c("Riemannian", "Euclidean")))
 
-  ## 1D Neville's algorithm via geodesic curve interpolation
-  pdNeville1D <- function(P, X, x){
-
-    nn <- dim(P)[3] - 1
-    geo <- function(Pi, t.range, t){
-      if(metric == "Riemannian"){
-        res <- Expm(Pi[, , 1], (t - t.range[1]) / (t.range[2] - t.range[1]) * Logm(Pi[, , 1], Pi[, , 2]))
-      } else if(metric == "Euclidean"){
-        res <- (t.range[2] - t)/(t.range[2] - t.range[1]) * Pi[, , 1] +
-                  (t - t.range[1])/(t.range[2] - t.range[1]) * Pi[, , 2]
-      }
-      res
-    }
-    ind <- expand.grid(1:nn, x)
-    Li <- array(c(mapply(function(i, xj) geo(P[, , c(i, i + 1)], X[c(i, i + 1)], xj),
-                         ind$Var1, ind$Var2)), dim = c(d, d, nn, length(x)))
-    if(nn > 1){
-      for(m in 2:nn){
-        ind_m <- expand.grid(1:(nn - m  + 1), 1:length(x))
-        Li <- array(c(mapply(function(i, j) geo(Li[, , c(i, i + 1), j], X[c(i, i + m)], x[j]),
-                             ind_m$Var1, ind_m$Var2)), dim = c(d, d, nn - m + 1, length(x)))
-      }
-    }
-    Li[, , 1, ]
-  }
-
   if(!is_2D) {
-
-    PP <- pdNeville1D(P, X, x)
-
+    PP <- pdNeville_C(P, X, x, metric)
   } else if(is_2D) {
-
     ## 2D Neville's algorithm via geodesic surface interpolation
     if(n[1] < 1 & n[2] < 1){
       PP <- array(P[, , 1, 1], dim = c(d, d, length(x$x), length(x$y)))
     } else if(n[1] < 1 | n[2] < 1){
       if(length(X$y) > 1){
-        PP_i <- pdNeville1D(P[, , 1, ], X$y, x$y)
-        PP <- aperm(sapply(1:length(x$x), function(i) PP_i, simplify = "array"), c(1, 2, 4, 3))
+        PP_i <- pdNeville_C(P[, , 1, ], X$y, x$y, metric)
+        PP <- aperm(replicate(length(x$x), PP_i), c(1, 2, 4, 3))
       } else if(length(X$x) > 1){
-        PP_j <- pdNeville1D(P[, , , 1], X$x, x$x)
-        PP <- sapply(1:length(x$y), function(j) PP_j, simplify = "array")
+        PP_j <- pdNeville_C(P[, , , 1], X$x, x$x, metric)
+        PP <- replicate(length(x$y), PP_j)
       }
     } else {
-      PP_i <- sapply(1:(n[1] + 1), function(i) pdNeville1D(P[, , i, ], X$y, x$y), simplify = "array")
-      PP <- sapply(1:length(x$y), function(j) pdNeville1D(PP_i[, , j, ], X$x, x$x), simplify = "array")
+      PP_i <- sapply(1:(n[1] + 1), function(i) pdNeville_C(P[, , i, ], X$y, x$y, metric), simplify = "array")
+      PP <- sapply(1:length(x$y), function(j) pdNeville_C(PP_i[, , j, ], X$x, x$x, metric), simplify = "array")
     }
-
   }
   return(PP)
 }

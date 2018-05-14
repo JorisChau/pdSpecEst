@@ -58,6 +58,7 @@
 #' @export
 pdPgram <- function(X, B, method = c("multitaper", "bartlett"), bias.corr = F, nw = pi) {
 
+  ## Initialize parameters
   if(missing(method)){
     method <- "multitaper"
   }
@@ -68,28 +69,19 @@ pdPgram <- function(X, B, method = c("multitaper", "bartlett"), bias.corr = F, n
     B <- d
   }
   if(B < d){
-    warning("The number of tapers 'B' is smaller than the dimension of the time series 'ncol(X)'; the periodogram matrix
-            is not positive definite!")
+    warning("The number of tapers 'B' is smaller than the dimension of the time series 'ncol(X)';
+            the periodogram matrix is not positive definite!")
   }
-  pgram <- function(Y){
-    dft <- 1/sqrt(nrow(Y)) * mvfft(Y)
-    return(sapply(1:floor(nrow(Y)/2), function(i) dft[i, ] %*% t(Conj(dft[i, ])), simplify = "array"))
-  }
+  ## Taper weights
+  h <- switch(method,
+              bartlett = matrix(0, 1, 1),
+              multitaper = multitaper::dpss(n, B, nw = nw, returnEigenvalues = F)$v * sqrt(n))
+  ## Compute periodogram
+  P <- pgram_C(X, B, h, method)
+  ## Bias-correction
+  bias <- ifelse(bias.corr, B * exp(-1/d * sum(digamma(B - (d - 1:d)))), 1)
 
-  if (method == "bartlett") {
-    Per <- sapply(1:B, function(b) 1/(2 * pi) * pgram(X[floor(n/B) * (b - 1) + 1:floor(n/B), ]), simplify = "array")
-  } else if (method == "multitaper") {
-    h <- multitaper::dpss(n, B, nw = nw, returnEigenvalues = F)$v * sqrt(n)
-    Per <- sapply(1:B, function(k) 1/(2 * pi) * pgram(h[, k] * X), simplify = "array")
-  }
-  if(bias.corr){
-    P <- B * exp(-1/d * sum(digamma(B - (d - 1:d)))) * apply(Per, c(1, 2, 3), mean)
-  } else{
-    P <- apply(Per, c(1, 2, 3), mean)
-  }
-  freq <- pi * (0:(dim(P)[3]-1))/dim(P)[3]
-
-  return(list(freq = freq, P = P))
+  return(list(freq = pi * (0:(dim(P)[3]-1))/dim(P)[3], P = bias * P))
 }
 
 #' Tapered HPD time-varying periodogram matrix
@@ -220,9 +212,19 @@ pdPgram2D <- function(X, B, tf.grid, method = c("dpss", "hermite"), nw = pi, bia
   }
 
   ## Sliding dpss or hermite multitaper
-  Per <- sapply(tf.grid$time, function(ti) bias.corr * apply(sapply(1:B, function(b) 1/(2 * pi) *
-                Per_t(h[, b] * X[(round(ti * n)  - floor(n / (2 * L) - 1)):(round(ti * n) + floor(n / (2 * L))),]),
-                simplify = "array"), c(1, 2, 3), mean), simplify = "array")
+  Per <- array(dim = c(d, d, length(tf.grid$freq), length(tf.grid$time)))
+  pb <- utils::txtProgressBar(min = 0, max = 100, style = 3)
+  for(ti in tf.grid$time){
+    Per[,,,which(tf.grid$time == ti)] <- bias.corr * apply(sapply(1:B, function(b) 1/(2 * pi) *
+                               Per_t(h[, b] * X[(round(ti * n)  - floor(n / (2 * L) - 1)):(round(ti * n) + floor(n / (2 * L))),]),
+                             simplify = "array"), c(1, 2, 3), mean)
+    setTxtProgressBar(pb, value = round(ti / max(tf.grid$time) * 100))
+  }
+  close(pb)
+
+  # Per <- sapply(tf.grid$time, function(ti) bias.corr * apply(sapply(1:B, function(b) 1/(2 * pi) *
+  #               Per_t(h[, b] * X[(round(ti * n)  - floor(n / (2 * L) - 1)):(round(ti * n) + floor(n / (2 * L))),]),
+  #               simplify = "array"), c(1, 2, 3), mean), simplify = "array")
 
   return(list(tf.grid = tf.grid, P = aperm(Per, c(1, 2, 4, 3))))
 }
