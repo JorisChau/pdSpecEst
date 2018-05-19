@@ -101,9 +101,9 @@ pdSpecClust1D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
   dots = list(...)
   order = (if(is.null(dots$order)) 5 else dots$order)
   alpha = (if(is.null(dots$alpha)) 1 else dots$alpha)
-  policy = (if(is.null(dots$policy)) "universal" else dots$policy)
   metric = match.arg(metric, c("Riemannian", "logEuclidean", "Cholesky", "rootEuclidean", "Euclidean"))
   return.D = (if(is.null(dots$return.D)) F else dots$return.D)
+  method = (if(is.null(dots$method)) "fast" else dots$method)
 
   ## input P
   d = dim(P)[1]
@@ -122,7 +122,7 @@ pdSpecClust1D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
   M0.est <- array(dim = c(d, d, order, S))
   D.nzero <- matrix(NA, S, jmax + 1)
   for (s in 1:S) {
-    D.s <- pdSpecEst1D(P[, , , s], order, policy, metric, alpha, return = "D",
+    D.s <- pdSpecEst1D(P[, , , s], order, metric, alpha, return = "D", method = method,
                        periodic = periodic, jmax = jmax, return.D = "D.white")
     D[[s]] <- sapply(0:jmax, function(j) D.s$D.white[[j + 1]][, , L_b + 1:2^j, drop = F])
     M0[, , s] <- D.s$M0[, , L + 1]
@@ -160,12 +160,12 @@ pdSpecClust1D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
   ii <- 0
   while ((!stopit) & (ii < max.iter)) {
     dist <- t(sapply(1:S, function(s) t(sapply(1:K, function(k) pdDist(M0[, , s], cent[, , k],
-                                                                       method = ifelse(metric == "Riemannian", "Riemannian", "Euclidean"))^2))))
+                                                                       metric = ifelse(metric == "Riemannian", "Riemannian", "Euclidean"))^2))))
     mu <- function(s) {
-      if (!any(dist[s, ] < .Machine$double.eps)) {
+      if (!any(dist[s, ] < 1E-10)) {
         sapply(1:K, function(k) 1/sum((dist[s, k]/dist[s, ])^(1/(m - 1))))
       } else {
-        as.numeric(dist[s, ] < .Machine$double.eps)/sum(dist[s, ] < .Machine$double.eps)
+        as.numeric(dist[s, ] < 1E-10)/sum(dist[s, ] < 1E-10)
       }
     }
     clust <- t(sapply(1:S, mu))
@@ -175,7 +175,7 @@ pdSpecClust1D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
       cent1[, , k] <- pdMean(M0, w, metric = ifelse(metric == "Riemannian", "Riemannian", "Euclidean"))
     }
     stopit <- ifelse(isTRUE(sum(sapply(1:K, function(k) pdDist(cent[, , k], cent1[, , k],
-                                                               method = ifelse(metric == "Riemannian", "Riemannian", "Euclidean"))^2)) > eps[1]), F, T)
+                                                               metric = ifelse(metric == "Riemannian", "Riemannian", "Euclidean"))^2)) > eps[1]), F, T)
     cent <- cent1
     ii <- ii + 1
     if(ii == max.iter){
@@ -213,12 +213,12 @@ pdSpecClust1D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
 
     ## update cluster weights
     mu <- function(s) {
-      if (!any(dist[s, ] < .Machine$double.eps)) {
+      if (!any(dist[s, ] < 1E-10)) {
         sapply(1:K, function(k) 1/sum((dist[s, k]/dist[s, ])^(1/(m - 1))))
-      } else if (all(dist[s, ] < .Machine$double.eps)) {
+      } else if (all(dist[s, ] < 1E-10)) {
         clust[s, ]
       } else {
-        as.numeric(dist[s, ] < .Machine$double.eps)/sum(dist[s, ] < .Machine$double.eps)
+        as.numeric(dist[s, ] < 1E-10)/sum(dist[s, ] < 1E-10)
       }
     }
     clust <- t(sapply(1:S, mu))
@@ -228,7 +228,7 @@ pdSpecClust1D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
       w <- clust[, k]^m/sum(clust[, k]^m)
       for (j in 0:jmax) {
         cent1[[j + 1]][, , , k] <- sapply(1:2^j, function(i) apply(array(rep(w,  each = d^2),
-                                                                         dim = c(d, d, S)) * DD[[j + 1]][, , i, ], c(1, 2), sum),
+                                        dim = c(d, d, S)) * DD[[j + 1]][, , i, ], c(1, 2), sum),
                                           simplify = "array")
       }
     }
@@ -244,7 +244,6 @@ pdSpecClust1D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
   rownames(clust) <- paste0("Subject", 1:S)
   colnames(clust) <- paste0("Cluster", 1:K)
 
-
   ## Compute centers
   weights <- unname(sapply(1:K, function(k) clust[, k]^m/sum(clust[, k]^m)))
   cent.M0 <- lapply(1:K, function(k) sapply(1:dim(M0.est)[3], function(i) pdMean(M0.est[, , i,], weights[, k],
@@ -257,7 +256,7 @@ pdSpecClust1D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
   ## Return 'cl.centers.f' or not
   if(return.centers){
     cent.f <- lapply(1:K, function(k) InvWavTransf1D(cent.D[[k]], cent.M0[[k]], order = order,
-                                                     periodic = periodic, metric = metric, chol.bias = T))
+                                                     periodic = periodic, metric = metric, method = method))
   }
 
   return(list(cl.prob = clust, cl.centers.D = cent.D, cl.centers.M0 = cent.M0, cl.centers.f =
@@ -361,6 +360,7 @@ pdSpecClust2D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
   alpha = (if(is.null(dots$alpha)) 1 else dots$alpha)
   metric = match.arg(metric, c("Riemannian", "logEuclidean", "Cholesky", "rootEuclidean", "Euclidean"))
   return.D = (if(is.null(dots$return.D)) F else dots$return.D)
+  method = (if(is.null(dots$method)) "fast" else dots$method)
 
   ## input P
   d = dim(P)[1]
@@ -375,7 +375,7 @@ pdSpecClust2D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
   D.nzero <- matrix(NA, S, jmax + 1)
   for (s in 1:S) {
     D.s <- pdSpecEst2D(P[, , , , s], order, metric, alpha, return = "D", jmax = jmax,
-                       return.D = "D.white", progress = F)
+                       return.D = "D.white", method = method)
     D[[s]] <- D.s$D.white
     M0[, , s] <- D.s$M0[, , 1, 1]
     D.nzero[s, ] <- sapply(0:jmax, function(j) sum(apply(D.s$D[[j + 1]], c(3, 4),
@@ -392,12 +392,12 @@ pdSpecClust2D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
   ii <- 0
   while ((!stopit) & (ii < max.iter)) {
     dist <- t(sapply(1:S, function(s) t(sapply(1:K, function(k) pdDist(M0[, , s], cent[, , k],
-                      method = ifelse(metric == "Riemannian", "Riemannian", "Euclidean"))^2))))
+                      metric = ifelse(metric == "Riemannian", "Riemannian", "Euclidean"))^2))))
     mu <- function(s) {
-      if (!any(dist[s, ] < .Machine$double.eps)) {
+      if (!any(dist[s, ] < 1E-10)) {
         sapply(1:K, function(k) 1/sum((dist[s, k]/dist[s, ])^(1/(m - 1))))
       } else {
-        as.numeric(dist[s, ] < .Machine$double.eps)/sum(dist[s, ] < .Machine$double.eps)
+        as.numeric(dist[s, ] < 1E-10)/sum(dist[s, ] < 1E-10)
       }
     }
     clust <- t(sapply(1:S, mu))
@@ -407,7 +407,7 @@ pdSpecClust2D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
       cent1[, , k] <- pdMean(M0, w, metric = ifelse(metric == "Riemannian", "Riemannian", "Euclidean"))
     }
     stopit <- ifelse(isTRUE(sum(sapply(1:K, function(k) pdDist(cent[, , k], cent1[, , k],
-                                                               method = ifelse(metric == "Riemannian", "Riemannian", "Euclidean"))^2)) > eps[1]), F, T)
+                                                               metric = ifelse(metric == "Riemannian", "Riemannian", "Euclidean"))^2)) > eps[1]), F, T)
     cent <- cent1
     ii <- ii + 1
     if(ii == max.iter){
@@ -447,12 +447,12 @@ pdSpecClust2D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
 
     ## update cluster weights
     mu <- function(s) {
-      if (!any(dist[s, ] < .Machine$double.eps)) {
+      if (!any(dist[s, ] < 1E-10)) {
         sapply(1:K, function(k) 1/sum((dist[s, k]/dist[s, ])^(1/(m - 1))))
-      } else if (all(dist[s, ] < .Machine$double.eps)) {
+      } else if (all(dist[s, ] < 1E-10)) {
         clust[s, ]
       } else {
-        as.numeric(dist[s, ] < .Machine$double.eps)/sum(dist[s, ] < .Machine$double.eps)
+        as.numeric(dist[s, ] < 1E-10)/sum(dist[s, ] < 1E-10)
       }
     }
     clust <- t(sapply(1:S, mu))
@@ -496,7 +496,7 @@ pdSpecClust2D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
   ## Return 'cl.centers.f' or not
   if(return.centers){
     cent.f <- lapply(1:K, function(k) InvWavTransf2D(cent.D[[k]], array(cent.M0[, , k], dim = c(d,d,1,1)),
-                                                     order = order, metric = metric, chol.bias = T, progress = F))
+                                                     order = order, metric = metric, method = method))
   }
 
   return(list(cl.prob = clust, cl.centers.D = cent.D, cl.centers.M0 = cent.M0, cl.centers.f =

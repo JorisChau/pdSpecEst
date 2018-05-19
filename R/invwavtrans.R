@@ -36,7 +36,6 @@
 #' @param metric the metric that the space of HPD matrices is equipped with. The default choice is \code{"Riemannian"},
 #' but this can also be one of: \code{"logEuclidean"}, \code{"Cholesky"}, \code{"rootEuclidean"} or
 #' \code{"Euclidean"}. The inverse intrinsic AI wavelet transform fundamentally relies on the chosen metric.
-#' @param progress should a console progress bar be displayed? Defaults to \code{progress = F}.
 #' @param ... additional arguments for internal use.
 #'
 #' @examples
@@ -93,12 +92,9 @@ InvWavTransf1D <- function(D, M0, order = 5, jmax, periodic = F, metric = "Riema
 
   ## Transform back to manifold
   if(return_val == "manifold") {
-    m1 <- switch(metric,
-                 logEuclidean = sapply(1:dim(m1)[3], function(i) Expm(diag(d), m1[, , i]), simplify = "array"),
-                 Cholesky = sapply(1:dim(m1)[3], function(i) t(Conj(m1[, , i])) %*% m1[, , i], simplify = "array"),
-                 rootEuclidean =  sapply(1:dim(m1)[3], function(i) t(Conj(m1[, , i])) %*% m1[, , i], simplify = "array"),
-                 Euclidean = m1,
-                 Riemannian = m1)
+    if(metric == "logEuclidean" | metric == "Cholesky" | metric == "rootEuclidean") {
+      m1 <- Ptransf2D_C(m1, T, metric)
+    }
   }
   return((if(periodic) m1[, , L_round + 1:2^J] else m1))
 }
@@ -138,7 +134,6 @@ InvWavTransf1D <- function(D, M0, order = 5, jmax, periodic = F, metric = "Riema
 #' @param metric the metric that the space of HPD matrices is equipped with. The default choice is \code{"Riemannian"},
 #' but this can also be one of: \code{"logEuclidean"}, \code{"Cholesky"}, \code{"rootEuclidean"} or
 #' \code{"Euclidean"}. The inverse intrinsic 2D AI wavelet transform fundamentally relies on the chosen metric.
-#' @param progress should a console progress bar be displayed? Defaults to \code{progress = T}.
 #' @param ... additional arguments for internal use.
 #'
 #' @examples
@@ -156,99 +151,75 @@ InvWavTransf1D <- function(D, M0, order = 5, jmax, periodic = F, metric = "Riema
 #' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
 #'
 #' @export
-InvWavTransf2D <- function(D, M0, order = c(3, 3), jmax, metric = "Riemannian", progress = T, ...) {
+InvWavTransf2D <- function(D, M0, order = c(3, 3), jmax, metric = "Riemannian", ...) {
 
   ## Set variables
-  dots = list(...)
-  return_val = (if(is.null(dots$return_val)) "manifold" else dots$return_val)
-  method = (if(is.null(dots$method)) "weights" else dots$method)
-  chol.bias = (if(is.null(dots$chol.bias)) F else dots$chol.bias)
+  dots <- list(...)
+  return_val <- (if(is.null(dots$return_val)) "manifold" else dots$return_val)
+  method <- (if(is.null(dots$method)) "fast" else dots$method)
   if (!isTRUE((order[1] %% 2 == 1) & (order[2] %% 2 == 1))) {
     warning("Refinement orders in both directions should be odd integers, by default set to c(5,5).")
-    order = c(3, 3)
+    order <- c(3, 3)
   }
-  metric = match.arg(metric, c("Riemannian", "logEuclidean", "Cholesky", "rootEuclidean", "Euclidean"))
-  L = (order - 1) / 2
-  d = dim(D[[1]])[1]
-  J = (if(missing(jmax)) length(D) else jmax)
-
-  ## Reconstruct scaling coefficients
-  m1 <- M0
+  if (!isTRUE((order[1] <= 9) & (order[2] <= 9))) {
+    stop(paste0("Refinement orders in both directions should be smaller or equal to 9, please change ",
+                order, " to be upper bounded by c(9, 9)." ))
+  }
+  metric <- match.arg(metric, c("Riemannian", "logEuclidean", "Cholesky", "rootEuclidean", "Euclidean"))
+  L <- (order - 1) / 2
+  d <- dim(D[[1]])[1]
+  J <- (if(missing(jmax)) length(D) else jmax)
   J0_2D <- sum(sapply(1:length(D), function(j) any(dim(D[[j]]) == 1)))
-
-  if(progress){
-    pb <- utils::txtProgressBar(1, 100, style = 3)
+  if(!isTRUE((J > 0) & isTRUE(all.equal(as.integer(J), J)))) {
+    stop("'jmax' should be an integer larger than zero")
   }
-  for (j in 0:(J - 1)) {
 
-    if((j + 1) <= length(D)){
+  ## Reconstruct midpoints
+  m1 <- M0
+  for (j in 0:(J - 1)) {
+    if(j < length(D)) {
       if(dim(D[[j + 1]])[3] == 1){
         ## Refine 1D
-        tm1 <- array(AIRefine1D(array(m1[, , 1, ], dim = c(d, d, 2^j)), L[2], method = method,
-                                inverse = T, metric = metric), dim = c(d, d, 1, 2^(j + 1)))
-      } else if (dim(D[[j + 1]])[4] == 1){
+        L1 <- ifelse(order[2] > 2^j, floor((2^j - 1) / 2), L[2])
+        tm1 <- impute_C(array(m1[, , 1, ], dim = c(d, d, 2^j)), W_1D[[min(L1 + 1, 5)]], L1, T, metric, method)
+        ## Reconstruct midpoints 1D
+        m1 <- reconstr2D_C(tm1, array(D[[j + 1]], dim = dim(tm1)), J0_2D + j, c(1, 2^(j + 1)), T, metric)
+        m1 <- array(m1, dim = c(d, d, 1, 2^(j + 1)))
+      } else if(dim(D[[j + 1]])[4] == 1){
         ## Refine 1D
-        tm1 <- array(AIRefine1D(array(m1[, , , 1], dim = c(d, d, 2^j)), L[1], method = method,
-                                inverse = T, metric = metric), dim = c(d, d, 2^(j + 1), 1))
-      }else{
-        ## Refine 2D
-        tm1 <- AIRefine2D(m1, L, method = method, metric = metric)
-      }
-    } else{
-      ## Refine 2D
-      tm1 <- AIRefine2D(m1, L, method = method, metric = metric)
-    }
-
-    reconstr <- function(i1, i2) {
-      if((j + 1) <= length(D)) {
-        if(any(c(D[[j + 1]][, , i1, i2]) != 0)){
-          if(metric == "Riemannian"){
-            m1_i <- Expm(tm1[, , i1, i2], ifelse(any(dim(D[[j + 1]]) == 1),
-                                        2^((J0_2D + j)/2), 2^j)  * D[[j + 1]][, , i1, i2])
-          } else{
-            m1_i <- ifelse(any(dim(D[[j + 1]]) == 1), 2^((J0_2D + j)/2), 2^j) *
-              D[[j + 1]][, , i1, i2] + tm1[, , i1, i2]
-          }
-        } else{
-          m1_i <- tm1[, , i1, i2]
-        }
+        L1 <- ifelse(order[1] > 2^j, floor((2^j - 1) / 2), L[1])
+        tm1 <- impute_C(array(m1[, , , 1], dim = c(d, d, 2^j)), W_1D[[min(L1 + 1, 5)]], L1, T, metric, method)
+        ## Reconstruct midpoints 1D
+        m1 <- reconstr2D_C(tm1, array(D[[j + 1]], dim = dim(tm1)), J0_2D + j, c(2^(j + 1), 1), T, metric)
+        m1 <- array(m1, dim = c(d, d, 2^(j + 1), 1))
       } else {
-        m1_i <- tm1[, , i1, i2]
+        ## Refine 2D
+        tm1 <- impute2D_R(m1, L, metric, method)
+        ## Reconstruct midpoints 2D
+        m1 <- reconstr2D_C(array(tm1, dim = c(d, d, dim(tm1)[3] * dim(tm1)[4])),
+                           array(D[[j + 1]], dim = c(d, d, dim(D[[j + 1]])[3] * dim(D[[j + 1]])[4])), 2 * j,
+                           c(dim(tm1)[3], dim(tm1)[4]), T, metric)
+        m1 <- array(m1, dim = dim(tm1))
       }
-      return(m1_i)
-    }
-
-    if((j + 1) <= length(D)){
-      grid_j <- expand.grid(1:dim(D[[j + 1]])[3], 1:dim(D[[j + 1]])[4])
-    } else{
-      grid_j <- expand.grid(1:(dim(D[[length(D)]])[3] * 2^((j + 1) - length(D))),
-                            1:(dim(D[[length(D)]])[4] * 2^((j + 1) - length(D))))
-    }
-    m1 <- array(c(mapply(function(i1, i2) reconstr(i1, i2), grid_j$Var1, grid_j$Var2, SIMPLIFY = "array")),
-                dim = c(d, d, attributes(grid_j)$out.attrs$dim[1], attributes(grid_j)$out.attrs$dim[2]))
-
-    if(progress){
-      utils::setTxtProgressBar(pb, round(100 * (j + 1) / J))
+    } else {
+      ## Refine 2D outside of range of scales
+      tm1 <- impute2D_R(m1, L, metric, method)
+      ## Reconstruct midpoints 2D
+      m1 <- reconstr2D_C(array(tm1, dim = c(d, d, dim(tm1)[3] * dim(tm1)[4])),
+                         array(dim = c(d, d, dim(tm1)[3] * dim(tm1)[4])), 2 * j,
+                         c(dim(tm1)[3], dim(tm1)[4]), F, metric)
+      m1 <- array(m1, dim = dim(tm1))
     }
   }
-  if(progress){
-    close(pb)
-  }
 
-  ## Back transform to manifold
+  ## Transform back to manifold
   if(return_val == "manifold"){
-    m1 <- (if(metric == "logEuclidean"){
-      array(apply(m1, c(3, 4), function(M) Expm(diag(d), M)),
-            dim = c(d, d, dim(m1)[3], dim(m1)[4]))
-    } else if(metric == "Cholesky"){
-      array(apply(m1, c(3, 4), function(M) Chol(M, inverse = T, bias.corr = chol.bias)),
-            dim = c(d, d, dim(m1)[3], dim(m1)[4]))
-    } else if(metric == "rootEuclidean") {
-      array(apply(m1, c(3, 4), function(M) t(Conj(M)) %*% M),
-            dim = c(d, d, dim(m1)[3], dim(m1)[4]))
-    } else m1)
+    if(metric == "logEuclidean" | metric == "Cholesky" | metric == "rootEuclidean") {
+      m1 <- array(Ptransf2D_C(array(m1, dim = c(d, d, dim(m1)[3] * dim(m1)[4])), T, metric), dim = dim(m1))
+    }
   }
 
   return(m1)
 }
+
 

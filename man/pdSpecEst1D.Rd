@@ -27,8 +27,6 @@ universal threshold, defaults to \code{alpha = 1}.}
 is returned or not.}
 
 \item{...}{additional arguments for internal use.}
-
-\item{policy}{a character, one of \code{"universal"} or \code{"cv"}, defaults to \code{policy = "universal"}.}
 }
 \value{
 The function returns a list with four components:
@@ -41,8 +39,6 @@ wavelet scale \code{j = 0}.}
 \item{M0 }{a numeric array containing the midpoint(s) at the coarsest scale \code{j = 0} in the midpoint pyramid.}
 \item{tree.weights }{a list of logical values specifying which coefficients to keep, with each list component
    corresponding to an individual wavelet scale.}
-\item{alpha.opt }{the wavelet thresholding tuning parameter equal to the input argument \code{alpha} if
-\code{policy = "universal"}; or determined data-adaptively via two-fold cross-validation if \code{policy = "cv"}.}
 }
 \description{
 \code{pdSpecEst1D} calculates a \eqn{(d,d)}-dimensional HPD wavelet-denoised spectral matrix estimator
@@ -61,9 +57,7 @@ of the wavelet coefficients based on the trace of the whitened coefficients as i
 minimization of a \emph{complexity penalized residual sum of squares} (CPRESS) criterion in (Donoho, 1997),
 via a fast tree-pruning algorithm. As in \code{\link{pdCART}}, the sparsity parameter is set equal to \code{alpha}
 times the universal threshold where the noise variance of the traces of the whitened wavelet
-coefficients determined from the finest wavelet scale. If the thresholding policy is set to \code{policy = "universal"},
-the sparsity parameter is set equal to the universal threshold. If the thresholding policy is set to \code{policy = "cv"},
-a data-adaptive sparsity parameter is computed via two-fold cross-validation as in (Nason, 1996) based on the chosen metric.\cr
+coefficients determined from the finest wavelet scale. \cr
 If \code{return == 'f'} the thresholded wavelet coefficients are transformed back to the frequency domain by
 the inverse intrinsic 1D AI wavelet transform via \code{\link{InvWavTransf1D}} giving the wavelet-denoised
 HPD spectral estimate.
@@ -76,9 +70,6 @@ f <- pdSpecEst1D(P)
 \references{
 Chau, J. and von Sachs, R. (2017a). \emph{Positive definite multivariate spectral
 estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
-
-Nason, G.P. (1996). \emph{Wavelet shrinkage using cross-validation}. Journal of the
-Royal Statistical Society: Series B, 58, 463-479.
 }
 \seealso{
 \code{\link{pdPgram}}, \code{\link{WavTransf1D}}, \code{\link{InvWavTransf1D}}, \code{\link{pdCART}}

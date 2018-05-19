@@ -15,9 +15,7 @@
 #' minimization of a \emph{complexity penalized residual sum of squares} (CPRESS) criterion in (Donoho, 1997),
 #' via a fast tree-pruning algorithm. As in \code{\link{pdCART}}, the sparsity parameter is set equal to \code{alpha}
 #' times the universal threshold where the noise variance of the traces of the whitened wavelet
-#' coefficients determined from the finest wavelet scale. If the thresholding policy is set to \code{policy = "universal"},
-#' the sparsity parameter is set equal to the universal threshold. If the thresholding policy is set to \code{policy = "cv"},
-#' a data-adaptive sparsity parameter is computed via two-fold cross-validation as in (Nason, 1996) based on the chosen metric.\cr
+#' coefficients determined from the finest wavelet scale. \cr
 #' If \code{return == 'f'} the thresholded wavelet coefficients are transformed back to the frequency domain by
 #' the inverse intrinsic 1D AI wavelet transform via \code{\link{InvWavTransf1D}} giving the wavelet-denoised
 #' HPD spectral estimate.
@@ -27,7 +25,6 @@
 #' defaults to \code{order = 5}. Note that if \code{order > 9}, the computational cost
 #' significantly increases as the wavelet transform no longer uses a fast wavelet refinement scheme based
 #' on pre-determined weights.
-#' @param policy a character, one of \code{"universal"} or \code{"cv"}, defaults to \code{policy = "universal"}.
 #' @param metric the metric that the space of HPD matrices is equipped with. The default choice is \code{"Riemannian"},
 #' but this can also be one of: \code{"logEuclidean"}, \code{"Cholesky"}, \code{"rootEuclidean"} or
 #' \code{"Euclidean"}. The intrinsic AI wavelet transform fundamentally relies on the chosen metric.
@@ -48,8 +45,6 @@
 #' \item{M0 }{a numeric array containing the midpoint(s) at the coarsest scale \code{j = 0} in the midpoint pyramid.}
 #' \item{tree.weights }{a list of logical values specifying which coefficients to keep, with each list component
 #'    corresponding to an individual wavelet scale.}
-#' \item{alpha.opt }{the wavelet thresholding tuning parameter equal to the input argument \code{alpha} if
-#' \code{policy = "universal"}; or determined data-adaptively via two-fold cross-validation if \code{policy = "cv"}.}
 #'
 #' @examples
 #' P <- rExamples(2^8, example = "bumps")$per
@@ -59,8 +54,6 @@
 #'
 #' @references Chau, J. and von Sachs, R. (2017a). \emph{Positive definite multivariate spectral
 #' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
-#' @references Nason, G.P. (1996). \emph{Wavelet shrinkage using cross-validation}. Journal of the
-#' Royal Statistical Society: Series B, 58, 463-479.
 #'
 #' @export
 pdSpecEst1D <- function(P, order = 5, metric = "Riemannian", alpha = 1, return = "f", ...) {
@@ -71,7 +64,6 @@ pdSpecEst1D <- function(P, order = 5, metric = "Riemannian", alpha = 1, return =
   w.tree = (if(is.null(dots$w.tree)) NULL else dots$w.tree)
   periodic = (if(is.null(dots$periodic)) T else dots$periodic)
   method = (if(is.null(dots$method)) "fast" else dots$method)
-
   metric = match.arg(metric, c("Riemannian", "logEuclidean", "Cholesky", "rootEuclidean", "Euclidean"))
   J = log2(dim(P)[3])
   d = dim(P)[1]
@@ -100,9 +92,9 @@ pdSpecEst1D <- function(P, order = 5, metric = "Riemannian", alpha = 1, return =
 
   ## Return whitened coeff's or not
   if(!isTRUE(return.D == "D.white")){
-    res <- list(f = f, D = coeff.thresh$D_w, M0 = coeff$M0, tree.weights = coeff.thresh$w)
+    res <- list(f = f, D = coeff.thresh$D_w, M0 = coeff$M0, D0 = coeff$D, tree.weights = coeff.thresh$w)
   } else{
-    res <- list(f = f, D = coeff.thresh$D_w, M0 = coeff$M0, tree.weights = coeff.thresh$w,
+    res <- list(f = f, D = coeff.thresh$D_w, M0 = coeff$M0, D0 = coeff$D, tree.weights = coeff.thresh$w,
                 D.white = coeff.thresh$D.white_w)
   }
   return(res)
@@ -174,32 +166,34 @@ pdSpecEst2D <- function(P, order = c(3, 3), metric = "Riemannian", alpha = 1, re
   dots = list(...)
   tree = (if(is.null(dots$tree)) T else dots$tree)
   w.tree = (if(is.null(dots$w.tree)) NULL else dots$w.tree)
+  method = (if(is.null(dots$method)) "fast" else dots$method)
   metric = match.arg(metric, c("Riemannian", "logEuclidean", "Cholesky", "rootEuclidean", "Euclidean"))
   J1 = log2(dim(P)[3])
   J2 = log2(dim(P)[4])
   J = max(J1, J2)
   d = dim(P)[1]
   B = (if(is.null(dots$B)) d else dots$B)
-  progress = (if(is.null(dots$progress)) T else dots$progress)
   J.out = (if(is.null(dots$J.out)) J else dots$J.out)
   jmax = min((if(is.null(dots$jmax)) J - 2 else dots$jmax), J.out - 1)
   bias.corr = (if(is.null(dots$bias.corr)) T else dots$bias.corr)
   return.D = (if(is.null(dots$return.D)) NA else dots$return.D)
   return_val = (if(is.null(dots$return_val)) "manifold" else dots$return_val)
 
-  # Manifold bias-correction
+  # Wishart bias-correction
   P <- (if((metric == "Riemannian" | metric == "logEuclidean") & bias.corr) {
     B * exp(-1/d * sum(digamma(B - (d - 1:d)))) * P } else P)
 
-  ## Threshold full data using 'alpha' (nonlinear) or 'w.tree' (linear)
-  coeff <- WavTransf2D(P, order = order, jmax = jmax, metric = metric, progress = progress)
+  ## (1) Transform data to wavelet domain
+  coeff <- WavTransf2D(P, order = order, jmax = jmax, metric = metric, method = method)
+
+  ## (2) Threshold coefficients in wavelet domain
   coeff.opt <- pdCART(coeff$D, coeff$D.white, alpha = alpha, tree = tree, w.tree = w.tree,
                       order = order, B = B, return.D = return.D)
 
-  ## Return 'f' or not
+  ## (3) Transform back to HPD space
   f <- (if(return == "f"){
     InvWavTransf2D(coeff.opt$D_w, coeff$M0, order = order, jmax = J.out, metric = metric,
-                   progress = progress, return_val = return_val, chol.bias = T)
+                   method = method, return_val = return_val)
   } else NULL)
 
   ## Return whitened coeff's or not
@@ -209,7 +203,6 @@ pdSpecEst2D <- function(P, order = c(3, 3), metric = "Riemannian", alpha = 1, re
     res <- list(f = f, D = coeff.opt$D_w, M0 = coeff$M0, tree.weights = coeff.opt$w, D.raw = coeff$D,
                 D.white = coeff.opt$D.white_w)
   }
-
   return(res)
 }
 
@@ -293,6 +286,7 @@ pdCART <- function(D, D.white, order, alpha = 1, tree = T, ...) {
   }
   lam = (if(is.null(dots$lam)) NA else dots$lam)
 
+  ## Compute traces and standardize variance across wavelet scales
   if(is_2D){
     D_trace <- lapply(2:J, function(j) apply(D.white[[j]], c(3, 4), function(A) Re(sum(diag(A)))))
     J_tr <- length(D_trace)

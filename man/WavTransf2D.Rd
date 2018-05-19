@@ -4,8 +4,7 @@
 \alias{WavTransf2D}
 \title{Forward average-interpolation 2D wavelet transform}
 \usage{
-WavTransf2D(P, order = c(3, 3), jmax, metric = "Riemannian", progress = T,
-  ...)
+WavTransf2D(P, order = c(3, 3), jmax, metric = "Riemannian", ...)
 }
 \arguments{
 \item{P}{a (\eqn{d,d,n1,n2})-dimensional array of Hermitian PD matrices, with \eqn{n_1 = 2^{J_1}} and \eqn{n_2 = 2^{J_2}}
@@ -22,8 +21,6 @@ specified it is set equal to the maximum possible scale \code{jmax = max(J1, J2)
 \item{metric}{the metric that the space of HPD matrices is equipped with. The default choice is \code{"Riemannian"},
 but this can be one of: \code{"Riemannian"}, \code{"logEuclidean"}, \code{"Cholesky"}, \code{"rootEuclidean"} or
 \code{"Euclidean"}. The intrinsic AI wavelet transform fundamentally relies on the chosen metric.}
-
-\item{progress}{should a console progress bar be displayed? Defaults to \code{progress = T}.}
 
 \item{...}{additional arguments for internal use.}
 }

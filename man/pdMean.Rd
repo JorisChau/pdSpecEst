@@ -4,8 +4,7 @@
 \alias{pdMean}
 \title{Weighted Karcher mean of HPD matrices}
 \usage{
-pdMean(M, w, metric = "Riemannian", grad_desc = F, maxit = 1000, reltol,
-  ...)
+pdMean(M, w, metric = "Riemannian", grad_desc = F, maxit = 1000, reltol)
 }
 \arguments{
 \item{M}{a \eqn{(d,d,S)}-dimensional array of Hermitian PD matrices.}
@@ -18,11 +17,11 @@ pdMean(M, w, metric = "Riemannian", grad_desc = F, maxit = 1000, reltol,
 \item{grad_desc}{if \code{metric == "Riemannian"}, a logical value indicating if the
 gradient descent algorithm should be used, defaults to \code{FALSE}.}
 
+\item{maxit}{maximum number of iterations in gradient descent algorithm, only used if
+\code{isTRUE(grad_desc & metric == "Riemannian")}. Defaults to \code{1000}}
+
 \item{reltol}{optional tolerance parameter in gradient descent algorithm, only used if
 \code{isTRUE(grad_desc & metric == "Riemannian")}. Defaults to \code{1E-10}.}
-
-\item{max_iter}{maximum number of iterations in gradient descent algorithm, only used if
-\code{isTRUE(grad_desc & metric == "Riemannian")}. Defaults to \code{1000}}
 }
 \description{
 \code{pdMean} calculates an (approximate) weighted Karcher or Frechet mean of \eqn{S} different

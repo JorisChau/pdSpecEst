@@ -31,7 +31,6 @@
 #' @param metric the metric that the space of HPD matrices is equipped with. The default choice is \code{"Riemannian"},
 #' but this can also be one of: \code{"logEuclidean"}, \code{"Cholesky"}, \code{"rootEuclidean"} or
 #' \code{"Euclidean"}. The intrinsic AI wavelet transform fundamentally relies on the chosen metric.
-#' @param progress should a console progress bar be displayed? Defaults to \code{progress = F}.
 #' @param ... additional arguments for internal use.
 #'
 #' @examples
@@ -76,20 +75,20 @@ WavTransf1D <- function(P, order = 5, jmax, periodic = F, metric = "Riemannian",
   Nj = as.integer(ifelse(periodic & (order > 1), N, n) / (2^(0:J)))
 
   ## Compute midpoint pyramid
-  Mper <- pdSpecEst:::wavPyr_C(P, ifelse(periodic & (order > 1), L, 0), J, Nj, metric)
+  Mper <- wavPyr_C(P, ifelse(periodic & (order > 1), L, 0), J, Nj, metric)
   M <- list()
   M[[1]] <- Mper[, , sum(head(Nj, J)) + 1:Nj[J + 1], drop = F]
   for(j in 1:J) {
     if(periodic & (order > 1)) {
       M[[j + 1]] <- Mper[, , ifelse(j < J, sum(Nj[1:(J - j)]), 0) + L * 2^j -
-                         L_round + 1:(2^j + 2 * L_round), drop = F]
+                           L_round + 1:(2^j + 2 * L_round), drop = F]
     } else {
       M[[j + 1]] <- Mper[, , ifelse(j < J, sum(Nj[1:(J - j)]), 0) + 1:2^j, drop = F]
     }
   }
 
   ## Create empty lists for predicted midpoints and wav. coeff's
-  D <- tM <- Dw <- list()
+  D <- Dw <- list()
   if (missing(jmax)) {
     jmax <- J - 1
   }
@@ -103,11 +102,11 @@ WavTransf1D <- function(P, order = 5, jmax, periodic = F, metric = "Riemannian",
     n_M <- dim(M[[j + 1]])[3]
     L1 <- ifelse(order > n_M, floor((n_M - 1) / 2), L)
     tm1 <- impute_C(M[[j + 1]], W_1D[[min(L1 + 1, 5)]], L1, F, metric, method)[, , 2 * (1:n_M), drop = F]
-    tM[[j + 1]] <- (if(periodic){ tm1[, , L_round / 2 + ifelse(j > 0 | L %% 2 == 0, 0, -1) +
-                            1:(2^j + L_round), drop = F] } else tm1)
+    tM <- (if(periodic){ tm1[, , L_round / 2 + ifelse(j > 0 | L %% 2 == 0, 0, -1) +
+                               1:(2^j + L_round), drop = F] } else tm1)
     ## Compute wavelet coefficients
-    n_W <- dim(tM[[j + 1]])[3]
-    W <- wavCoeff_C(tM[[j + 1]], M[[j + 2]][, , 2 * (1:n_W), drop = F], j, metric)
+    n_W <- dim(tM)[3]
+    W <- wavCoeff_C(tM, M[[j + 2]][, , 2 * (1:n_W), drop = F], j, metric)
     Dw[[j + 1]] <- W[, , 1:n_W, drop = F]
     D[[j + 1]] <- W[, , n_W + 1:n_W, drop = F]
     names(D)[j + 1] <- names(Dw)[j + 1] <- paste0("D.scale", j)
@@ -146,7 +145,6 @@ WavTransf1D <- function(P, order = 5, jmax, periodic = F, metric = "Riemannian",
 #' @param metric the metric that the space of HPD matrices is equipped with. The default choice is \code{"Riemannian"},
 #' but this can be one of: \code{"Riemannian"}, \code{"logEuclidean"}, \code{"Cholesky"}, \code{"rootEuclidean"} or
 #' \code{"Euclidean"}. The intrinsic AI wavelet transform fundamentally relies on the chosen metric.
-#' @param progress should a console progress bar be displayed? Defaults to \code{progress = T}.
 #' @param ... additional arguments for internal use.
 #'
 #' @examples
@@ -168,72 +166,52 @@ WavTransf1D <- function(P, order = 5, jmax, periodic = F, metric = "Riemannian",
 #' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
 #'
 #' @export
-WavTransf2D <- function(P, order = c(3, 3), jmax, metric = "Riemannian", progress = T, ...) {
+WavTransf2D <- function(P, order = c(3, 3), jmax, metric = "Riemannian", ...) {
 
   ## Set variables
-  J1 = log2(dim(P)[3])
-  J2 = log2(dim(P)[4])
-  J = max(J1, J2)
-  J0_2D = abs(J1 - J2)
+  J1 <- log2(dim(P)[3])
+  J2 <- log2(dim(P)[4])
+  J <- max(J1, J2)
+  J0_2D <- abs(J1 - J2)
   if (!isTRUE(all.equal(as.integer(J1), J1) & all.equal(as.integer(J2), J2))) {
     stop(paste0("Input length is non-dyadic, please change length ", dim(P)[3], " or ",
                 dim(P)[4], " to dyadic number."))
   }
   if (!isTRUE((order[1] %% 2 == 1) & (order[2] %% 2 == 1))) {
-    warning("Refinement orders in both directions should be odd integers, by default set to c(5,5).")
-    order = c(3, 3)
+    warning("Refinement orders in both directions should be odd integers, by default set to c(3,3).")
+    order <- c(3, 3)
   }
-  metric = match.arg(metric, c("Riemannian", "logEuclidean", "Cholesky", "rootEuclidean", "Euclidean"))
-  dots = list(...)
-  method = (if(is.null(dots$method)) "weights" else dots$method)
-  L = (order - 1) / 2
-  d = dim(P)[1]
+  if (!isTRUE((order[1] <= 9) & (order[2] <= 9))) {
+    stop(paste0("Refinement orders in both directions should be smaller or equal to 9, please change ",
+                order, " to be upper bounded by c(9, 9)." ))
+  }
+  metric <- match.arg(metric, c("Riemannian", "logEuclidean", "Cholesky", "rootEuclidean", "Euclidean"))
+  dots <- list(...)
+  method <- (if(is.null(dots$method)) "fast" else dots$method)
+  L <- (order - 1) / 2
+  d <- dim(P)[1]
 
-  P <- (if(metric == "logEuclidean"){
-    array(apply(P, c(3, 4), function(Pi) Logm(diag(d), Pi)), dim = c(d, d, 2^J1, 2^J2))
-  } else if(metric == "Cholesky"){
-    array(apply(P, c(3, 4), function(Pi) Chol(Pi)), dim = c(d, d, 2^J1, 2^J2))
-  } else if(metric == "rootEuclidean"){
-    array(apply(P, c(3, 4), function(Pi) Sqrt(Pi)), dim = c(d, d, 2^J1, 2^J2))
-  } else P)
-
-  Mper_2D <- function(Mper, j1, j2) {
-    l1 <- t(sapply(1:2^j1, function(i) c(1, 2) + 2 * (i - 1)))
-    l2 <- t(sapply(1:2^j2, function(i) c(1, 2) + 2 * (i - 1)))
-    grid <- expand.grid(1:2^j1, 1:2^j2)
-    Mper <- array(c(mapply(function(i1, i2) pdMean(array(c(Mper[,,l1[i1,],l2[i2,]]), dim = c(d, d, 4)),
-                                                   metric = ifelse(metric == "Riemannian", "Riemannian", "Euclidean")),
-                           grid$Var1, grid$Var2, SIMPLIFY = "array")), dim = c(d, d, 2^j1, 2^j2))
-    return(Mper)
+  ## Transform surface
+  if(metric == "logEuclidean" | metric == "Cholesky" | metric == "rootEuclidean") {
+    P <- array(Ptransf2D_C(array(P, dim = c(d, d, dim(P)[3] * dim(P)[4])), F, metric), dim = dim(P))
   }
 
-  grid_j <- cbind((J1:0)[1:(J + 1)], (J2:0)[1:(J + 1)])
-
+  ## Construct 2D midpoint pyramid
+  grid_n <- cbind(2^((J1:0)[1:(J + 1)]), 2^((J2:0)[1:(J + 1)]))
+  grid_n[which(is.na(grid_n))] <- 0
   M <- list()
   for (j in J:0) {
     if(j == J){
-      Mper <- unname(P)
-    } else if(j >= J0_2D) {
-      Mper <- Mper_2D(Mper, grid_j[J + 1 - j, 1], grid_j[J + 1 - j, 2])
+      Mper <- array(c(P), dim = c(d, d, grid_n[1, 1] * grid_n[1, 2]))
+      M[[j + 1]] <- P
     } else {
-      if(is.na(grid_j[J + 1 - j, 1])) {
-        j2 <- grid_j[J + 1 - j, 2]
-        Mper <- array(c(sapply(1:2^j2, function(i){
-          if(metric == "Riemannian") Mid(Mper[, , , 2 * i - 1], Mper[, , , 2 * i]) else{
-            0.5 * (Mper[, , , 2 * i - 1] + Mper[, , , 2 * i])
-          }})), dim = c(d, d, 1, 2^j2))
-      } else if(is.na(grid_j[J + 1 - j, 2])) {
-        j1 <- grid_j[J + 1 - j, 1]
-        Mper <- array(c(sapply(1:2^j1, function(i){
-          if(metric == "Riemannian") Mid(Mper[, , 2 * i - 1, ], Mper[, , 2 * i, ]) else{
-            0.5 * (Mper[, , 2 * i - 1, ] + Mper[, , 2 * i, ])
-          }})), dim = c(d, d, 2^j1, 1))
-      }
+      Mper <- wavPyr2D_C(Mper, max(grid_n[J - j, 1], 1), max(grid_n[J - j, 2], 1), metric)
+      M[[j + 1]] <- array(c(Mper), dim = c(d, d, max(grid_n[J + 1 - j, 1], 1), max(grid_n[J + 1 - j, 2], 1)))
     }
-    M[[j + 1]] <- Mper
   }
 
-  D <- tM <- D.white <- list()
+  ## 2D AI Wavelet transform
+  D <- Dw <- list()
   if (missing(jmax)) {
     jmax <- J - 1
   }
@@ -242,73 +220,35 @@ WavTransf2D <- function(P, order = c(3, 3), jmax, metric = "Riemannian", progres
     jmax <- J - 1
   }
 
-  ## Compute 2D wavelet transform
-  if(progress){
-    pb <- utils::txtProgressBar(1, 100, style = 3)
-  }
   for (j in 0:jmax) {
-
-    if(is.na(grid_j[J + 1 - j, 1])) {
-
+    if(grid_n[J + 1 - j, 1] < 1) {
       ## Refine 1D
-      tm1 <- array(AIRefine1D(array(M[[j + 1]][, , 1, ], dim = c(d, d, 2^j)), L[2], method = method, inverse = T, metric = metric),
-                              dim = c(d, d, 1, 2^(j + 1)))
-
-      ## Construct (correctly scaled) wavelet coefficients
-      if(!(metric == "Riemannian")){
-        D[[j + 1]] <- D.white[[j + 1]] <- array(c(sapply(1:2^(j + 1), function(i) 2^((-J0_2D - j)/2) *
-                                                  (M[[j + 2]][, , 1, i] - tm1[, , 1, i]))), dim = c(d, d, 1, 2^(j + 1)))
-      } else{
-        iSqrt_tm1 <- sapply(1:2^(j + 1), function(i) iSqrt(tm1[, , 1, i]), simplify = "array")
-        D[[j + 1]] <- array(c(sapply(1:2^(j + 1), function(i) 2^((-J0_2D - j)/2) *
-                                       Logm(tm1[, , 1, i], M[[j + 2]][, , 1, i]))), dim = c(d, d, 1, 2^(j + 1)))
-        D.white[[j + 1]] <- array(c(sapply(1:2^(j + 1), function(i) (iSqrt_tm1[, , i] %*% D[[j + 1]][, , 1, i]) %*%
-                                             iSqrt_tm1[, , i])), dim = c(d, d, 1, 2^(j + 1)))
-      }
-    } else if(is.na(grid_j[J + 1 - j, 2])) {
-
+      n_M <- dim(M[[j + 1]])[4]
+      L1 <- ifelse(order[2] > n_M, floor((n_M - 1) / 2), L[2])
+      tm1 <- impute_C(array(M[[j + 1]][, , 1, ], dim = c(d, d, 2^j)), W_1D[[min(L1 + 1, 5)]], L1, T, metric, method)
+      ## Compute (correctly scaled) wavelet coefficients
+      W <- wavCoeff_C(tm1, M[[j + 2]][, , 1, ], J0_2D + j, metric)
+      Dw[[j + 1]] <- array(W[, , 1:(2 * n_M)], dim = dim(M[[j + 2]]))
+      D[[j + 1]] <- array(W[, , (2 * n_M) + 1:(2 * n_M)], dim = dim(M[[j + 2]]))
+    } else if(grid_n[J + 1 - j, 2] < 1) {
       ## Refine 1D
-      tm1 <- array(AIRefine1D(array(M[[j + 1]][, , , 1], dim = c(d, d, 2^j)), L[1], method = method, inverse = T, metric = metric),
-                              dim = c(d, d, 2^(j + 1), 1))
-
-      ## Construct (correctly scaled) wavelet coefficients
-      if(!(metric == "Riemannian")){
-        D[[j + 1]] <- D.white[[j + 1]] <- array(c(sapply(1:2^(j + 1), function(i) 2^((-J0_2D - j)/2) *
-                                                           (M[[j + 2]][, , i, 1] - tm1[, , i, 1]))), dim = c(d, d, 2^(j + 1), 1))
-      } else{
-        iSqrt_tm1 <- sapply(1:2^(j + 1), function(i) iSqrt(tm1[, , i, 1]), simplify = "array")
-        D[[j + 1]] <- array(c(sapply(1:2^(j + 1), function(i) 2^((-J0_2D - j)/2) *
-                                       Logm(tm1[, , i, 1], M[[j + 2]][, , i, 1]))), dim = c(d, d, 2^(j + 1), 1))
-        D.white[[j + 1]] <- array(c(sapply(1:2^(j + 1), function(i) (iSqrt_tm1[, , i] %*% D[[j + 1]][, , i, 1]) %*%
-                                             iSqrt_tm1[, , i])), dim = c(d, d, 2^(j + 1), 1))
-      }
+      n_M <- dim(M[[j + 1]])[3]
+      L1 <- ifelse(order[1] > n_M, floor((n_M - 1) / 2), L[1])
+      tm1 <- impute_C(array(M[[j + 1]][, , , 1], dim = c(d, d, 2^j)), W_1D[[min(L1 + 1, 5)]], L1, T, metric, method)
+      ## Compute (correctly scaled) wavelet coefficients
+      W <- wavCoeff_C(tm1, M[[j + 2]][, , , 1], J0_2D + j, metric)
+      Dw[[j + 1]] <- array(W[, , 1:(2 * n_M)], dim = dim(M[[j + 2]]))
+      D[[j + 1]] <- array(W[, , (2 * n_M) + 1:(2 * n_M)], dim = dim(M[[j + 2]]))
     } else {
-
       ## Refine 2D
-      tm1 <- AIRefine2D(M[[j + 1]], L, method = method, metric = metric)
-      grid <- expand.grid(1:dim(tm1)[3], 1:dim(tm1)[4])
-
-      if(!(metric == "Riemannian")){
-        ## Euclidean wavelet coeff's
-        D[[j + 1]] <- D.white[[j + 1]] <- array(c(mapply(function(i1, i2) 2^(-j) * (M[[j + 2]][, , i1, i2] -
-                                                tm1[, , i1, i2]), grid$Var1, grid$Var2)), dim = c(d, d, dim(tm1)[3], dim(tm1)[4]))
-      } else{
-        ## Riemannian wavelet coeff's
-        iSqrt_tm1 <- array(apply(tm1, c(3, 4), function(tM) iSqrt(tM)), dim = c(d, d, dim(tm1)[3], dim(tm1)[4]))
-        D[[j + 1]] <- array(c(mapply(function(i1, i2) 2^(-j) * Logm(tm1[, , i1, i2], M[[j + 2]][, , i1, i2]),
-                                     grid$Var1, grid$Var2)), dim = c(d, d, dim(tm1)[3], dim(tm1)[4]))
-        D.white[[j + 1]] <- array(c(mapply(function(i1, i2) (iSqrt_tm1[, , i1, i2] %*% D[[j + 1]][, , i1, i2]) %*%
-                                             iSqrt_tm1[, , i1, i2], grid$Var1, grid$Var2)), dim = c(d, d, dim(tm1)[3], dim(tm1)[4]))
-      }
+      tm1 <- impute2D_R(M[[j + 1]], L, metric, method)
+      ## Compute (correctly scaled) wavelet coefficients
+      n_tM <- dim(tm1)[3] * dim(tm1)[4]
+      W <- wavCoeff_C(array(tm1, dim = c(d, d, n_tM)), array(M[[j + 2]], dim = c(d, d, n_tM)), 2 * j, metric)
+      Dw[[j + 1]] <- array(W[, , 1:n_tM], dim = dim(M[[j + 2]]))
+      D[[j + 1]] <- array(W[, , n_tM + 1:n_tM], dim = dim(M[[j + 2]]))
     }
-    tM[[j + 1]] <- tm1
-    names(D)[j + 1] <- names(D.white)[j + 1] <- paste0("D.scale", j)
-    if(progress){
-      utils::setTxtProgressBar(pb, round(100 * (j + 1) / (jmax + 1)))
-    }
+    names(D)[j + 1] <- names(Dw)[j + 1] <- paste0("D.scale", j)
   }
-  if(progress){
-    close(pb)
-  }
-  return(list(D = D, D.white = D.white, M0 = M[[1]]))
+  return(list(D = D, D.white = Dw, M0 = M[[1]]))
 }

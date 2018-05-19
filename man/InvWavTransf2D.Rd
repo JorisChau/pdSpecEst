@@ -4,8 +4,7 @@
 \alias{InvWavTransf2D}
 \title{Inverse average-interpolation 2D wavelet transform}
 \usage{
-InvWavTransf2D(D, M0, order = c(3, 3), jmax, metric = "Riemannian",
-  progress = T, ...)
+InvWavTransf2D(D, M0, order = c(3, 3), jmax, metric = "Riemannian", ...)
 }
 \arguments{
 \item{D}{a list of arrays containing the 2D pyramid of wavelet coefficients, where each array contains the
@@ -28,8 +27,6 @@ reconstructed. If \code{jmax} is not specified it is set equal to the resolution
 \item{metric}{the metric that the space of HPD matrices is equipped with. The default choice is \code{"Riemannian"},
 but this can also be one of: \code{"logEuclidean"}, \code{"Cholesky"}, \code{"rootEuclidean"} or
 \code{"Euclidean"}. The inverse intrinsic 2D AI wavelet transform fundamentally relies on the chosen metric.}
-
-\item{progress}{should a console progress bar be displayed? Defaults to \code{progress = T}.}
 
 \item{...}{additional arguments for internal use.}
 }

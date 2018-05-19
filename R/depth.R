@@ -155,21 +155,21 @@ pdDepth <- function(y = NULL, X, method = c("zonoid", "gdd", "spatial"), metric 
   if (method == "gdd") {
     if (!is.null(y)) {
       if (length(dim(X)) == 3) {
-        depth <- exp(-mean(sapply(1:S, function(s) pdDist(y, X[, , s], method = metric))))
+        depth <- exp(-mean(sapply(1:S, function(s) pdDist(y, X[, , s], metric = metric))))
       } else if (length(dim(X)) == 4) {
         depth <- exp(-mean(sapply(1:S, function(s) mean(sapply(1:n,
-                                            function(t) pdDist(y[, , t], X[, , t, s], method = metric))))))
+                                            function(t) pdDist(y[, , t], X[, , t, s], metric = metric))))))
       }
     } else {
       dist <- matrix(0, nrow = S, ncol = S)
       grid <- expand.grid(1:S, 1:S)
       grid <- grid[grid$Var1 > grid$Var2, ]
       if (length(dim(X)) == 3) {
-        dist[lower.tri(dist)] <- mapply(function(i, j) pdDist(X[, , i], X[, , j], method = metric),
+        dist[lower.tri(dist)] <- mapply(function(i, j) pdDist(X[, , i], X[, , j], metric = metric),
                                         grid$Var1, grid$Var2)
       } else if (length(dim(X)) == 4) {
         dist[lower.tri(dist)] <- mapply(function(i, j) mean(sapply(1:n,
-                                            function(t) pdDist(X[, , t, i], X[, , t, j], method = metric))),
+                                            function(t) pdDist(X[, , t, i], X[, , t, j], metric = metric))),
                                         grid$Var1, grid$Var2)
       }
       dist[upper.tri(dist)] <- t(dist)[upper.tri(dist)]

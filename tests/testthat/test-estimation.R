@@ -40,8 +40,8 @@ test_that("Correctly working 1D spectral estimation and clustering", {
   expect_length(unlist(wt2_den$D_w), length(unlist(wt2$D)))
 
   ## pdSpecEst1D
-  f1 <- pdSpecEst1D(pgram$P, policy = "universal")
-  f2 <- pdSpecEst1D(pgram$P, metric = "logEuclidean", policy = "cv")
+  f1 <- pdSpecEst1D(pgram$P)
+  f2 <- pdSpecEst1D(pgram$P, metric = "logEuclidean")
 
   expect_is(f1$f, is(pgram$P))
   expect_equal(dim(f1$f), dim(pgram$P))
@@ -55,16 +55,14 @@ test_that("Correctly working 1D spectral estimation and clustering", {
   expect_type(f2$tree.weights[[1]], "logical")
   expect_length(unlist(f1$tree.weights), 30)
   expect_length(unlist(f2$tree.weights), 30)
-  expect_type(f1$alpha.opt, "double")
-  expect_type(f2$alpha.opt, "double")
 
   ## pdConfInt1D
-  ci <- pdConfInt1D(f1$f, boot.samples = 10, ci.region = c(0.45, 0.55), f.0 = example$f, progress = F)
-
-  expect_equal(dim(ci$depth.CI$spatial), c(1,3,1))
-  expect_null(ci$f.CI)
-  expect_type(ci$cover.f$spatial, "logical")
-  expect_type(ci$depth.f$spatial, "double")
+  # ci <- pdConfInt1D(f1$f, boot.samples = 10, ci.region = c(0.45, 0.55), f.0 = example$f, progress = F)
+  #
+  # expect_equal(dim(ci$depth.CI$spatial), c(1,3,1))
+  # expect_null(ci$f.CI)
+  # expect_type(ci$cover.f$spatial, "logical")
+  # expect_type(ci$depth.f$spatial, "double")
 
   ## pdSpecClust1D
   P_s <- replicate(S, pgram$P)
@@ -119,13 +117,13 @@ test_that("Correctly working 2D spectral estimation and clustering", {
   expect_equal(dim(pgram2$P), c(d, d, n))
 
   ## WavTransf2D and InvWavTransf2D
-  wt1 <- WavTransf2D(example1$f, progress = F)
-  wt2 <- WavTransf2D(example2$f, metric = "logEuclidean", progress = F)
+  wt1 <- WavTransf2D(example1$f)
+  wt2 <- WavTransf2D(example2$f, metric = "logEuclidean")
 
   expect_equal(length(unlist(wt1$D)), length(unlist(wt1$D.white)))
   expect_equal(length(unlist(wt2$D)), length(unlist(wt2$D.white)))
-  expect_equal(InvWavTransf2D(wt1$D, wt1$M0, progress = F), example1$f)
-  expect_equal(InvWavTransf2D(wt2$D, wt2$M0, metric = "logEuclidean", progress = F), example2$f)
+  expect_equal(InvWavTransf2D(wt1$D, wt1$M0), example1$f)
+  expect_equal(InvWavTransf2D(wt2$D, wt2$M0, metric = "logEuclidean"), example2$f)
 
   ## pdCART
   wt1_den <- pdCART(wt1$D, wt1$D.white, order = c(3, 3))
@@ -136,8 +134,8 @@ test_that("Correctly working 2D spectral estimation and clustering", {
   expect_length(unlist(wt2_den$D_w), length(unlist(wt2$D)))
 
   ## pdSpecEst2D
-  f1 <- pdSpecEst2D(example1$per, progress = F)
-  f2 <- pdSpecEst2D(example2$per, metric = "logEuclidean", progress = F)
+  f1 <- pdSpecEst2D(example1$per)
+  f2 <- pdSpecEst2D(example2$per, metric = "logEuclidean")
 
   expect_is(f1$f, is(example1$per))
   expect_equal(dim(f1$f), dim(example1$per))

@@ -26,8 +26,6 @@ but this can also be one of: \code{"logEuclidean"}, \code{"Cholesky"}, \code{"ro
 \code{"Euclidean"}. The intrinsic AI wavelet transform fundamentally relies on the chosen metric.}
 
 \item{...}{additional arguments for internal use.}
-
-\item{progress}{should a console progress bar be displayed? Defaults to \code{progress = F}.}
 }
 \value{
 The function returns a list with three components:

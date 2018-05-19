@@ -18,7 +18,7 @@ test_that("Correctly working geometric tools", {
 
   expect_equal(pdMean(array(c(P1, P2), dim = c(d, d, 2))), Mid(P1, P2))
   expect_type(pdDist(P1, P2), "double")
-  expect_type(pdDist(P1, P2, method = "logEuclidean"), "double")
+  expect_type(pdDist(P1, P2, metric = "logEuclidean"), "double")
 
 })
 

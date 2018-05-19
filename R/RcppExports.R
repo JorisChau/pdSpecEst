@@ -9,8 +9,8 @@ pgram_C <- function(X, B, h, method) {
     .Call(`_pdSpecEst_pgram_C`, X, B, h, method)
 }
 
-Mid_w <- function(A, B, w) {
-    .Call(`_pdSpecEst_Mid_w`, A, B, w)
+Mid_w <- function(A, B, w, metric) {
+    .Call(`_pdSpecEst_Mid_w`, A, B, w, metric)
 }
 
 pdMean_C_approx <- function(M, mu) {
@@ -29,12 +29,20 @@ Euclid_Median_C <- function(M0, M, mu, maxit, reltol) {
     .Call(`_pdSpecEst_Euclid_Median_C`, M0, M, mu, maxit, reltol)
 }
 
-pdNeville_C <- function(P, X, x, method) {
-    .Call(`_pdSpecEst_pdNeville_C`, P, X, x, method)
+pdNeville_C <- function(P, X, x, metric) {
+    .Call(`_pdSpecEst_pdNeville_C`, P, X, x, metric)
 }
 
 impute_C <- function(M0, W, L, inverse, metric, method) {
     .Call(`_pdSpecEst_impute_C`, M0, W, L, inverse, metric, method)
+}
+
+wavPyr2D_C <- function(P, n1, n2, metric) {
+    .Call(`_pdSpecEst_wavPyr2D_C`, P, n1, n2, metric)
+}
+
+impute2D_C <- function(M0, W, n1, n2, L, metric, method) {
+    .Call(`_pdSpecEst_impute2D_C`, M0, W, n1, n2, L, metric, method)
 }
 
 #' Geodesic midpoint between HPD-matrices
@@ -85,6 +93,10 @@ wavCoeff_C <- function(M1, M0, j, metric) {
 
 reconstr_C <- function(M1, M0, Dj, j, nj, in_sample, L1, metric) {
     .Call(`_pdSpecEst_reconstr_C`, M1, M0, Dj, j, nj, in_sample, L1, metric)
+}
+
+reconstr2D_C <- function(M1, D, j, n, in_sample, metric) {
+    .Call(`_pdSpecEst_reconstr2D_C`, M1, D, j, n, in_sample, metric)
 }
 
 pdDist_C <- function(A, B, method) {
@@ -195,5 +207,9 @@ E_coeff_inv <- function(coeff) {
 
 T_coeff_inv <- function(coeff, y) {
     .Call(`_pdSpecEst_T_coeff_inv`, coeff, y)
+}
+
+Ptransf2D_C <- function(P, inverse, metric) {
+    .Call(`_pdSpecEst_Ptransf2D_C`, P, inverse, metric)
 }
 

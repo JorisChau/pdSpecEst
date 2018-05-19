@@ -33,8 +33,6 @@ but this can also be one of: \code{"logEuclidean"}, \code{"Cholesky"}, \code{"ro
 \code{"Euclidean"}. The inverse intrinsic AI wavelet transform fundamentally relies on the chosen metric.}
 
 \item{...}{additional arguments for internal use.}
-
-\item{progress}{should a console progress bar be displayed? Defaults to \code{progress = F}.}
 }
 \value{
 Returns a (\eqn{d, d, m})-dimensional array corresponding to a curve of length \eqn{m} of

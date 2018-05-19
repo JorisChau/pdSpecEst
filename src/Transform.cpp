@@ -278,3 +278,40 @@ arma::cx_mat T_coeff_inv(arma::vec coeff, arma::cx_mat y) {
 
 }
 
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export()]]
+
+arma::cx_cube Ptransf2D_C(arma::cx_cube P, bool inverse, std::string metric) {
+
+  // Set parameters
+  int d = P.n_rows;
+  int n = P.n_slices;
+  arma::cx_cube P1(d, d, n);
+
+  if(!inverse) {
+    // Transform according to metric
+    for(int i = 0; i < n; ++i) {
+      if(metric == "logEuclidean") {
+        P1.slice(i) = arma::logmat_sympd(P.slice(i));
+      }
+      else if(metric == "Cholesky") {
+        P1.slice(i) = arma::chol(P.slice(i));
+      }
+      else if(metric == "rootEuclidean") {
+        P1.slice(i) = arma::sqrtmat_sympd(P.slice(i));
+      }
+    }
+  } else {
+    // Transform back according to metric
+    for(int i = 0; i < n; ++i) {
+      if(metric == "logEuclidean") {
+        P1.slice(i) = arma::expmat_sym(P.slice(i));
+      }
+      else if(metric == "Cholesky" || metric == "rootEuclidean") {
+        P1.slice(i) = arma::trans(P.slice(i)) * P.slice(i);
+      }
+    }
+  }
+  return P1;
+}
+

@@ -58,7 +58,7 @@ pdDist <- function(A, B, metric = "Riemannian") {
 #' \code{'Cholesky'}, \code{'Euclidean'} or \code{'rootEuclidean'}. Defaults to \code{'Riemannian'}.
 #' @param grad_desc if \code{metric == "Riemannian"}, a logical value indicating if the
 #' gradient descent algorithm should be used, defaults to \code{FALSE}.
-#' @param max_iter maximum number of iterations in gradient descent algorithm, only used if
+#' @param maxit maximum number of iterations in gradient descent algorithm, only used if
 #' \code{isTRUE(grad_desc & metric == "Riemannian")}. Defaults to \code{1000}
 #' @param reltol optional tolerance parameter in gradient descent algorithm, only used if
 #' \code{isTRUE(grad_desc & metric == "Riemannian")}. Defaults to \code{1E-10}.
@@ -81,7 +81,7 @@ pdDist <- function(A, B, metric = "Riemannian") {
 #' @seealso \code{\link{Mid}}, \code{\link{pdMedian}}
 #'
 #' @export
-pdMean <- function(M, w, metric = "Riemannian", grad_desc = F, maxit = 1000, reltol, ...) {
+pdMean <- function(M, w, metric = "Riemannian", grad_desc = F, maxit = 1000, reltol) {
 
   if (!(isTRUE(is.array(M) & (dim(M)[1] == dim(M)[2]) & (length(dim(M)) == 3)))) {
     stop("Incorrect input dimensions for arguments: 'M',
@@ -138,7 +138,7 @@ pdMean <- function(M, w, metric = "Riemannian", grad_desc = F, maxit = 1000, rel
 #' @param w an \eqn{S}-dimensional nonnegative weight vector, such that \code{sum(w) = 1}.
 #' @param metric the distance measure, one of \code{'Riemannian'}, \code{'logEuclidean'},
 #' \code{'Cholesky'}, \code{'Euclidean'} or \code{'rootEuclidean'}. Defaults to \code{'Riemannian'}.
-#' @param max_iter maximum number of iterations in gradient descent algorithm. Defaults to \code{1000}
+#' @param maxit maximum number of iterations in gradient descent algorithm. Defaults to \code{1000}
 #' @param reltol optional tolerance parameter in gradient descent algorithm. Defaults to \code{1E-10}.
 #'
 #' @examples
@@ -158,7 +158,7 @@ pdMean <- function(M, w, metric = "Riemannian", grad_desc = F, maxit = 1000, rel
 #' @seealso \code{\link{pdMean}}
 #'
 #' @export
-pdMedian <- function(M, w, metric = "Riemannian", max_iter = 1000, reltol) {
+pdMedian <- function(M, w, metric = "Riemannian", maxit = 1000, reltol) {
 
   if (!(isTRUE(is.array(M) & (dim(M)[1] == dim(M)[2]) & (length(dim(M)) == 3)))) {
     stop("Incorrect input dimensions for arguments: 'M',

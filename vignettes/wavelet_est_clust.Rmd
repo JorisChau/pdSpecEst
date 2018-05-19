@@ -34,17 +34,6 @@ references:
   type: article-journal
   issued:
   year: 1997  
-- id: N96
-  title: 'Wavelet shrinkage using cross-validation'
-  author:
-  - family: Nason
-    given: G.P.
-  container-title: Journal of the Royal Statistical Society (Series B)
-  volume: 58
-  pages: 463-479
-  type: article-journal
-  issued:
-  year: 1996     
 - id: COvS17
   title: 'Data depth and rank-based tests for covariance and spectral density matrices'
   author:
@@ -208,7 +197,7 @@ str(f.hat)
 
 #### Nonlinear tree-structured wavelet thresholding
 
-The noise is removed by nonlinear tree-structured thresholding of the wavelet coefficients based on the trace of the whitened coefficients through minimization of a complexity penalized residual sum of squares (CPRESS) criterion via the fast tree-pruning algorithm in [@D97]. The sparsity parameter is set equal to `alpha` times the universal threshold, where the noise standard deviation (homogeneous across scales) of the traces of the whitened coefficients is determined via the median absolute deviation (MAD) of the coefficients at the finest wavelet scale. If the thresholding policy is set to `policy = 'universal'`, the sparsity parameter is set equal to the universal threshold. If the thresholding policy is set to `policy = 'cv'`, a data-adaptive sparsity parameter is determined via a more time-consuming two-fold cross-validation procedure as in [@N96] relying on the chosen metric for the space of HPD matrices. Note that the two-fold cross-validation procedure works best if the noisy HPD matrix-valued observations are (approximately) independent in the frequency domain.
+The noise is removed by nonlinear tree-structured thresholding of the wavelet coefficients based on the trace of the whitened coefficients through minimization of a complexity penalized residual sum of squares (CPRESS) criterion via the fast tree-pruning algorithm in [@D97]. The sparsity parameter is set equal to `alpha` times the universal threshold, where the noise standard deviation (homogeneous across scales) of the traces of the whitened coefficients is determined via the median absolute deviation (MAD) of the coefficients at the finest wavelet scale. Note that the two-fold cross-validation procedure works best if the noisy HPD matrix-valued observations are (approximately) independent in the frequency domain.
 
 #### Linear wavelet thresholding
 

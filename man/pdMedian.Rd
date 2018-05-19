@@ -4,7 +4,7 @@
 \alias{pdMedian}
 \title{Weighted intrinsic median of HPD matrices}
 \usage{
-pdMedian(M, w, metric = "Riemannian", max_iter = 1000, reltol)
+pdMedian(M, w, metric = "Riemannian", maxit = 1000, reltol)
 }
 \arguments{
 \item{M}{a \eqn{(d,d,S)}-dimensional array of Hermitian PD matrices.}
@@ -14,7 +14,7 @@ pdMedian(M, w, metric = "Riemannian", max_iter = 1000, reltol)
 \item{metric}{the distance measure, one of \code{'Riemannian'}, \code{'logEuclidean'},
 \code{'Cholesky'}, \code{'Euclidean'} or \code{'rootEuclidean'}. Defaults to \code{'Riemannian'}.}
 
-\item{max_iter}{maximum number of iterations in gradient descent algorithm. Defaults to \code{1000}}
+\item{maxit}{maximum number of iterations in gradient descent algorithm. Defaults to \code{1000}}
 
 \item{reltol}{optional tolerance parameter in gradient descent algorithm. Defaults to \code{1E-10}.}
 }

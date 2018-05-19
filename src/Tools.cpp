@@ -59,12 +59,6 @@ double NormF(arma::cx_mat M) {
   return arma::norm(M, "fro");
 }
 
-// double RiemmDist(arma::cx_mat A, arma::cx_mat B) {
-//   arma::cx_mat A1 = arma::inv_sympd(arma::sqrtmat_sympd(A));
-//   arma::cx_mat A2 = arma::logmat_sympd(A1 * B * A1);
-//   return arma::norm(A2, "fro");
-// }
-
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export()]]
 
@@ -193,6 +187,43 @@ arma::cx_cube reconstr_C(arma::cx_cube M1, arma::cx_cube M0, arma::cx_cube Dj, d
     }
     else {
         M2.slice(2 * k) = 2 * M0.slice(k + L1) - M2.slice(2 * k + 1);
+    }
+  }
+  return M2;
+}
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export()]]
+
+arma::cx_cube reconstr2D_C(arma::cx_cube M1, arma::cx_cube D, double j,
+                           arma::ivec n, bool in_sample, std::string metric) {
+  // Initialize variables
+  int d = M1.n_cols;
+  arma::cx_cube M2(d, d, n(0) * n(1));
+  arma::cx_mat Msqrt(d, d);
+  arma::cx_mat Misqrt(d, d);
+
+  for(int k1 = 0; k1 < n(0); ++k1) {
+    for(int k2 = 0; k2 < n(1); ++k2) {
+      // Reconstruct midpoints from non-zero wav. coeffs
+      if((arma::norm(D.slice(k2 * n(0) + k1), "inf") > 1E-10) && in_sample) {
+        if(metric == "Riemannian") {
+        // Riemannian metric
+        Msqrt = arma::sqrtmat_sympd(M1.slice(k2 * n(0) + k1));
+        Misqrt = arma::inv_sympd(Msqrt);
+        M2.slice(k2 * n(0) + k1) = Msqrt * arma::expmat_sym(std::pow((double)2, (double)(j/2)) *
+          Misqrt * D.slice(k2 * n(0) + k1) * Misqrt) * Msqrt;
+        }
+        else {
+          // Euclidean metric
+          M2.slice(k2 * n(0) + k1) = std::pow((double)2, (double)(j/2)) * D.slice(k2 * n(0) + k1) +
+            M1.slice(k2 * n(0) + k1);
+        }
+      }
+      else {
+        // Reconstruct midpoints from zero wav. coeffs
+        M2.slice(k2 * n(0) + k1) = M1.slice(k2 * n(0) + k1);
+      }
     }
   }
   return M2;
