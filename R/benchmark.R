@@ -206,29 +206,6 @@ H.coeff <- function(H, inverse = F){
   return(HH)
 }
 
-## Iterative Cholesky with inverse bias-correction (Dai & Guo, 2004)
-Chol <- function(R, inverse = F, bias.corr = T){
-  d <- dim(R)[1]
-  S <- matrix(0, nrow = d, ncol = d)
-  if(!inverse){
-    S[1, 1] <- sqrt(R[1, 1])
-    for(k in 1:(d - 1)){
-      S[k + 1, 1:k] <- t(R[k + 1, 1:k]) %*% solve(t(Conj(S[1:k, 1:k])))
-      S[k + 1, k + 1] <- sqrt(R[k + 1, k + 1] - t(R[k + 1, 1:k]) %*% solve(R[1:k, 1:k]) %*% Conj(R[k + 1, 1:k]))
-    }
-  } else {
-    b <- (if(bias.corr) gamma(d - 1:d + 3/2) / (sqrt(d) * gamma(d - 1:d + 1)) else rep(1, d))
-    S[1, 1] <- R[1, 1]^2 / b[1]^2
-    for(k in 1:(d - 1)){
-      S[k + 1, 1:k] <- (t(R[k + 1, 1:k]) %*% solve(R[1:k, 1:k])) %*% S[1:k, 1:k]
-      S[1:k, k + 1] <- Conj(S[k + 1, 1:k])
-      S[k + 1, k + 1] <- R[k + 1, k + 1]^2 / b[k + 1]^2 + (t(S[k + 1, 1:k]) %*%
-                                                             solve(S[1:k, 1:k])) %*% Conj(S[k + 1, 1:k])
-    }
-  }
-  return(S)
-}
-
 ## Orthonormal basis expansion Cholesky matrix
 E_chol <- function(R, inverse = F){
   d <- (if(!inverse) dim(R)[1] else round(sqrt(length(R))))

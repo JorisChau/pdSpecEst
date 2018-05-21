@@ -104,10 +104,10 @@ pdDepth <- function(y = NULL, X, method = c("zonoid", "gdd", "spatial"), metric 
         X.coeff <- X.coeff[X.rows, , drop = F]
         y.coeff <- (if(point) E_coeff(Logm(diag(d), y))[X.rows] else X.coeff)
       } else if(metric == "Cholesky"){
-        X.coeff <- apply(X, 3, function(X) E_chol(Chol(X)))
+        X.coeff <- apply(X, 3, function(X) E_chol(Chol_C(X, F, F)))
         X.rows <- apply(X.coeff, 1, function(X){isTRUE(diff(range(X)) > .Machine$double.eps)})
         X.coeff <- X.coeff[X.rows, , drop = F]
-        y.coeff <- (if(point) E_chol(Chol(y))[X.rows] else X.coeff)
+        y.coeff <- (if(point) E_chol(Chol_C(y, F, F))[X.rows] else X.coeff)
       } else if(metric == "Euclidean"){
         X.coeff <- apply(X, 3, function(X) E_coeff(X))
         X.rows <- apply(X.coeff, 1, function(X){isTRUE(diff(range(X)) > .Machine$double.eps)})
@@ -192,8 +192,8 @@ pdDepth <- function(y = NULL, X, method = c("zonoid", "gdd", "spatial"), metric 
           X.coeff <- apply(X, 3, function(X) E_coeff(Logm(diag(d), X)))
           y.coeff <- (if(point) E_coeff(Logm(diag(d), y)) else X.coeff)
         } else if(metric == "Cholesky"){
-          X.coeff <- apply(X, 3, function(X) E_chol(Chol(X)))
-          y.coeff <- (if(point) E_chol(Chol(y)) else X.coeff)
+          X.coeff <- apply(X, 3, function(X) E_chol(Chol_C(X, F, F)))
+          y.coeff <- (if(point) E_chol(Chol_C(y, F, F)) else X.coeff)
         } else if(metric == "Euclidean"){
           X.coeff <- apply(X, 3, function(X) E_coeff(X))
           y.coeff <- (if(point) E_coeff(y) else X.coeff)

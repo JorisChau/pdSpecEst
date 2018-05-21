@@ -71,8 +71,8 @@ Sqrt <- function(M) {
     .Call(`_pdSpecEst_Sqrt`, M)
 }
 
-Chol_C <- function(M) {
-    .Call(`_pdSpecEst_Chol_C`, M)
+Chol_C <- function(M, bias, inverse) {
+    .Call(`_pdSpecEst_Chol_C`, M, bias, inverse)
 }
 
 iSqrt <- function(M) {
@@ -101,6 +101,10 @@ reconstr2D_C <- function(M1, D, j, n, in_sample, metric) {
 
 pdDist_C <- function(A, B, method) {
     .Call(`_pdSpecEst_pdDist_C`, A, B, method)
+}
+
+Ptransf2D_C <- function(P, inverse, chol_bias, metric) {
+    .Call(`_pdSpecEst_Ptransf2D_C`, P, inverse, chol_bias, metric)
 }
 
 #' Exponential map
@@ -207,9 +211,5 @@ E_coeff_inv <- function(coeff) {
 
 T_coeff_inv <- function(coeff, y) {
     .Call(`_pdSpecEst_T_coeff_inv`, coeff, y)
-}
-
-Ptransf2D_C <- function(P, inverse, metric) {
-    .Call(`_pdSpecEst_Ptransf2D_C`, P, inverse, metric)
 }
 

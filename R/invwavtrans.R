@@ -59,6 +59,7 @@ InvWavTransf1D <- function(D, M0, order = 5, jmax, periodic = F, metric = "Riema
   dots = list(...)
   return_val = (if(is.null(dots$return_val)) "manifold" else dots$return_val)
   method = (if(is.null(dots$method)) "fast" else dots$method)
+  chol_bias = (if(is.null(dots$chol_bias)) F else dots$chol_bias)
   if (!(order %% 2 == 1)) {
     warning("Refinement order should be an odd integer, by default set to 5")
     order = 5
@@ -93,7 +94,7 @@ InvWavTransf1D <- function(D, M0, order = 5, jmax, periodic = F, metric = "Riema
   ## Transform back to manifold
   if(return_val == "manifold") {
     if(metric == "logEuclidean" | metric == "Cholesky" | metric == "rootEuclidean") {
-      m1 <- Ptransf2D_C(m1, T, metric)
+      m1 <- Ptransf2D_C(m1, T, chol_bias, metric)
     }
   }
   return((if(periodic) m1[, , L_round + 1:2^J] else m1))
@@ -157,6 +158,7 @@ InvWavTransf2D <- function(D, M0, order = c(3, 3), jmax, metric = "Riemannian", 
   dots <- list(...)
   return_val <- (if(is.null(dots$return_val)) "manifold" else dots$return_val)
   method <- (if(is.null(dots$method)) "fast" else dots$method)
+  chol_bias <- (if(is.null(dots$chol_bias)) F else dots$chol_bias)
   if (!isTRUE((order[1] %% 2 == 1) & (order[2] %% 2 == 1))) {
     warning("Refinement orders in both directions should be odd integers, by default set to c(5,5).")
     order <- c(3, 3)
@@ -215,7 +217,7 @@ InvWavTransf2D <- function(D, M0, order = c(3, 3), jmax, metric = "Riemannian", 
   ## Transform back to manifold
   if(return_val == "manifold"){
     if(metric == "logEuclidean" | metric == "Cholesky" | metric == "rootEuclidean") {
-      m1 <- array(Ptransf2D_C(array(m1, dim = c(d, d, dim(m1)[3] * dim(m1)[4])), T, metric), dim = dim(m1))
+      m1 <- array(Ptransf2D_C(array(m1, dim = c(d, d, dim(m1)[3] * dim(m1)[4])), T, chol_bias, metric), dim = dim(m1))
     }
   }
 

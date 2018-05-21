@@ -96,7 +96,8 @@ rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
 #' the example spectral matrix and complex normal random variates.
 #'
 #' @param n number of time series observations to be generated.
-#' @param example the example spectral matrix, one of \code{'heaviSine'}, \code{'bumps'}, \code{'two-cats'} or \code{'gaussian'}.
+#' @param example the example spectral matrix, one of \code{'heaviSine'}, \code{'bumps'}, \code{'two-cats'}, \code{'gaussian'} or
+#'        \code{'mix-gaussian'}.
 #' @param ... additional arguments passed on to \code{\link{pdPgram}}.
 #'
 #' @return Returns a list with four components:
@@ -118,17 +119,17 @@ rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
 #' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
 #'
 #' @export
-rExamples <- function(n, example = c("heaviSine", "bumps", "two-cats", "gaussian"), ...){
+rExamples <- function(n, example = c("heaviSine", "bumps", "two-cats", "gaussian", "mix-gaussian"), ...){
 
   ## Set variables
-  example = match.arg(example, c("heaviSine", "bumps", "two-cats", "gaussian"))
+  example = match.arg(example, c("heaviSine", "bumps", "two-cats", "gaussian", "mix-gaussian"))
   if(n %% 2 != 0){
     warning("'n' is odd and cannot be divided by 2, instead 'n' is replaced by 'n + 1'")
     n = n + 1
   }
   m = n/2
-  d = ifelse(example == "gaussian", 2, 3)
   dots = list(...)
+  d = (if(example == "gaussian") 2 else if(example == "mix-gaussian" & !is.null(dots$d)) dots$d else 3)
   B = (if(is.null(dots$B)) d else dots$B)
   if(B < d){
     warning("The number of tapers 'B' is smaller than the dimension of the time series 'ncol(X)'; the periodogram matrix
@@ -139,7 +140,7 @@ rExamples <- function(n, example = c("heaviSine", "bumps", "two-cats", "gaussian
   breaks = (if(is.null(dots$breaks)) 2 else dots$breaks)
   v0 = (if(is.null(dots$v0)) NULL else dots$v0)
   v1 = (if(is.null(dots$v1)) NULL else dots$v1)
-  x = seq(0, 1, length.out = n / 2)
+  x = seq(0, 1, length.out = m)
 
   if(example == "heaviSine"){
     P0 <- sapply(x, function(t) H.coeff(sin(HeaviSine[2, ] * pi * t + HeaviSine[1, ]), inverse = T), simplify = "array")
@@ -172,12 +173,21 @@ rExamples <- function(n, example = c("heaviSine", "bumps", "two-cats", "gaussian
     P <- sapply(1:m, function(i) Expm(diag(3), P0[,,i]), simplify = "array")
   } else if(example == "gaussian"){
     v0 <- c(7.21935, 13.05307, 12.70734, 14.73554)
-    P0 <- sapply(x, function(t) H.coeff(v0/sqrt(2*pi) * exp(-((t - 0.5)/0.3)^2/2), inverse = T)
-                                            , simplify = "array")
+    P0 <- sapply(x, function(t) H.coeff(v0/sqrt(2*pi) * exp(-((t - 0.5)/0.3)^2/2), inverse = T), simplify = "array")
     P <- sapply(1:m, function(i) Expm(diag(2, d), P0[, , i]), simplify = "array")
+  } else if(example == "mix-gaussian"){
+    x <- seq(-pi, pi, length.out = m)
+    pars <- list(mu = runif(4, min = -3, max = 3), sd = abs(rnorm(4, sd = 1)),
+                 w = abs(rnorm(4)), w.comp = sapply(1:4, function(i) rnorm(d^2, mean = 1)))
+    pars$w <- pars$w / sum(pars$w)
+    P0 <- sapply(1:4, function(i) pars$w[i] * sapply(x, function(t) H.coeff(pars$w.comp[,i] * pars$sd[i]/sqrt(2*pi) *
+                        exp(-(t - pars$mu[i])^2/(2*pars$sd[i]^2)), inverse = T), simplify = "array"), simplify = "array")
+    P1 <- apply(P0, c(1,2,3), sum)
+    P <- sapply(1:m, function(i) Expm(0.25 * diag(d), P1[, , i]), simplify = "array")
+    P <- P / (0.5*mean(sapply(1:m, function(i) NormF(P[,,i]))))
   }
 
-  P.sqrt <- sapply(1:m, function(i) Sqrt(P[, , i]), simplify = "array")
+  P.sqrt <- Ptransf2D_C(P, F, F, "rootEuclidean")
 
   ## Generate time series via Cramer representation
   chi <- matrix(nrow = d, ncol = 2 * m)

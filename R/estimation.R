@@ -74,8 +74,8 @@ pdSpecEst1D <- function(P, order = 5, metric = "Riemannian", alpha = 1, return =
   return.D = (if(is.null(dots$return.D)) NA else dots$return.D)
 
   ## Wishart bias-correction
-  P <- (if(isTRUE((metric == "Riemannian" | metric == "logEuclidean") & bias.corr)) {
-          B * exp(-1/d * sum(digamma(B - (d - 1:d)))) * P } else P)
+  P <- (if((metric == "Riemannian" | metric == "logEuclidean") & bias.corr) {
+    B * exp(-1/d * sum(digamma(B - (d - 1:d)))) * P } else P)
 
   ## (1) Transform data to wavelet domain
   coeff <- WavTransf1D(P, order, jmax = jmax, periodic = periodic, metric = metric, method = method)
@@ -87,7 +87,7 @@ pdSpecEst1D <- function(P, order = 5, metric = "Riemannian", alpha = 1, return =
   ## (3) Transform back to HPD space
   f <- (if(return == "f"){
     InvWavTransf1D(coeff.thresh$D_w, coeff$M0, order = order, jmax = J.out, periodic = periodic,
-                   metric = metric, method = method)
+                   metric = metric, method = method, chol_bias = bias.corr)
   } else NULL)
 
   ## Return whitened coeff's or not
@@ -193,7 +193,7 @@ pdSpecEst2D <- function(P, order = c(3, 3), metric = "Riemannian", alpha = 1, re
   ## (3) Transform back to HPD space
   f <- (if(return == "f"){
     InvWavTransf2D(coeff.opt$D_w, coeff$M0, order = order, jmax = J.out, metric = metric,
-                   method = method, return_val = return_val)
+                   method = method, return_val = return_val, chol_bias = bias.corr)
   } else NULL)
 
   ## Return whitened coeff's or not
@@ -201,7 +201,7 @@ pdSpecEst2D <- function(P, order = c(3, 3), metric = "Riemannian", alpha = 1, re
     res <- list(f = f, D = coeff.opt$D_w, M0 = coeff$M0, tree.weights = coeff.opt$w, D.raw = coeff$D)
   } else{
     res <- list(f = f, D = coeff.opt$D_w, M0 = coeff$M0, tree.weights = coeff.opt$w, D.raw = coeff$D,
-                D.white = coeff.opt$D.white_w)
+                D.white = coeff.opt$D.white_w, D.raw_white = coeff$D.white)
   }
   return(res)
 }

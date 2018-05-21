@@ -4,12 +4,14 @@
 \alias{rExamples}
 \title{Several example spectral matrices}
 \usage{
-rExamples(n, example = c("heaviSine", "bumps", "two-cats", "gaussian"), ...)
+rExamples(n, example = c("heaviSine", "bumps", "two-cats", "gaussian",
+  "mix-gaussian"), ...)
 }
 \arguments{
 \item{n}{number of time series observations to be generated.}
 
-\item{example}{the example spectral matrix, one of \code{'heaviSine'}, \code{'bumps'}, \code{'two-cats'} or \code{'gaussian'}.}
+\item{example}{the example spectral matrix, one of \code{'heaviSine'}, \code{'bumps'}, \code{'two-cats'}, \code{'gaussian'} or
+\code{'mix-gaussian'}.}
 
 \item{...}{additional arguments passed on to \code{\link{pdPgram}}.}
 }

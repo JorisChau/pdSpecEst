@@ -109,19 +109,17 @@ pdMean <- function(M, w, metric = "Riemannian", grad_desc = F, maxit = 1000, rel
       }
     } else {
       ## Transform
-      M1 <- switch(metric,
-                   logEuclidean = sapply(1:dim(M)[3], function(i) Logm(diag(d), M[, , i]), simplify = "array"),
-                   Cholesky = sapply(1:dim(M)[3], function(i) Chol_C(M[, , i]), simplify = "array"),
-                   rootEuclidean = sapply(1:dim(M)[3], function(i) Sqrt(M[, , i]), simplify = "array"),
-                   Euclidean = M)
+      if(metric %in% c("logEuclidean", "Cholesky", "rootEuclidean")) {
+        M <- Ptransf2D_C(M, F, F, metric)
+      }
       ## Euclidean mean
-      Mean0 <- apply(sweep(M1, 3, w, "*"), c(1, 2), sum)
+      Mean <- apply(sweep(M, 3, w, "*"), c(1, 2), sum)
       ## Transform back
       Mean <- switch(metric,
-                     logEuclidean = Expm(diag(d), Mean0),
-                     Cholesky = t(Conj(Mean0)) %*% Mean0,
-                     rootEuclidean = t(Conj(Mean0)) %*% Mean0,
-                     Euclidean = Mean0)
+                       logEuclidean = Expm(diag(d), Mean),
+                       Cholesky = Chol_C(Mean, F, T),
+                       rootEuclidean = t(Conj(Mean)) %*% Mean,
+                       Euclidean = Mean)
     }
   }
   return(Mean)
@@ -184,21 +182,19 @@ pdMedian <- function(M, w, metric = "Riemannian", maxit = 1000, reltol) {
       Med <- pdMedian_C(Med0, M, w, round(maxit), reltol)
     } else {
       ## Transform
-      M1 <- switch(metric,
-                   logEuclidean = sapply(1:dim(M)[3], function(i) Logm(diag(d), M[, , i]), simplify = "array"),
-                   Cholesky = sapply(1:dim(M)[3], function(i) Chol_C(M[, , i]), simplify = "array"),
-                   rootEuclidean = sapply(1:dim(M)[3], function(i) Sqrt(M[, , i]), simplify = "array"),
-                   Euclidean = M)
+      if(metric %in% c("logEuclidean", "Cholesky", "rootEuclidean")) {
+        M <- Ptransf2D_C(M, F, F, metric)
+      }
       ## Initial estimate
-      Med0 <- apply(sweep(M1, 3, w, "*"), c(1, 2), sum)
+      Med0 <- apply(sweep(M, 3, w, "*"), c(1, 2), sum)
       ## Euclidean Weiszfeld algorithm
-      Med1 <- Euclid_Median_C(Med0, M1, w, round(maxit), reltol)
+      Med <- Euclid_Median_C(Med0, M, w, round(maxit), reltol)
       ## Transform back
       Med <- switch(metric,
-                    logEuclidean = Expm(diag(d), Med1),
-                    Cholesky = t(Conj(Med1)) %*% Med1,
-                    rootEuclidean = t(Conj(Med1)) %*% Med1,
-                    Euclidean = Med1)
+                     logEuclidean = Expm(diag(d), Med),
+                     Cholesky = Chol_C(Med, F, T),
+                     rootEuclidean = t(Conj(Med)) %*% Med,
+                     Euclidean = Med)
     }
   }
   return(Med)

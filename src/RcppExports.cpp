@@ -190,13 +190,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // Chol_C
-arma::cx_mat Chol_C(arma::cx_mat M);
-RcppExport SEXP _pdSpecEst_Chol_C(SEXP MSEXP) {
+arma::cx_mat Chol_C(arma::cx_mat M, bool bias, bool inverse);
+RcppExport SEXP _pdSpecEst_Chol_C(SEXP MSEXP, SEXP biasSEXP, SEXP inverseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::cx_mat >::type M(MSEXP);
-    rcpp_result_gen = Rcpp::wrap(Chol_C(M));
+    Rcpp::traits::input_parameter< bool >::type bias(biasSEXP);
+    Rcpp::traits::input_parameter< bool >::type inverse(inverseSEXP);
+    rcpp_result_gen = Rcpp::wrap(Chol_C(M, bias, inverse));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -298,6 +300,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// Ptransf2D_C
+arma::cx_cube Ptransf2D_C(arma::cx_cube P, bool inverse, bool chol_bias, std::string metric);
+RcppExport SEXP _pdSpecEst_Ptransf2D_C(SEXP PSEXP, SEXP inverseSEXP, SEXP chol_biasSEXP, SEXP metricSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cx_cube >::type P(PSEXP);
+    Rcpp::traits::input_parameter< bool >::type inverse(inverseSEXP);
+    Rcpp::traits::input_parameter< bool >::type chol_bias(chol_biasSEXP);
+    Rcpp::traits::input_parameter< std::string >::type metric(metricSEXP);
+    rcpp_result_gen = Rcpp::wrap(Ptransf2D_C(P, inverse, chol_bias, metric));
+    return rcpp_result_gen;
+END_RCPP
+}
 // Expm
 arma::cx_mat Expm(arma::cx_mat P, arma::cx_mat H);
 RcppExport SEXP _pdSpecEst_Expm(SEXP PSEXP, SEXP HSEXP) {
@@ -381,19 +397,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// Ptransf2D_C
-arma::cx_cube Ptransf2D_C(arma::cx_cube P, bool inverse, std::string metric);
-RcppExport SEXP _pdSpecEst_Ptransf2D_C(SEXP PSEXP, SEXP inverseSEXP, SEXP metricSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cx_cube >::type P(PSEXP);
-    Rcpp::traits::input_parameter< bool >::type inverse(inverseSEXP);
-    Rcpp::traits::input_parameter< std::string >::type metric(metricSEXP);
-    rcpp_result_gen = Rcpp::wrap(Ptransf2D_C(P, inverse, metric));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_pdSpecEst_ARMA", (DL_FUNC) &_pdSpecEst_ARMA, 4},
@@ -409,7 +412,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pdSpecEst_impute2D_C", (DL_FUNC) &_pdSpecEst_impute2D_C, 7},
     {"_pdSpecEst_Mid", (DL_FUNC) &_pdSpecEst_Mid, 2},
     {"_pdSpecEst_Sqrt", (DL_FUNC) &_pdSpecEst_Sqrt, 1},
-    {"_pdSpecEst_Chol_C", (DL_FUNC) &_pdSpecEst_Chol_C, 1},
+    {"_pdSpecEst_Chol_C", (DL_FUNC) &_pdSpecEst_Chol_C, 3},
     {"_pdSpecEst_iSqrt", (DL_FUNC) &_pdSpecEst_iSqrt, 1},
     {"_pdSpecEst_NormF", (DL_FUNC) &_pdSpecEst_NormF, 1},
     {"_pdSpecEst_wavPyr_C", (DL_FUNC) &_pdSpecEst_wavPyr_C, 5},
@@ -417,6 +420,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pdSpecEst_reconstr_C", (DL_FUNC) &_pdSpecEst_reconstr_C, 8},
     {"_pdSpecEst_reconstr2D_C", (DL_FUNC) &_pdSpecEst_reconstr2D_C, 6},
     {"_pdSpecEst_pdDist_C", (DL_FUNC) &_pdSpecEst_pdDist_C, 3},
+    {"_pdSpecEst_Ptransf2D_C", (DL_FUNC) &_pdSpecEst_Ptransf2D_C, 4},
     {"_pdSpecEst_Expm", (DL_FUNC) &_pdSpecEst_Expm, 2},
     {"_pdSpecEst_Logm", (DL_FUNC) &_pdSpecEst_Logm, 2},
     {"_pdSpecEst_ParTrans", (DL_FUNC) &_pdSpecEst_ParTrans, 3},
@@ -424,7 +428,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pdSpecEst_T_coeff", (DL_FUNC) &_pdSpecEst_T_coeff, 2},
     {"_pdSpecEst_E_coeff_inv", (DL_FUNC) &_pdSpecEst_E_coeff_inv, 1},
     {"_pdSpecEst_T_coeff_inv", (DL_FUNC) &_pdSpecEst_T_coeff_inv, 2},
-    {"_pdSpecEst_Ptransf2D_C", (DL_FUNC) &_pdSpecEst_Ptransf2D_C, 3},
     {NULL, NULL, 0}
 };
 

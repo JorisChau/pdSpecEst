@@ -193,7 +193,7 @@ WavTransf2D <- function(P, order = c(3, 3), jmax, metric = "Riemannian", ...) {
 
   ## Transform surface
   if(metric == "logEuclidean" | metric == "Cholesky" | metric == "rootEuclidean") {
-    P <- array(Ptransf2D_C(array(P, dim = c(d, d, dim(P)[3] * dim(P)[4])), F, metric), dim = dim(P))
+    P <- array(Ptransf2D_C(array(P, dim = c(d, d, dim(P)[3] * dim(P)[4])), F, F, metric), dim = dim(P))
   }
 
   ## Construct 2D midpoint pyramid
