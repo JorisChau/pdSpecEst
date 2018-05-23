@@ -27,12 +27,12 @@ arma::mat ARMA(arma::cube Phi, arma::cube Theta, arma::mat Z, int len) {
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export()]]
 
-arma::cx_cube pgram_C(arma::cx_mat X, int B, arma::cx_mat h, std::string method) {
+arma::cx_cube pgram_C(arma::cx_mat X, int B, arma::cx_mat h, std::string method, bool is_2D) {
   // Compute fast periodogram
   try{
     int d = X.n_cols;
     int n = X.n_rows;
-    if(method == "bartlett"){
+    if(method == "bartlett" && !is_2D){
       // Bartlett averaged periodogram
       int n_B = n / B;
       int m_B = n_B / 2;
@@ -52,7 +52,13 @@ arma::cx_cube pgram_C(arma::cx_mat X, int B, arma::cx_mat h, std::string method)
     }
     else if(method == "multitaper"){
       // DPSS multitaper periodogram
-      int m = n / 2;
+      int m;
+      if(!is_2D) {
+        m = n / 2;
+      }
+      else {
+        m = n;
+      }
       arma::cx_mat dft(m, d);
       arma::cx_mat dft_t(m, d);
       arma::cx_cube per = arma::zeros<arma::cx_cube>(d, d, m);

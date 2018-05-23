@@ -77,7 +77,7 @@ pdPgram <- function(X, B, method = c("multitaper", "bartlett"), bias.corr = F, n
               bartlett = matrix(0, 1, 1),
               multitaper = multitaper::dpss(n, B, nw = nw, returnEigenvalues = F)$v * sqrt(n))
   ## Compute periodogram
-  P <- pgram_C(X, B, h, method)
+  P <- pgram_C(X, B, h, method, F)
   ## Bias-correction
   bias <- ifelse(bias.corr, B * exp(-1/d * sum(digamma(B - (d - 1:d)))), 1)
 
@@ -164,67 +164,43 @@ pdPgram2D <- function(X, B, tf.grid, method = c("dpss", "hermite"), nw = pi, bia
     B = d
   }
   if(B < d){
-    warning("The number of tapers 'B' is smaller than the dimension of the time series 'ncol(X)'; the periodogram matrix
-            is not positive definite!")
+    warning("The number of tapers 'B' is smaller than the dimension of the time series 'ncol(X)';
+             the periodogram matrix is not positive definite!")
   }
+  L = ifelse(missing(tf.grid), 2^round(log2(sqrt(n))), length(tf.grid$time))
+  m = 2 * floor(n / (2 * L))
   if(missing(tf.grid)){
-    tf.grid = list(time = seq(2^round(log2(sqrt(n))) + 1, n - 2^round(log2(sqrt(n))) - 1,
-                              length = 2^round(log2(sqrt(n))))/n,
-                   freq = seq(2^round(log2(sqrt(n))) + 1, n - 2^round(log2(sqrt(n))) - 1,
-                              length = 2^round(log2(sqrt(n))))/(2*n))
+    tf.grid = list(time = seq(L + 1, n - L - 1, length = L)/n, freq = pi * 0:(m - 1) / m)
   }
-  L = length(tf.grid$time)
-  x = head(seq(0, 1, len = n + 1), -1)
-  bias.corr = ifelse(bias.corr, B * exp(-1/d * sum(digamma(B - (d - 1:d)))), 1)
-
-  ## Periodogram matrix pointwise in time
-  Per_t <- function(Y){
-    dft <- 1/sqrt(nrow(Y)) * mvfft(Y)
-    return(sapply(ceiling(tf.grid$freq * nrow(Y)), function(i) dft[i, ] %*% t(Conj(dft[i, ])), simplify = "array"))
-  }
+  bias.corr = ifelse(isTRUE(bias.corr & B >= d), B * exp(-1/d * sum(digamma(B - (d - 1:d)))), 1)
 
   ## Taper weights
   if(method == "dpss"){
-    h <- multitaper::dpss(2 * floor(n / (2 * L)), B, nw, returnEigenvalues = F)$v * sqrt(2 * floor(n / (2 * L)))
+    ## DPSS tapers
+    h <- multitaper::dpss(m, B, nw, returnEigenvalues = F)$v * sqrt(m)
   } else if(method == "hermite"){
-
-    ## Hermite functions
+    ## Hermite tapers
     Hermite <- function(k, t){
-      Herm_poly <- function(ti){
+      res <- numeric(length(t))
+      for(ti in t){
+        ## Hermite polynomials
         H <- numeric(k + 1)
         for(i in 0:k){
-          if(identical(i, as.integer(0))){
-            H[i + 1] <- 1
-          } else if(identical(i, as.integer(1))){
-            H[i + 1] <- 2 * ti
-          } else{
-            H[i + 1] <- 2 * ti * H[i] - 2 * (i - 1) * H[i - 1]
-          }
+          H[i + 1] <- (if(i == 0) 1 else if(i == 1) 2 * ti else 2 * ti * H[i] - 2 * (i - 1) * H[i - 1])
         }
-        H[k + 1]
+        res[which(t == ti)] <- exp(-ti^2 / 2) * H[k + 1] / sqrt(sqrt(pi) * 2^k * factorial(k))
       }
-      sapply(t, function(ti) exp(-ti^2 / 2) * Herm_poly(ti) / sqrt(sqrt(pi) * 2^k * factorial(k)))
+      return(res)
     }
-
-    h0 <- sapply(0:(B-1), function(b) Hermite(b, seq(-nw, nw, length = 2 * floor(n / (2 * L)))))
+    h0 <- sapply(0:(B-1), function(b) Hermite(b, seq(-nw, nw, length = m)))
     norm.h0 <- sqrt(mean(h0[, 1]^2))
     h <- apply(h0, 2, function(h.col) h.col / norm.h0)
   }
 
   ## Sliding dpss or hermite multitaper
-  Per <- array(dim = c(d, d, length(tf.grid$freq), length(tf.grid$time)))
-  pb <- utils::txtProgressBar(min = 0, max = 100, style = 3)
-  for(ti in tf.grid$time){
-    Per[,,,which(tf.grid$time == ti)] <- bias.corr * apply(sapply(1:B, function(b) 1/(2 * pi) *
-                               Per_t(h[, b] * X[(round(ti * n)  - floor(n / (2 * L) - 1)):(round(ti * n) + floor(n / (2 * L))),]),
-                             simplify = "array"), c(1, 2, 3), mean)
-    setTxtProgressBar(pb, value = round(ti / max(tf.grid$time) * 100))
-  }
-  close(pb)
+  Per <- sapply(tf.grid$time, function(ti) {
+                pgram_C(X[round(ti * n) + (-floor(m/2 - 1)):(m / 2), ], B, h, "multitaper", T)
+                }, simplify = "array")
 
-  # Per <- sapply(tf.grid$time, function(ti) bias.corr * apply(sapply(1:B, function(b) 1/(2 * pi) *
-  #               Per_t(h[, b] * X[(round(ti * n)  - floor(n / (2 * L) - 1)):(round(ti * n) + floor(n / (2 * L))),]),
-  #               simplify = "array"), c(1, 2, 3), mean), simplify = "array")
-
-  return(list(tf.grid = tf.grid, P = aperm(Per, c(1, 2, 4, 3))))
+  return(list(tf.grid = tf.grid, P = bias.corr * aperm(Per, c(1, 2, 4, 3))))
 }

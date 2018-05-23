@@ -21,8 +21,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // pgram_C
-arma::cx_cube pgram_C(arma::cx_mat X, int B, arma::cx_mat h, std::string method);
-RcppExport SEXP _pdSpecEst_pgram_C(SEXP XSEXP, SEXP BSEXP, SEXP hSEXP, SEXP methodSEXP) {
+arma::cx_cube pgram_C(arma::cx_mat X, int B, arma::cx_mat h, std::string method, bool is_2D);
+RcppExport SEXP _pdSpecEst_pgram_C(SEXP XSEXP, SEXP BSEXP, SEXP hSEXP, SEXP methodSEXP, SEXP is_2DSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -30,7 +30,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type B(BSEXP);
     Rcpp::traits::input_parameter< arma::cx_mat >::type h(hSEXP);
     Rcpp::traits::input_parameter< std::string >::type method(methodSEXP);
-    rcpp_result_gen = Rcpp::wrap(pgram_C(X, B, h, method));
+    Rcpp::traits::input_parameter< bool >::type is_2D(is_2DSEXP);
+    rcpp_result_gen = Rcpp::wrap(pgram_C(X, B, h, method, is_2D));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -400,7 +401,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_pdSpecEst_ARMA", (DL_FUNC) &_pdSpecEst_ARMA, 4},
-    {"_pdSpecEst_pgram_C", (DL_FUNC) &_pdSpecEst_pgram_C, 4},
+    {"_pdSpecEst_pgram_C", (DL_FUNC) &_pdSpecEst_pgram_C, 5},
     {"_pdSpecEst_Mid_w", (DL_FUNC) &_pdSpecEst_Mid_w, 4},
     {"_pdSpecEst_pdMean_C_approx", (DL_FUNC) &_pdSpecEst_pdMean_C_approx, 2},
     {"_pdSpecEst_pdMean_C", (DL_FUNC) &_pdSpecEst_pdMean_C, 5},

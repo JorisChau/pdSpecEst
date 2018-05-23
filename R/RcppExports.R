@@ -5,8 +5,8 @@ ARMA <- function(Phi, Theta, Z, len) {
     .Call(`_pdSpecEst_ARMA`, Phi, Theta, Z, len)
 }
 
-pgram_C <- function(X, B, h, method) {
-    .Call(`_pdSpecEst_pgram_C`, X, B, h, method)
+pgram_C <- function(X, B, h, method, is_2D) {
+    .Call(`_pdSpecEst_pgram_C`, X, B, h, method, is_2D)
 }
 
 Mid_w <- function(A, B, w, metric) {

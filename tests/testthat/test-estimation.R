@@ -112,9 +112,9 @@ test_that("Correctly working 2D spectral estimation and clustering", {
   expect_length(pgram1$tf.grid$time, 2^4)
   expect_length(pgram2$tf.grid$time, 2^4)
   expect_length(pgram1$tf.grid$freq, 2^4)
-  expect_length(pgram2$tf.grid$freq, 2^4)
+  expect_length(pgram2$tf.grid$freq, 14)
   expect_equal(dim(pgram1$P), c(d, d, n))
-  expect_equal(dim(pgram2$P), c(d, d, n))
+  expect_equal(dim(pgram2$P), c(d, d, 16, 14))
 
   ## WavTransf2D and InvWavTransf2D
   wt1 <- WavTransf2D(example1$f)
