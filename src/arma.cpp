@@ -22,6 +22,7 @@ arma::mat ARMA(arma::cube Phi, arma::cube Theta, arma::mat Z, int len) {
   } catch(...) {
     Rcpp::exception("c++ exception (unknown reason)");
   }
+  return arma::zeros<arma::mat>(1, 1); // not reached
 }
 
 // [[Rcpp::depends(RcppArmadillo)]]

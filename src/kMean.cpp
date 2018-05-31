@@ -456,8 +456,8 @@ arma::cx_cube impute2D_C(arma::cx_cube M0, arma::field<arma::mat> W, int n1, int
         arma::field<arma::cx_mat> M_field = M0_field.subfield(nbrs_x(0), nbrs_y(0), nbrs_x(1), nbrs_y(1));
         // Transform subfield to cube
         arma::cx_cube M_cube(d, d, M_field.n_rows * M_field.n_cols);
-        for(int i1 = 0; i1 < M_field.n_rows; ++i1){
-          for(int i2 = 0; i2 < M_field.n_cols; ++i2) {
+        for(unsigned int i1 = 0; i1 < M_field.n_rows; ++i1){
+          for(unsigned int i2 = 0; i2 < M_field.n_cols; ++i2) {
             M_cube.slice(i2 * M_field.n_rows + i1) = M_field(i1, i2);
           }
         }
@@ -487,7 +487,7 @@ arma::cx_cube impute2D_C(arma::cx_cube M0, arma::field<arma::mat> W, int n1, int
           arma::cx_mat M_w1 = arma::zeros<arma::cx_mat>(d, d);
           arma::cx_mat M_w2 = arma::zeros<arma::cx_mat>(d, d);
           arma::cx_mat M_w3 = arma::zeros<arma::cx_mat>(d, d);
-          for(int i = 0; i < M_cube.n_slices; ++i){
+          for(unsigned int i = 0; i < M_cube.n_slices; ++i){
             M_w0 += w(i, 0) * M_cube.slice(i);
             M_w1 += w(i, 1) * M_cube.slice(i);
             M_w2 += w(i, 2) * M_cube.slice(i);
@@ -503,7 +503,7 @@ arma::cx_cube impute2D_C(arma::cx_cube M0, arma::field<arma::mat> W, int n1, int
   }
   // Transform field of predicted midpoints to cube
   arma::cx_cube M1(d, d, 4 * n1 * n2);
-  for(int k = 0; k < M1.n_slices; ++k) {
+  for(unsigned int k = 0; k < M1.n_slices; ++k) {
     M1.slice(k) = M1_field(k % (2 * n1), k / (2 * n1));
   }
   return M1;
