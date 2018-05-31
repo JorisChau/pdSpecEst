@@ -361,25 +361,22 @@ arma::cx_cube wavPyr2D_C(arma::cx_cube P, int n1, int n2, std::string metric) {
   int d = P.n_rows;
   int n = P.n_slices;
   int len, len1, len2;
-  if(n1 == (int)1 || n2 == (int)1) {
-    len = n / 2;
-  } else {
-    len = n / 4;
-    len1 = n1 / 2;
-    len2 = n2 / 2;
-  }
   arma::cx_cube M(d, d, len);
   arma::cx_cube M2d(d, d, 4);
   arma::vec w = arma::ones<arma::vec>(4) / 4;
 
   // Local averages curve of HPD matrices
   if(n1 == (int)1 || n2 == (int)1) {
+    len = n / 2;
     for(int k = 0; k < len; ++k) {
       M.slice(k) = Mid_w(P.slice(2 * k), P.slice(2 * k + 1), 0.5, metric);
     }
   }
   else {
     // Local averages surface of HPD matrices
+    len = n / 4;
+    len1 = n1 / 2;
+    len2 = n2 / 2;
     for(int k1 = 0; k1 < len1; ++k1) {
       for(int k2 = 0; k2 < len2; ++k2) {
 
