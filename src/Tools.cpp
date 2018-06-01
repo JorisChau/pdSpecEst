@@ -289,6 +289,7 @@ double pdDist_C(arma::cx_mat A, arma::cx_mat B, std::string method) {
   } catch(...) {
     Rcpp::exception("c++ exception (unknown reason)");
   }
+  return NA_REAL; //not reached
 }
 
 // [[Rcpp::depends(RcppArmadillo)]]

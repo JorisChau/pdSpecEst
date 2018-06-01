@@ -84,4 +84,5 @@ arma::cx_cube pgram_C(arma::cx_mat X, int B, arma::cx_mat h, std::string method,
   } catch(...) {
     Rcpp::exception("c++ exception (unknown reason)");
   }
+  return arma::zeros<arma::cx_cube>(1,1,1);
 }
