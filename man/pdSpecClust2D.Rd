@@ -97,8 +97,8 @@ to the cluster centers based on the given metric by applying the intrinsic inver
 \code{\link{InvWavTransf2D}}) to the cluster centers in the wavelet domain.
 }
 \examples{
-## Generate periodogram date for 4 subjects
-pgram <- function(seed) rExamples2D(c(2^5, 2^5), 2, example = "smiley", seed = seed)$per
+## Generate periodogram data for 4 subjects
+pgram <- function(rescale) rescale * rExamples2D(c(2^5, 2^5), 2, example = "smiley")$P
 P <- array(c(replicate(2, pgram(1)), replicate(2, pgram(2))), dim=c(2,2,2^5,2^5,4))
 
 cl <- pdSpecClust2D(P, K = 2, metric = "logEuclidean")

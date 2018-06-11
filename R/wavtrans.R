@@ -34,7 +34,7 @@
 #' @param ... additional arguments for internal use.
 #'
 #' @examples
-#' P <- rExamples(2^8, example = "bumps")
+#' P <- rExamples1D(2^8, example = "bumps")
 #' P.wt <- WavTransf1D(P$f, periodic = FALSE)
 #'
 #' @return The function returns a list with three components:

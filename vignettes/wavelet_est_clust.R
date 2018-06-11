@@ -7,8 +7,7 @@ library(pdSpecEst)
 set.seed(123)
 d <- 3
 n <- 2^9 
-example <- rExamples(2 * n, example = "bumps")
-freq <- example$freq
+example <- rExamples1D(n, example = "bumps", return.ts = T)
 str(example)
 
 ## ---- echo = F, out.width='75%', fig.width = 8, fig.height = 3, dpi=100, fig.align = "center"----
@@ -61,7 +60,7 @@ plotspec <- function(i, data, data1 = NULL){
   }
 }
 par(mfrow=c(d, d), mar = c(3.5,1,1.5,1))
-invisible(apply(expand.grid(1:d, 1:d), 1, function(i) plotspec(i, data = example)))
+invisible(apply(expand.grid(1:d, 1:d), 1, function(i) plotspec(i, data = list(freq = pi * (0:(dim(example$f)[3]-1))/dim(example$f)[3], f = example$f))))
 invisible(dev.off())
 
 ## ------------------------------------------------------------------------
@@ -101,19 +100,19 @@ plotCoeff <- function(D, title){
 invisible(plotCoeff(wt.f$D, title = "Frobenius norm of target wavelet coefficients"))
 
 ## ------------------------------------------------------------------------
-f.hat <- pdSpecEst1D(example$per)
+f.hat <- pdSpecEst1D(example$P)
 str(f.hat)
 
 ## ---- echo=FALSE, out.width='75%', fig.width = 8, fig.height = 3, dpi=100, fig.align = "center"----
-wt.per <- WavTransf1D(example$per, periodic = T)
+wt.per <- WavTransf1D(example$P, periodic = T)
 invisible(plotCoeff(wt.per$D, title = "Frobenius norm of noisy periodogram wavelet coefficients"))
 invisible(plotCoeff(f.hat$D, title = "Frobenius norm of denoised wavelet coefficients"))
 
 ## ---- echo=FALSE, out.width='75%', fig.width = 8, fig.height = 5, dpi=100, fig.align = "center", fig.cap = "Figure 2: target spectral matrix (dashed lines) and estimated spectral matrix (continuous lines)."----
 ## Plot estimated spectral matrix
 par(mfrow=c(d, d), mar = c(3.5,1,1.5,1))
-invisible(apply(expand.grid(1:d, 1:d), 1, function(i) plotspec(i, data = example, 
-                                                               data1 = list(freq = example$freq, f = f.hat$f))))
+invisible(apply(expand.grid(1:d, 1:d), 1, function(i) plotspec(i, data = list(freq = pi * (0:(dim(example$f)[3]-1))/dim(example$f)[3], f = example$f), 
+                                                               data1 = list(freq = pi * (0:(dim(f.hat$f)[3]-1))/dim(f.hat$f)[3], f = f.hat$f))))
 invisible(dev.off())
 
 ## ---- eval = F-----------------------------------------------------------
@@ -137,8 +136,7 @@ pdSpecEst:::vignette1.data$depth.f
 set.seed(17)
 d <- 2
 n <- c(2^7, 2^7) 
-example <- rExamples2D(n, d, example = "smiley", snr = 0.5)
-tf.grid <- example$tf.grid ## time-frequency grid
+example <- rExamples2D(n, d, example = "smiley", noise = "wishart", noise.level = 0.5)
 str(example)
 
 ## ---- echo = F, out.width='75%', fig.width = 8, fig.height = 6, dpi=100, fig.align = "center", fig.cap = "Figure 3: Matrix-log's of target time-varying spectrum"----
@@ -232,10 +230,10 @@ plotspec2D <- function(P, lim = T, Log = F){
 invisible(plotspec2D(example$f, lim = T, Log = T))
 
 ## ---- echo = F, out.width='75%', fig.width = 8, fig.height = 6, dpi=100, fig.align = "center", fig.cap = "Figure 4: Matrix-log's of pseudo-periodogram matrix"----
-invisible(plotspec2D(example$per, lim = T, Log = T))
+invisible(plotspec2D(example$P, lim = T, Log = T))
 
 ## ------------------------------------------------------------------------
-f.hat <- pdSpecEst2D(example$per, order = c(1, 1), progress = F)
+f.hat <- pdSpecEst2D(example$P, order = c(1, 1))
 str(f.hat)
 
 ## ---- echo = F, out.width='75%', fig.width = 8, fig.height = 6, dpi=100, fig.align = "center", fig.cap = "Figure 5: Matrix-log's of estimated time-varying spectrum"----

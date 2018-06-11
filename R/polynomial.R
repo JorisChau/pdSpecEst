@@ -36,7 +36,7 @@
 #'
 #' @examples
 #' ### Polynomial curve interpolation
-#' P <- rExamples(100, example = 'gaussian')$f[, , 10*(1:5)]
+#' P <- rExamples1D(100, example = 'gaussian')$f[, , 10*(1:5)]
 #' P.poly <- pdNeville(P, (1:5)/5, (1:50)/50)
 #' ## Examine matrix-component (1,1)
 #' plot((1:50)/50, Re(P.poly[1, 1, ]), type = "l") ## interpolated polynomial

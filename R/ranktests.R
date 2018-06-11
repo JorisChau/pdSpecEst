@@ -12,16 +12,16 @@
 #' \code{sample.sizes} specifies the sizes of the individual samples so that \code{sum(sample.sizes)} is equal to \code{S}. \cr
 #' The available generalized rank-based testing procedures (specified by the argument \code{test}) are:
 #' \describe{
-#' \item{\code{"rank.sum"}}{Manifold Wilcoxon rank-sum test to test for homogeneity of distributions of two independent
+#' \item{\code{"rank.sum"}}{Intrinsic Wilcoxon rank-sum test to test for homogeneity of distributions of two independent
 #' samples of Hermitian PD matrices or samples of sequences of Hermitian PD matrices. The usual univariate ranks are replaced by data depth
 #' induced ranks via \code{\link{pdDepth}}.}
-#' \item{\code{"krusk.wall"}}{Manifold Kruskal-Wallis test to test for homogeneity of distributions of more than two independent
+#' \item{\code{"krusk.wall"}}{Intrinsic Kruskal-Wallis test to test for homogeneity of distributions of more than two independent
 #' samples of Hermitian PD matrices or samples of sequences of Hermitian PD matrices. The usual univariate ranks are replaced by data depth
 #' induced ranks via \code{\link{pdDepth}}.}
-#' \item{\code{"signed.rank"}}{Manifold signed-rank test to test for homogeneity of distributions of independent paired or matched samples
-#' of Hermitian PD matrices. The manifold signed-rank test is \emph{not} based on data depth induced ranks, but on a specific difference score on the Riemannian
+#' \item{\code{"signed.rank"}}{Intrinsic signed-rank test to test for homogeneity of distributions of independent paired or matched samples
+#' of Hermitian PD matrices. The intrinsic signed-rank test is \emph{not} based on data depth induced ranks, but on a specific difference score on the Riemannian
 #' manifold of Hermitian PD matrices.}
-#' \item{\code{"bartels"}}{Manifold Bartels-von Neumann test to test for randomness (i.e. exchangeability) within a single independent sample of
+#' \item{\code{"bartels"}}{Intrinsic Bartels-von Neumann test to test for randomness (i.e. exchangeability) within a single independent sample of
 #' Hermitian PD matrices or a sample of sequences of Hermitian PD matrices. The usual univariate ranks are replaced by data depth induced
 #' ranks via \code{\link{pdDepth}}.}
 #' }
@@ -30,7 +30,7 @@
 #' The default Riemannian metric is invariant under congruence transformation by any invertible matrix, whereas the Log-Euclidean metric is only
 #' invariant under congruence transformation by unitary matrices, see (Chau, Ombao and von Sachs 2017b) for more details.
 #'
-#' @note The manifold signed-rank test also provides a valid test for equivalence of spectral matrices of two multivariate stationary time
+#' @note The intrinsic signed-rank test also provides a valid test for equivalence of spectral matrices of two multivariate stationary time
 #' series based on the Hermitian PD periodogram matrices obtained via \code{\link{pdPgram}}, see (Chau, Ombao, and von Sachs, 2017b) for the details.
 #'
 #' @param data either a \eqn{(d,d,S)}-dimensional array corresponding to an array of pooled individual samples of Hermitian PD matrices, or a
@@ -40,7 +40,7 @@
 #' @param test rank-based hypothesis testing procedure, one of \code{"rank.sum"}, \code{"krusk.wall"}, \code{"signed.rank"}, \code{"bartels"} explained
 #' in the Details section below.
 #' @param depth data depth measure used in the rank-based tests, one of \code{"gdd"}, \code{"zonoid"}, or \code{"spatial"} corresponding to the
-#' geodesic distance depth, manifold zonoid depth and manifold spatial depth respectively. Defaults to \code{"gdd"}. Not required for test
+#' geodesic distance depth, intrinsic zonoid depth and intrinsic spatial depth respectively. Defaults to \code{"gdd"}. Not required for test
 #' \code{"signed.rank"}.
 #' @param metric the metric that the space of HPD matrices is equipped with, either \code{"Riemannian"} or \code{"logEuclidean"}. Defaults to
 #' \code{"Riemannian"}.
@@ -106,7 +106,7 @@ pdRankTests <- function(data, sample.sizes, test = c("rank.sum", "krusk.wall", "
     test <- "rank.sum"
   }
 
-  ## Manifold rank-sum test
+  ## Intrinsic rank-sum test
   if (test == "rank.sum") {
     if (!isTRUE((((length(ddim) == 3) & (ddim[3] == sum(n))) | ((length(ddim) == 4) &
                       (ddim[4] == sum(n)))) & (ddim[1] == ddim[2]) & (length(n) == 2))) {
@@ -121,7 +121,7 @@ pdRankTests <- function(data, sample.sizes, test = c("rank.sum", "krusk.wall", "
                                                   null.distr = "Standard normal distribution", depth.values = dd)
   }
 
-  ## Manifold Kruskal-Wallis test
+  ## Intrinsic Kruskal-Wallis test
   if (test == "krusk.wall") {
     N <- sum(n)
     if (!isTRUE((((length(ddim) == 3) & (ddim[3] == N)) | ((length(ddim) == 4) &
@@ -138,7 +138,7 @@ pdRankTests <- function(data, sample.sizes, test = c("rank.sum", "krusk.wall", "
                                     null.distr = "Chi-squared distribution (df = 2)", depth.values = dd)
   }
 
-  ## Manifold signed-rank test
+  ## Intrinsic signed-rank test
   if (test == "signed.rank") {
     if (!isTRUE((length(ddim) == 3) & (ddim[1] == ddim[2]) & (ddim[3]%%2 == 0))) {
       stop(err.message)
@@ -155,7 +155,7 @@ pdRankTests <- function(data, sample.sizes, test = c("rank.sum", "krusk.wall", "
     output <- list(test = "Intrinsic Wilcoxon signed-rank", p.value = T3$p.value, statistic = T3$statistic, null.distr = T3$method)
   }
 
-  ## Manifold Bartels-von Neumann test
+  ## Intrinsic Bartels-von Neumann test
   if (test == "bartels") {
     if (!isTRUE(((length(ddim) == 3) | ((length(ddim) == 4))) & (ddim[1] == ddim[2]))) {
       stop(err.message)

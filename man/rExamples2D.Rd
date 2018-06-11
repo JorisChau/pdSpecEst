@@ -4,8 +4,8 @@
 \alias{rExamples2D}
 \title{Several example time-varying spectral matrices}
 \usage{
-rExamples2D(n, d = 3, B, example = c("smiley", "tvar", "peak", "facets"),
-  bias.corr = F, ...)
+rExamples2D(n, d = 2, example = c("smiley", "tvar", "peak", "facets"),
+  noise = "riem-gaussian", noise.level = 1, df.wishart = NULL)
 }
 \arguments{
 \item{n}{numeric vector with two components corresponding to the size of the discretized time-frequency grid at which the spectral matrix
@@ -13,27 +13,23 @@ is generated.}
 
 \item{d}{row- (resp. column-)dimension of the generated spectral matrix.}
 
-\item{B}{complex Wishart distribution degrees of freedom, defaults to \code{B = d}, such that the generated pseudo periodogram matrix
-observations are positive definite. Note that \code{B} coincides with the number of tapering functions in the (time-varying) multitaper
-periodogram in \code{\link{pdPgram2D}}.}
-
 \item{example}{the example spectral matrix, one of \code{'smiley'}, \code{'tvar'}, \code{'peak'} or \code{'facets'}.}
 
-\item{bias.corr}{should the Riemannian manifold bias-correction be applied to the HPD periodogram matrix?
-Defaults to \code{FALSE}.}
+\item{noise}{noise distribution for the generated noisy time-varying spectral matrices, one of \code{'riem-gaussian'},
+\code{'log-gaussian'}, \code{'wishart'} or \code{'log-wishart'}. Additional details are given below.}
 
-\item{...}{additional arguments for internal use.}
+\item{noise.level}{parameter to tune the signal-to-noise ratio for the generated noisy spectral matrices.}
+
+\item{df.wishart}{complex Wishart distribution degrees of freedom, defaults to \code{df.wishart = d}, such that the generated pseudo periodogram matrix
+observations are positive definite. Note that \code{df.wishart} coincides with the number of tapering functions in the (time-varying) multitaper
+periodogram in \code{\link{pdPgram2D}}.}
 }
 \value{
 Returns a list with two components:
    \item{\code{f} }{ example spectral matrix, \code{f} is a \code{(d, d, n[1], n[2])}-dimensional array, corresponding
    to a \eqn{(d \times d)}-dimensional spectral matrix at a \eqn{(n_1,n_2)}-dimensional grid of time-frequency points.}
-   \item{\code{tf.grid} }{ a list with two components \code{tf.grid$time} and \code{tf.grid$frequency} specifying the
-   rectangular grid of time-frequency points at which the spectral matrix is generated. \code{tf.grid$time}
-   is a numeric vector of rescaled time points in \code{(0,1]}. \code{tf.grid$frequency} is a numeric
-   vector of frequency points in \code{(0,0.5]}, with 0.5 corresponding to the Nyquist frequency.}
-   \item{\code{per} }{ pseudo HPD periodogram observations generated as random complex Wishart matrices centered around \code{f}
-   with \code{B} degrees of freedom at \eqn{(n_1,n_2)}-dimensional grid of time-frequency points.}
+   \item{\code{P} }{ pseudo HPD periodogram observations generated as random complex Wishart matrices centered around \code{f}
+   with \code{df.wishart} degrees of freedom at \eqn{(n_1,n_2)}-dimensional grid of time-frequency points.}
 }
 \description{
 \code{rExamples2D()} generates several example HPD time-varying spectral matrices for testing and simulation purposes.
@@ -50,7 +46,7 @@ distribution of actual HPD periodogram observations (as obtained via \code{\link
 generating HPD spectral matrix.
 }
 \examples{
-example <- rExamples2D(n = c(2^5, 2^5), example = "smiley")
+example <- rExamples2D(n = c(32, 32), example = "smiley")
 
 }
 \references{

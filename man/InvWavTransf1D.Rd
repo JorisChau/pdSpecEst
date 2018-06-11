@@ -59,7 +59,7 @@ Euclidean metric and (v) root-Euclidean metric. The default choice (Riemannian) 
 not shared by the other metrics, see (Chau and von Sachs, 2017a) for more details.
 }
 \examples{
-P <- rExamples(2^8, example = "bumps")
+P <- rExamples1D(2^8, example = "bumps")
 P.wt <- WavTransf1D(P$f) ## forward transform
 P.f <- InvWavTransf1D(P.wt$D, P.wt$M0) ## backward transform
 all.equal(P.f, P$f)

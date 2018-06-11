@@ -64,7 +64,7 @@ HPD time-varying spectral estimate.
 }
 \examples{
 \dontrun{
- P <- rExamples2D(c(2^7, 2^7), 3, example = "tvar")$per
+ P <- rExamples2D(c(2^7, 2^7), 3, example = "tvar")$P
  f <- pdSpecEst2D(P)
 }
 

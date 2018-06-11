@@ -39,7 +39,7 @@
 #' @param ... additional arguments for internal use.
 #'
 #' @examples
-#' P <- rExamples(2^8, example = "bumps")
+#' P <- rExamples1D(2^8, example = "bumps")
 #' P.wt <- WavTransf1D(P$f) ## forward transform
 #' P.f <- InvWavTransf1D(P.wt$D, P.wt$M0) ## backward transform
 #' all.equal(P.f, P$f)

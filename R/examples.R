@@ -85,7 +85,7 @@ rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
 
 #' Several example spectral matrices
 #'
-#' \code{rExamples()} generates stationary time series observations from several example HPD spectral matrices
+#' \code{rExamples1D()} generates stationary time series observations from several example HPD spectral matrices
 #' for testing and simulation purposes. For more details, we refer to the simulation studies in (Chau and von Sachs, 2017).
 #'
 #' The examples include: (i) a \eqn{(3 \times 3)} heaviSine HPD spectral matrix consisting of smooth sinosoids with a break,
@@ -95,23 +95,30 @@ rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
 #' functions. The time series observations are generated via the Cram\'er representation based on the transfer function of
 #' the example spectral matrix and complex normal random variates.
 #'
-#' @param n number of time series observations to be generated.
-#' @param example the example spectral matrix, one of \code{'heaviSine'}, \code{'bumps'}, \code{'two-cats'}, \code{'gaussian'} or
-#'        \code{'mix-gaussian'}.
-#' @param ... additional arguments passed on to \code{\link{pdPgram}}.
+#' @param n number of sampled matrices to be generated.
+#' @param d row- (resp. column-)dimension of the generated matrices.
+#' @param example the example HPD spectral matrix curve, one of \code{'heaviSine'}, \code{'bumps'}, \code{'two-cats'},
+#'     \code{'gaussian'} or \code{'mix-gaussian'}.
+#' @param return.ts if \code{isTRUE(return.ts)} the function returns time series observations generated via the Cram\'er representation
+#' based on the transfer function of the example spectral matrix and complex normal random variates.
+#' @param noise noise distribution for the generated noisy spectral matrices, one of \code{'riem-gaussian'},
+#' \code{'periodogram'}, \code{'log-gaussian'}, \code{'wishart'} or \code{'log-wishart'}. Additional details are given below.
+#' @param noise.level parameter to tune the signal-to-noise ratio for the generated noisy spectral matrices.
+#' @param df.wishart optional parameter to specify the degrees of freedom in the case of a Wishart noise distribution or the
+#' number of DPSS taper functions in the case of generated periodogram matrices. Only used if \code{noise} is equal to \code{'periodogram'},
+#' \code{'wishart'} or \code{'log-wishart'}. By default \code{df.wishart} is equal to the dimension \code{d} to
+#' guarantee positive definiteness of the generated matrices.
 #'
-#' @return Returns a list with four components:
+#' @return Depending on the input arguments returns a list with two or three components:
 #'    \item{\code{f} }{ example spectral matrix, \code{f} is a \code{(d, d, length(freq))}-dimensional array, corresponding
 #'    to a \eqn{(d \times d)}-dimensional spectral matrix at the Fourier frequencies \code{freq}.}
-#'    \item{\code{freq} }{ vector of Fourier frequencies from zero to \eqn{\pi}.}
-#'    \item{\code{per} }{ multitaper HPD periodogram of the generated time series, by default pre-smoothed using \code{B = d}
+#'    \item{\code{P} }{ multitaper HPD periodogram of the generated time series, by default pre-smoothed using \code{df.wishart = d}
 #'    DPSS tapering functions, see \code{\link{pdPgram}} for details.}
-#'    \item{\code{ts} }{ generated time series observations, the \code{d} columns correspond to the components of
-#'     the multivariate time series.}
+#'    \item{\code{ts}}{ generated \eqn{d}-dimensional time series observations, only available if \code{isTRUE(return.ts)}.}
 #'
 #' @examples
-#' example <- rExamples(100, example = "bumps")
-#' ts.plot(Re(example$ts)) # plot generated time series.
+#' example <- rExamples1D(100, example = "bumps", return.ts = TRUE)
+#' ts.plot(Re(example$ts)) # plot generated time series
 #'
 #' @seealso \code{\link{pdPgram}}
 #'
@@ -119,90 +126,123 @@ rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
 #' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
 #'
 #' @export
-rExamples <- function(n, example = c("heaviSine", "bumps", "two-cats", "gaussian", "mix-gaussian"), ...){
+rExamples1D <- function(n, d = 3, example = c("heaviSine", "bumps", "two-cats", "gaussian", "mix-gaussian"),
+                        return.ts = FALSE, noise = "riem-gaussian", noise.level = 1, df.wishart = NULL){
 
   ## Set variables
-  example = match.arg(example, c("heaviSine", "bumps", "two-cats", "gaussian", "mix-gaussian"))
-  if(n %% 2 != 0){
-    warning("'n' is odd and cannot be divided by 2, instead 'n' is replaced by 'n + 1'")
-    n = n + 1
+  example <- match.arg(example, c("heaviSine", "bumps", "two-cats", "gaussian", "mix-gaussian"))
+  noise <- match.arg(noise, c("riem-gaussian", "periodogram", "log-gaussian", "wishart", "log-wishart"))
+  d <- switch(example,
+              "heaviSine" = 3,
+              "bumps" = 3,
+              "two-cats" = 3,
+              "gaussian" = 2,
+              "mix-gaussian" = d)
+  df.wishart <- (if(is.null(df.wishart)) d else df.wishart)
+  if(df.wishart < d & noise %in% c("wishart", "log-wishart")) {
+    warning("'df.wishart' is smaller than the dimension 'd';
+             the generated wishart matrices are not positive definite!")
+    if(noise == "log-wishart") {
+      stop("Matrix logarithm of generated wishart matrices fails due to zero eigenvalues;
+            increase value of 'df.wishart' to resolve problem.")
+    }
   }
-  m = n/2
-  dots = list(...)
-  d = (if(example == "gaussian") 2 else if(example == "mix-gaussian" & !is.null(dots$d)) dots$d else 3)
-  B = (if(is.null(dots$B)) d else dots$B)
-  if(B < d){
-    warning("The number of tapers 'B' is smaller than the dimension of the time series 'ncol(X)'; the periodogram matrix
-            is not positive definite!")
-  }
-  method = (if(is.null(dots$method)) "multitaper" else dots$method)
-  bias.corr = (if(is.null(dots$bias.corr)) F else dots$bias.corr)
-  breaks = (if(is.null(dots$breaks)) 2 else dots$breaks)
-  v0 = (if(is.null(dots$v0)) NULL else dots$v0)
-  v1 = (if(is.null(dots$v1)) NULL else dots$v1)
-  x = seq(0, 1, length.out = m)
+  x <- seq(0, 1, length.out = n)
 
   if(example == "heaviSine"){
-    P0 <- sapply(x, function(t) H.coeff(sin(HeaviSine[2, ] * pi * t + HeaviSine[1, ]), inverse = T), simplify = "array")
-    P1 <- sapply(x, function(t) H.coeff(sin(HeaviSine[4, ] * pi * t + HeaviSine[3, ]), inverse = T), simplify = "array")
-
-      if(breaks == 3){
-        P2 <- sapply(x, function(t) H.coeff(HeaviSine[2, ] * pi * t + HeaviSine[1, ], inverse = T), simplify = "array")
-        P <- sapply(1:m, function(i) (if(i <= m/2) 3 * Expm(diag(2, d), P0[, , i]) else if(i <= 3/4 * m){
-          Expm(diag(2, 3), P1[, , i]) } else 2 * Expm(diag(2, d), P2[, , i])), simplify = "array")
-      } else if(breaks == 2){
-        P <- sapply(1:m, function(i) (if(i <= m/2) Expm(diag(2, d), P0[, , i]) else 3 * Expm(diag(2, d), P1[, , i])),
-                    simplify = "array")
-      }
-    } else if(example == "sine") {
-      if(!is.null(v0)){
-        P0 <- sapply(x, function(t) H.coeff(v0[1, ] * sin(v0[2, ] * 2 * pi * t + v0[3, ] * pi), inverse = T), simplify = "array")
-      } else {
-        P0 <- sapply(x, function(t) H.coeff(Sine1[1, ] * sin(Sine1[2, ] * 2 * pi * t + Sine1[3, ] * pi), inverse = T), simplify = "array")
-      }
-      P <- sapply(1:m, function(i) 3 * Expm(diag(2, d), P0[, , i]), simplify = "array")
+    ## Discontinuous heavisine matrix curve (d = 3)
+    f <- sapply(x, function(t){
+      Expm(diag(2, 3), H.coeff(sin(HeaviSine[ifelse(t < 0.5, 2, 4),] * pi * t +
+                                   HeaviSine[ifelse(t < 0.5, 1, 3),]), inverse = T))
+    }, simplify = "array")
   } else if(example == "two-cats"){
-    v1 <- (if(is.null(v1)) c(2.0000000, 0.4961828, -0.8595843, -0.8290600, 2.5000000, -1.3037704, -1.4214866,
-                             1.7449149, 3.0000000) else v1)
-    f <- cat_fun[round(seq(from = 1, to = 2^10, length = m))]
-    P0 <- sapply(1:d^2, function(i) if(i %in% c(1, 5, 9)) v1[i] * f + 0.05 else v1[i] * f)
-    P <- sapply(1:m, function(i) t(Conj(H.coeff(P0[i,], inverse = T))) %*% H.coeff(P0[i,], inverse = T), simplify = "array")
+    ## Locally smooth two-cats matrix curve (d = 3)
+    v1 <- c(2.0000000, 0.4961828, -0.8595843, -0.8290600, 2.5000000, -1.3037704, -1.4214866, 1.7449149, 3.0000000)
+    f0 <- sapply(1:n, function(i){
+      H.coeff(v1 * cat_fun[ceiling(1024 / n * i)] + c(0.05, 0, 0, 0, 0.05, 0, 0, 0, 0.05), inverse = T)
+    }, simplify = "array")
+    f <- Ptransf2D_C(f0, T, F, "rootEuclidean")
   } else if(example == "bumps"){
-    P0 <- sapply(x, function(t)  (1 - 0.4 * t) * H.coeff(sqrt(t * (1 - t) + 1) *
-                                                               sin(pi/(0.4 * t + 0.1)) * (1 + Bumps), inverse = T), simplify = "array")
-    P <- sapply(1:m, function(i) Expm(diag(3), P0[,,i]), simplify = "array")
+    ## Locally smooth bumps matrix curve (d = 3)
+    f <- sapply(x, function(t){
+      Expm(diag(3), (1 - 0.4 * t) * H.coeff(sqrt(t * (1 - t) + 1) *
+                                        sin(pi / (0.4 * t + 0.1)) * (1 + Bumps), inverse = T))
+    }, simplify = "array")
   } else if(example == "gaussian"){
+    ## Gaussian matrix curve (d = 2)
     v0 <- c(7.21935, 13.05307, 12.70734, 14.73554)
-    P0 <- sapply(x, function(t) H.coeff(v0/sqrt(2*pi) * exp(-((t - 0.5)/0.3)^2/2), inverse = T), simplify = "array")
-    P <- sapply(1:m, function(i) Expm(diag(2, d), P0[, , i]), simplify = "array")
+    f <- sapply(x, function(t){
+      Expm(diag(2, 2), H.coeff(v0 / sqrt(2 * pi) * exp(-((t - 0.5) / 0.3)^2 / 2), inverse = T))
+    }, simplify = "array")
   } else if(example == "mix-gaussian"){
-    x <- seq(-pi, pi, length.out = m)
-    pars <- list(mu = runif(4, min = -3, max = 3), sd = abs(rnorm(4, sd = 1)),
-                 w = abs(rnorm(4)), w.comp = sapply(1:4, function(i) rnorm(d^2, mean = 1)))
+    ## Random mixture of gaussian matrix curves
+    pars <- list(mu = runif(4, min = -3, max = 3),
+                 sd = abs(rnorm(4)),
+                 w = abs(rnorm(4)),
+                 w.comp = replicate(4, rnorm(d^2, mean = 1)))
     pars$w <- pars$w / sum(pars$w)
-    P0 <- sapply(1:4, function(i) pars$w[i] * sapply(x, function(t) H.coeff(pars$w.comp[,i] * pars$sd[i]/sqrt(2*pi) *
-                        exp(-(t - pars$mu[i])^2/(2*pars$sd[i]^2)), inverse = T), simplify = "array"), simplify = "array")
-    P1 <- apply(P0, c(1,2,3), sum)
-    P <- sapply(1:m, function(i) Expm(0.25 * diag(d), P1[, , i]), simplify = "array")
-    P <- P / (0.5*mean(sapply(1:m, function(i) NormF(P[,,i]))))
+    f0 <- apply(sapply(1:4, function(i){
+            pars$w[i] * sapply(2 * pi * x - pi, function(t) {
+            H.coeff(pars$w.comp[, i] * pars$sd[i] / sqrt(2 * pi) *
+                      exp(-(t - pars$mu[i])^2/(2 * pars$sd[i]^2)), inverse = T)
+            }, simplify = "array")
+      }, simplify = "array"), c(1,2,3), sum)
+    f <- sapply(1:n, function(i) Expm(diag(0.25, d), f0[, , i]), simplify = "array")
   }
 
-  P.sqrt <- Ptransf2D_C(P, F, F, "rootEuclidean")
+  ## Standardize int. Frob. norm of f
+  f <- f / mean(sapply(1:n, function(i) NormF(f[,,i])))
+  f1 <- Ptransf2D_C(f, F, F, ifelse(noise %in% c("riem-gaussian", "wishart", "periodogram"),
+                                    "rootEuclidean", "logEuclidean"))
 
-  ## Generate time series via Cramer representation
-  chi <- matrix(nrow = d, ncol = 2 * m)
-  chi[, 1:(m - 1)] <- replicate(m - 1, complex(d, rnorm(d, sd = sqrt(1/2)), rnorm(d, sd = sqrt(1/2))))
-  chi[, c(m, 2 * m)] <- replicate(2, rnorm(d))
-  chi[, (m + 1):(2 * m - 1)] <- Conj(chi[, 1:(m - 1)])
+  if(return.ts | noise == "periodogram") {
 
-  P.sqrt1 <- array(c(P.sqrt, Conj(P.sqrt[, , m:1])), dim = c(d, d, 2 * m))
-  ts <- sqrt(2 * pi) / sqrt(2 * m) * mvfft(t(sapply(1:(2 * m), function(i) P.sqrt1[, , i] %*% chi[, i])), inverse = T)
+    ## Generate time series via Cramer representation
+    chi <- matrix(nrow = d, ncol = 2 * n)
+    chi[, 1:(n - 1)] <- replicate(n - 1, complex(d, rnorm(d, sd = sqrt(1/2)), rnorm(d, sd = sqrt(1/2))))
+    chi[, c(n, 2 * n)] <- replicate(2, rnorm(d))
+    chi[, (n + 1):(2 * n - 1)] <- Conj(chi[, 1:(n - 1)])
+    f2 <- array(c(f1, Conj(f1[, , n:1])), dim = c(d, d, 2 * n))
+    ts <- sqrt(2 * pi) / sqrt(2 * n) * mvfft(t(sapply(1:(2 * n), function(i) f2[, , i] %*% chi[, i])), inverse = T)
 
-  ## Compute pre-smoothed periodogram
-  per <- pdPgram(ts, B = B, method = method, bias.corr = bias.corr)
+    ## Generate multitaper periodogram from time series
+    if(noise == "periodogram") {
+      P <- pdPgram(ts, B = df.wishart, method = "multitaper")$P
+    }
+  }
 
-  return(list(f = P, freq = per$freq, per = per$P, ts = ts))
+  if(noise %in% c("riem-gaussian", "log-gaussian")) {
+    ## Generate iid zero mean (intrinsic) gaussian noise
+    W0 <- replicate(n, H.coeff(rnorm(d^2, sd = sqrt(noise.level)), inverse = T))
+    if(noise == "riem-gaussian") {
+      W <- Ptransf2D_C(W0, T, F, "logEuclidean")
+      P <- sapply(1:n, function(i) (t(Conj(f1[, , i])) %*% W[, , i]) %*% f1[, , i], simplify = "array")
+    } else if(noise == "log-gaussian") {
+      P <- Ptransf2D_C(f1 + W0, T, F, "logEuclidean")
+    }
+  } else if(noise %in% c("wishart", "log-wishart")) {
+    ## Generate iid zero mean (intrinsic) wishart noise
+    X0 <- replicate(n * df.wishart, complex(d, rnorm(d, sd = sqrt(1/2)), rnorm(d, sd = sqrt(1/2))))
+    W0 <- array(apply(X0, 2, function(x) x %*% t(Conj(x))), dim = c(d, d, n * df.wishart))
+    W <- sapply(1:n, function(i) apply(W0[, , (i - 1) * df.wishart + 1:df.wishart], c(1, 2), mean), simplify = "array")
+    if(noise.level != 1 & df.wishart >= d) {
+      W <- Ptransf2D_C(sqrt(noise.level) * Ptransf2D_C(W, F, F, "logEuclidean"), T, F, "logEuclidean")
+    }
+    if(noise == "wishart") {
+      P <- sapply(1:n, function(i) (t(Conj(f1[, , i])) %*% W[, , i]) %*% f1[, , i], simplify = "array")
+    } else {
+      P <- Ptransf2D_C(f1 + Ptransf2D_C(W, F, F, "logEuclidean"), T, F, "logEuclidean")
+    }
+  }
 
+  ## return list with objects
+  if(return.ts) {
+    res <-  list(f = f, P = P, ts = ts)
+  } else {
+    res <- list(f = f, P = P)
+  }
+
+  return(res)
 }
 
 #' Several example time-varying spectral matrices
@@ -222,26 +262,22 @@ rExamples <- function(n, example = c("heaviSine", "bumps", "two-cats", "gaussian
 #' @param n numeric vector with two components corresponding to the size of the discretized time-frequency grid at which the spectral matrix
 #' is generated.
 #' @param d row- (resp. column-)dimension of the generated spectral matrix.
-#' @param B complex Wishart distribution degrees of freedom, defaults to \code{B = d}, such that the generated pseudo periodogram matrix
-#' observations are positive definite. Note that \code{B} coincides with the number of tapering functions in the (time-varying) multitaper
-#' periodogram in \code{\link{pdPgram2D}}.
 #' @param example the example spectral matrix, one of \code{'smiley'}, \code{'tvar'}, \code{'peak'} or \code{'facets'}.
-#' @param bias.corr should the Riemannian manifold bias-correction be applied to the HPD periodogram matrix?
-#' Defaults to \code{FALSE}.
-#' @param ... additional arguments for internal use.
+#' @param noise noise distribution for the generated noisy time-varying spectral matrices, one of \code{'riem-gaussian'},
+#'    \code{'log-gaussian'}, \code{'wishart'} or \code{'log-wishart'}. Additional details are given below.
+#' @param noise.level parameter to tune the signal-to-noise ratio for the generated noisy spectral matrices.
+#' @param df.wishart complex Wishart distribution degrees of freedom, defaults to \code{df.wishart = d}, such that the generated pseudo periodogram matrix
+#' observations are positive definite. Note that \code{df.wishart} coincides with the number of tapering functions in the (time-varying) multitaper
+#' periodogram in \code{\link{pdPgram2D}}.
 #'
 #' @return Returns a list with two components:
 #'    \item{\code{f} }{ example spectral matrix, \code{f} is a \code{(d, d, n[1], n[2])}-dimensional array, corresponding
 #'    to a \eqn{(d \times d)}-dimensional spectral matrix at a \eqn{(n_1,n_2)}-dimensional grid of time-frequency points.}
-#'    \item{\code{tf.grid} }{ a list with two components \code{tf.grid$time} and \code{tf.grid$frequency} specifying the
-#'    rectangular grid of time-frequency points at which the spectral matrix is generated. \code{tf.grid$time}
-#'    is a numeric vector of rescaled time points in \code{(0,1]}. \code{tf.grid$frequency} is a numeric
-#'    vector of frequency points in \code{(0,0.5]}, with 0.5 corresponding to the Nyquist frequency.}
-#'    \item{\code{per} }{ pseudo HPD periodogram observations generated as random complex Wishart matrices centered around \code{f}
-#'    with \code{B} degrees of freedom at \eqn{(n_1,n_2)}-dimensional grid of time-frequency points.}
+#'    \item{\code{P} }{ pseudo HPD periodogram observations generated as random complex Wishart matrices centered around \code{f}
+#'    with \code{df.wishart} degrees of freedom at \eqn{(n_1,n_2)}-dimensional grid of time-frequency points.}
 #'
 #' @examples
-#' example <- rExamples2D(n = c(2^5, 2^5), example = "smiley")
+#' example <- rExamples2D(n = c(32, 32), example = "smiley")
 #'
 #' @seealso \code{\link{pdPgram2D}}
 #'
@@ -249,118 +285,133 @@ rExamples <- function(n, example = c("heaviSine", "bumps", "two-cats", "gaussian
 #' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
 #'
 #' @export
-rExamples2D <- function(n, d = 3, B, example = c("smiley", "tvar", "peak", "facets"), bias.corr = F, ...){
-
+rExamples2D <- function(n, d = 2, example = c("smiley", "tvar", "peak", "facets"),
+                        noise = "riem-gaussian", noise.level = 1, df.wishart = NULL){
   ## Set variables
-  dots = list(...)
-  snr = (if(is.null(dots$snr)) 1 else dots$snr)
-  B = (if(missing(B)) d else B)
-  if(B < d){
-    warning("The number of tapers 'B' is smaller than the dimension 'd'; the pseudo periodogram
-            observations are not positive definite!")
+  example <- match.arg(example, c("smiley", "tvar", "peak", "facets"))
+  noise <- match.arg(noise, c("riem-gaussian", "log-gaussian", "wishart", "log-wishart"))
+  df.wishart <- (if(is.null(df.wishart)) d else df.wishart)
+  if(df.wishart < d & noise %in% c("wishart", "log-wishart")) {
+    warning("'df.wishart' is smaller than the dimension 'd';
+             the generated wishart matrices are not positive definite!")
+    if(noise == "log-wishart") {
+      stop("Matrix logarithm of generated wishart matrices fails due to zero eigenvalues;
+            increase value of 'df.wishart' to resolve problem.")
+    }
   }
-  bias =  B * exp(-1/d * sum(digamma(B - (d - 1:d))))
-  bias.inv = (if(bias.corr) 1 else 1/bias)
   grid.n <- expand.grid(1:n[1], 1:n[2])
-  ast <- function(A, B) (A %*% B) %*% t(Conj(A))
-  if(!is.null(dots$seed)) set.seed(dots$seed)
+  ast <- function(A, B) (t(Conj(A)) %*% B) %*% A
+  ## wrapper for Ptransf2D_C
+  Ptransf2D <- function(X, inv, metric){
+      array(Ptransf2D_C(array(X, dim = c(dim(X)[1], dim(X)[2], dim(X)[3] * dim(X)[4])), inv, F, metric),
+            dim = dim(X))
+  }
 
   ## Create spectrum
   if(example == "smiley"){
 
     ## Create 2D smiley spectrum
-    f <- array(dim = c(d, d, n[1], n[2]))
-    center <- c(n[1]/2, n[2]/2)
-    eye1 <- c(1/3 * n[1], 2/3 * n[2])
-    eye2 <- c(2/3 * n[1], 2/3 * n[2])
-    p_i <- replicate(4, Expm(2*diag(d), H.coeff(2*rnorm(d^2), inverse = T)))
+    f <- array(dim = c(d, d, n))
+    center <- n / 2
+    eye1 <- c(1/3, 2/3) * n
+    eye2 <- c(2/3, 2/3) * n
+    p_i <- replicate(4, Expm(diag(2, d), H.coeff(rnorm(d^2, sd = 2), inverse = T)))
     for(i1 in 1:n[1]){
       for(i2 in 1:n[2]){
-        if(((i1 - center[1])^2/(n[1] * 3/7)^2 + (i2 - center[2])^2/(n[2] * 2/5)^2) <= 1){
-          f[,,i1,i2] <- p_i[,,1]
+        if(((i1 - center[1])^2 / (n[1] * 3/7)^2 + (i2 - center[2])^2 / (n[2] * 2/5)^2) <= 1){
+          f[, , i1, i2] <- p_i[, , 1]
         } else {
-          f[,,i1,i2] <- p_i[,,3]
+          f[, , i1, i2] <- p_i[, , 3]
         }
-        if(((i1 - center[1])^2/(n[1] * 1/sqrt(10))^2 + (i2 - center[2])^2 /
-            (n[2] * 1/sqrt(10))^2) <= 1 &
-           ((i1 - center[1])^2/(n[1] * 1/sqrt(25))^2 + (i2 - center[2])^2 /
-            (n[2] * 1/sqrt(25))^2) >= 1 &
+        if(((i1 - center[1])^2 / (n[1] / sqrt(10))^2 + (i2 - center[2])^2 / (n[2] / sqrt(10))^2) <= 1 &
+           ((i1 - center[1])^2/(n[1] / sqrt(25))^2 + (i2 - center[2])^2 / (n[2] / sqrt(25))^2) >= 1 &
            (i2 - center[2]) < -0.25 * abs(i1 - center[1])) {
-          f[,,i1,i2] <- p_i[,,2]
+          f[, , i1, i2] <- p_i[, , 2]
         }
-        if(((i1 - eye1[1])^2/(n[1] * 1/sqrt(100))^2 + (i2 - eye1[2])^2 /
-            (n[2] * 1/sqrt(100))^2) <= 1 |
-           ((i1 - eye2[1])^2/(n[1] * 1/sqrt(100))^2 + (i2 - eye2[2])^2 /
-            (n[2] * 1/sqrt(100))^2) <= 1) {
-          f[,,i1,i2] <- p_i[,,4]
+        if(((i1 - eye1[1])^2/(n[1] / 10)^2 + (i2 - eye1[2])^2 / (n[2] / 10)^2) <= 1 |
+           ((i1 - eye2[1])^2/(n[1] / 10)^2 + (i2 - eye2[2])^2 / (n[2] / 10)^2) <= 1) {
+          f[, , i1, i2] <- p_i[, , 4]
         }
       }
     }
+
   } else if(example == "tvar"){
 
-      ## Create 2D (smooth) arma spectrum
-      Sigma <- Expm(diag(d), H.coeff(rnorm(d^2), inverse = T))
-      x <- head(seq(0, 1, len = n[2] + 1), -1)
-      v0 <- matrix(0.1, nrow=d, ncol=d) + diag(0.5, nrow = d)
-      v1 <- 2*rnorm(d^2)
-      v2 <- 2+rnorm(d^2)
-      Phi.t <- sapply(x, function(t) matrix(c(v0 * sin(v2*pi*t + v1)), nrow = d), simplify = "array")
-
-      f.nu_t <- function(nu, t) {
-        PhiB <- solve(diag(d) - Phi.t[, , t] * exp(-1i * pi * nu / n[1]))
-        return(1/(2 * pi) * ((PhiB %*% Sigma) %*% t(Conj(PhiB))))
-      }
-
-      f <- array(c(mapply(function(nu, t) f.nu_t(nu, t), grid.n$Var1, grid.n$Var2)),
-                 dim = c(d, d, n[1], n[2]))
-
-    } else if(example == "peak"){
-
-      ## Create 2D peak spectrum
-      v1 <- abs(rnorm(d^2, mean = 0.5, sd = 0.5))
-      grid.x <- expand.grid(seq(-1, 1, len = n[1]), seq(-1, 1, len = n[2]))
-      mu <- Expm(diag(d), H.coeff(rnorm(d^2), inverse = T))
-      f <- array(c(mapply(function(x, y) Expm(mu, H.coeff(exp(-(abs(x)^v1 + abs(y)^v1)),
-                        inverse = T)), grid.x$Var1, grid.x$Var2)), dim = c(d, d, n[1], n[2]))
-
-    } else if(example == "facets"){
-
-      ## Create 2D facets spectrum
-
-      p <- replicate(2, Expm(diag(d), H.coeff(rnorm(d^2), inverse = T)))
-      facets <- sapply(1:2, function(i) pdNeville(array(replicate(4, Expm(i*diag(d), H.coeff(rnorm(d^2), inverse = T))),
-                                             dim=c(d,d,2,2)), X = list(x = c(0,1), y = c(0,1)),
-                                             x = list(x = seq(0,1,length = n[1]), y = seq(0,1,length = n[2]))), simplify = "array")
-      select <- function(i1, i2){
-        if((n[2]/n[1] * i1) < i2 & i2 <= (n[2] - n[2]/n[1] * i1)){
-          res <- facets[, , i1, i2, 1]
-        } else if((n[2]/n[1] * i1) < i2 & i2 > (n[2] - n[2]/n[1] * i1)){
-          res <- facets[, , i1, i2, 2]
-        } else if((n[2]/n[1] * i1) >= i2 & i2 >= (n[2] - n[2]/n[1] * i1)){
-          res <- ast(p[, , 1], facets[, , i1, i2, 1])
-        } else if((n[2]/n[1] * i1) >= i2 & i2 < (n[2] - n[2]/n[1] * i1)){
-          res <- ast(p[, , 2], facets[, , i1, i2, 2])
-        }
-        res
-      }
-
-      f <- array(c(mapply(select, grid.n$Var1, grid.n$Var2)), dim = c(d, d, n[1], n[2]))
-
+    ## Create 2D (smooth) arma spectrum
+    Sigma <- Expm(diag(d), H.coeff(rnorm(d^2), inverse = T))
+    x <- head(seq(0, 1, length.out = n[2] + 1), -1)
+    v0 <- matrix(0.1, d, d) + diag(0.5, d)
+    v1 <- rnorm(d^2, sd = 2)
+    v2 <- 2 + rnorm(d^2)
+    Phi.t <- sapply(x, function(t) matrix(c(v0 * sin(v2 * pi * t + v1)), d), simplify = "array")
+    f.nu_t <- function(nu, t) {
+      PhiB <- solve(diag(d) - Phi.t[, , t] * exp(-1i * pi * nu / n[1]))
+      return(1/(2 * pi) * ((PhiB %*% Sigma) %*% t(Conj(PhiB))))
     }
+    f <- array(c(mapply(function(nu, t) f.nu_t(nu, t), grid.n$Var1, grid.n$Var2)), dim = c(d, d, n))
 
-    ## Create iid Wishart periodogram
-    if(!is.null(dots$seed)) set.seed(seed = NULL)
-    tf.grid <- list(time = (1:n[1])/n[1], frequency = (1:n[2])/(2*n[2]))
-    f.sqrt <- array(c(apply(f, c(3, 4), function(f) Sqrt(f))), dim = dim(f))
-    X0 <- array(c(replicate(n[1] * n[2] * B, complex(d, rnorm(d, sd = sqrt(1/2)), rnorm(d, sd = sqrt(1/2))))),
-                  dim = c(d, n[1] * B, n[2]))
-    W0 <- array(c(apply(X0, c(2,3), function(X) X %*% t(Conj(X)))), dim = c(d,d,n[1]*B,n[2]))
-    W <- array(c(mapply(function(i1, i2) bias * apply(W0[, , (i1 - 1) * B + 1:B, i2], c(1, 2), mean), grid.n$Var1,
-                 grid.n$Var2)), dim = c(d, d, n[1], n[2]))
-    W.snr <- array(apply(W, c(3,4), function(W) Expm(diag(d), snr * Logm(diag(d), W))), dim = c(d, d, n[1], n[2]))
-    X <- array(c(mapply(function(i1, i2) bias.inv * ast(f.sqrt[, , i1, i2], W.snr[, , i1, i2]), grid.n$Var1,
-                        grid.n$Var2)), dim = dim(W))
+  } else if(example == "peak"){
 
-    return(list(f = f, tf.grid = tf.grid, per = X))
+    ## Create 2D peak spectrum
+    v1 <- abs(rnorm(d^2, 0.5, 0.5))
+    grid.x <- expand.grid(seq(-1, 1, length.out = n[1]), seq(-1, 1, length.out = n[2]))
+    mu <- Expm(diag(d), H.coeff(rnorm(d^2), inverse = T))
+    f <- array(c(mapply(function(x, y) Expm(mu, H.coeff(exp(-(abs(x)^v1 + abs(y)^v1)),
+                            inverse = T)), grid.x$Var1, grid.x$Var2)), dim = c(d, d, n))
+
+  } else if(example == "facets"){
+
+    ## Create 2D facets spectrum
+    p <- replicate(2, Expm(diag(d), H.coeff(rnorm(d^2), inverse = T)))
+    facets <- sapply(1:2, function(i) pdNeville(array(replicate(4, Expm(i * diag(d), H.coeff(rnorm(d^2), inverse = T))),
+                                      dim=c(d, d, 2, 2)), X = list(x = c(0, 1), y = c(0, 1)),
+                                      x = list(x = seq(0, 1, length.out = n[1]), y = seq(0, 1, length.out = n[2]))), simplify = "array")
+    select <- function(i1, i2){
+      if((n[2] / n[1] * i1) < i2 & i2 <= (n[2] - n[2] / n[1] * i1)){
+        res <- facets[, , i1, i2, 1]
+      } else if((n[2] / n[1] * i1) < i2 & i2 > (n[2] - n[2] / n[1] * i1)){
+        res <- facets[, , i1, i2, 2]
+      } else if((n[2] / n[1] * i1) >= i2 & i2 >= (n[2] - n[2] / n[1] * i1)){
+        res <- ast(p[, , 1], facets[, , i1, i2, 1])
+      } else if((n[2] / n[1] * i1) >= i2 & i2 < (n[2] - n[2] / n[1] * i1)){
+        res <- ast(p[, , 2], facets[, , i1, i2, 2])
+      }
+      res
+    }
+    f <- array(c(mapply(select, grid.n$Var1, grid.n$Var2)), dim = c(d, d, n))
+
+  }
+
+  ## Standardize int. Frob. norm of f
+  f <- f / mean(apply(f, c(3, 4), NormF))
+  f1 <- Ptransf2D(f, F, ifelse(noise %in% c("riem-gaussian","wishart"), "rootEuclidean", "logEuclidean"))
+
+  if(noise %in% c("riem-gaussian", "log-gaussian")) {
+    ## Generate iid zero mean (intrinsic) gaussian noise
+    W0 <- replicate(n[2], replicate(n[1], H.coeff(rnorm(d^2, sd = sqrt(noise.level)), inverse = T)))
+    if(noise == "riem-gaussian") {
+      W <- Ptransf2D(W0, T, "logEuclidean")
+      P <- array(c(mapply(function(i, j) ast(f1[, , i, j], W[, , i, j]), grid.n$Var1, grid.n$Var2)), dim = dim(W))
+    } else if(noise == "log-gaussian") {
+      P <- Ptransf2D(f1 + W0, T, "logEuclidean")
+    }
+  } else if(noise %in% c("wishart", "log-wishart")) {
+    ## Generate iid zero mean (intrinsic) wishart noise
+    X0 <- array(c(replicate(n[1] * n[2] * df.wishart, complex(d, rnorm(d, sd = sqrt(1/2)),
+                  rnorm(d, sd = sqrt(1/2))))), dim = c(d, n[1] * df.wishart, n[2]))
+    W0 <- array(c(apply(X0, c(2,3), function(x) x %*% t(Conj(x)))), dim = c(d,d, n[1] * df.wishart, n[2]))
+    W <- array(c(mapply(function(i1, i2) apply(W0[, , (i1 - 1) * df.wishart + 1:df.wishart, i2], c(1, 2), mean),
+                        grid.n$Var1, grid.n$Var2)), dim = c(d, d, n))
+    if(noise.level != 1 & df.wishart >= d) {
+      W <- Ptransf2D(sqrt(noise.level) * Ptransf2D(W, F, "logEuclidean"), T, "logEuclidean")
+    }
+    if(noise == "wishart") {
+      P <- array(c(mapply(function(i1, i2) ast(f1[, , i1, i2], W[, , i1, i2]), grid.n$Var1,
+                          grid.n$Var2)), dim = dim(W))
+    } else {
+      P <- Ptransf2D(f1 + Ptransf2D(W, F, "logEuclidean"), T, "logEuclidean")
+    }
+  }
+  return(list(f = f, P = P))
 }
 

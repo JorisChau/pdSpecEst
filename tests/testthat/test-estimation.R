@@ -7,29 +7,27 @@ test_that("Correctly working 1D spectral estimation and clustering", {
   S <- 5
 
   ## rExamples and rARMA
-  example <- rExamples(2 * n, example = "gaussian")
+  example <- rExamples1D(n, example = "gaussian")
   expect_equal(dim(example$f), c(d, d, n))
-  expect_length(example$freq, n)
-  expect_equal(dim(example$per), c(d, d, n))
-  expect_equal(dim(example$ts), c(2 * n, d))
+  expect_equal(dim(example$P), c(d, d, n))
 
   ts.sim <- rARMA(n, d, array(0, c(d, d, 2)), array(0, c(d, d, 2)), diag(d))
   expect_type(ts.sim$X, "double")
   expect_equal(dim(ts.sim$X), c(n, d))
 
   ## pdPgram
-  pgram <- pdPgram(example$ts)
-  expect_equal(pgram$P, example$per)
-  expect_equal(length(pgram$freq), n)
+  pgram <- pdPgram(ts.sim$X)
+  expect_equal(dim(pgram$P), c(d, d, n / 2))
+  expect_equal(length(pgram$freq), n / 2)
 
   ## WavTransf1D and InvWavTransf1D
-  wt1 <- WavTransf1D(pgram$P, periodic = T)
-  wt2 <- WavTransf1D(pgram$P, metric = "logEuclidean")
+  wt1 <- WavTransf1D(example$P, periodic = T)
+  wt2 <- WavTransf1D(example$P, metric = "logEuclidean")
 
   expect_equal(length(unlist(wt1$D)), length(unlist(wt1$D.white)))
   expect_equal(length(unlist(wt2$D)), length(unlist(wt2$D.white)))
-  expect_equal(InvWavTransf1D(wt1$D, wt1$M0, periodic = T), pgram$P)
-  expect_equal(InvWavTransf1D(wt2$D, wt2$M0, metric = "logEuclidean"), pgram$P)
+  expect_equal(InvWavTransf1D(wt1$D, wt1$M0, periodic = T), example$P)
+  expect_equal(InvWavTransf1D(wt2$D, wt2$M0, metric = "logEuclidean"), example$P)
 
   ## pdCART
   wt1_den <- pdCART(wt1$D, wt1$D.white, order = 5, periodic = T)
@@ -40,11 +38,11 @@ test_that("Correctly working 1D spectral estimation and clustering", {
   expect_length(unlist(wt2_den$D_w), length(unlist(wt2$D)))
 
   ## pdSpecEst1D
-  f1 <- pdSpecEst1D(pgram$P)
-  f2 <- pdSpecEst1D(pgram$P, metric = "logEuclidean")
+  f1 <- pdSpecEst1D(example$P)
+  f2 <- pdSpecEst1D(example$P, metric = "logEuclidean")
 
-  expect_is(f1$f, is(pgram$P))
-  expect_equal(dim(f1$f), dim(pgram$P))
+  expect_is(f1$f, is(example$P))
+  expect_equal(dim(f1$f), dim(example$P))
   expect_type(f1$D[[1]], "complex")
   expect_type(f2$D[[1]], "complex")
   expect_length(unlist(f1$D), 164)
@@ -65,7 +63,7 @@ test_that("Correctly working 1D spectral estimation and clustering", {
   # expect_type(ci$depth.f$spatial, "double")
 
   ## pdSpecClust1D
-  P_s <- replicate(S, pgram$P)
+  P_s <- replicate(S, example$P)
   cl <- pdSpecClust1D(P_s, K = 2, metric = "logEuclidean")
 
   expect_equal(sum(cl$cl.prob), S)
@@ -96,14 +94,9 @@ test_that("Correctly working 2D spectral estimation and clustering", {
   example2 <- rExamples2D(n, d, example = "smiley")
 
   expect_equal(dim(example1$f), c(d,d,n))
-  expect_length(example1$tf.grid$time, n[1])
-  expect_length(example1$tf.grid$frequency, n[2])
-  expect_equal(dim(example1$per), c(d,d,n))
-
+  expect_equal(dim(example1$P), c(d,d,n))
   expect_equal(dim(example2$f), c(d,d,n))
-  expect_length(example2$tf.grid$time, n[1])
-  expect_length(example2$tf.grid$frequency, n[2])
-  expect_equal(dim(example2$per), c(d,d,n))
+  expect_equal(dim(example2$P), c(d,d,n))
 
   ## pdPgram2
   pgram1 <- pdPgram2D(matrix(rnorm(d * 2^8), ncol = d), method = "dpss")
@@ -134,11 +127,11 @@ test_that("Correctly working 2D spectral estimation and clustering", {
   expect_length(unlist(wt2_den$D_w), length(unlist(wt2$D)))
 
   ## pdSpecEst2D
-  f1 <- pdSpecEst2D(example1$per)
-  f2 <- pdSpecEst2D(example2$per, metric = "logEuclidean")
+  f1 <- pdSpecEst2D(example1$P)
+  f2 <- pdSpecEst2D(example2$P, metric = "logEuclidean")
 
-  expect_is(f1$f, is(example1$per))
-  expect_equal(dim(f1$f), dim(example1$per))
+  expect_is(f1$f, is(example1$P))
+  expect_equal(dim(f1$f), dim(example1$P))
   expect_type(f1$D[[1]], "complex")
   expect_type(f2$D[[1]], "complex")
   expect_length(unlist(f1$D), 336)
@@ -153,7 +146,7 @@ test_that("Correctly working 2D spectral estimation and clustering", {
   expect_length(unlist(f2$D.raw), 336)
 
   ## pdSpecClust2D
-  P_s <- replicate(S, example1$per)
+  P_s <- replicate(S, example1$P)
   cl <- pdSpecClust2D(P_s, K = 2, metric = "logEuclidean")
 
   expect_equal(sum(cl$cl.prob), S)

@@ -58,7 +58,7 @@ one of the following metrics: (i) Riemannian metric (default) as in (Bhatia, 200
 other metrics, see (Chau and von Sachs, 2017a) for more details.
 }
 \examples{
-P <- rExamples(2^8, example = "bumps")
+P <- rExamples1D(2^8, example = "bumps")
 P.wt <- WavTransf1D(P$f, periodic = FALSE)
 
 }

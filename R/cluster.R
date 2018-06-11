@@ -131,26 +131,6 @@ pdSpecClust1D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
     D.est[[s]] <- D.s$D
   }
 
-  ## if(!is.null(D.est)) {
-
-  # ## Define variables
-  # d = dim(D.est[[1]][[1]])[1]
-  # S = length(D.est)
-  # jmax = (if(missing(jmax)) length(D.est[[1]]) - 1 else jmax)
-  # L_b = round((dim(D.est[[1]][[2]])[3] - 2) / 2)
-  #
-  # D <- list()
-  # M01 <- array(dim = c(d, d, S))
-  # D.nzero <- matrix(NA, S, jmax + 1)
-  # for (s in 1:S) {
-  #   D[[s]] <- sapply(0:jmax, function(j) D.est[[s]][[j + 1]][, , L_b + 1:2^j, drop = F])
-  #   M01[, , s] <- M0[[s]][, , ceiling(dim(M0[[s]])[3] / 2)]
-  #   D.nzero[s, ] <- sapply(0:jmax, function(j) sum(apply(D.est1[[s]][[j + 1]], 3, function(D) any(c(D) != 0)))/2^j)
-  # }
-  # D.est <- D.est1
-  # M0 <- M01
-  ##}
-
   ## Update maximum wavelet scale of interest
   jmax <- min(jmax, sum(colMeans(D.nzero) > d.jmax) - 1)
 
@@ -160,7 +140,7 @@ pdSpecClust1D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
   ii <- 0
   while ((!stopit) & (ii < max.iter)) {
     dist <- t(sapply(1:S, function(s) t(sapply(1:K, function(k) pdDist(M0[, , s], cent[, , k],
-                                                                       metric = ifelse(metric == "Riemannian", "Riemannian", "Euclidean"))^2))))
+                                  metric = ifelse(metric == "Riemannian", "Riemannian", "Euclidean"))^2))))
     mu <- function(s) {
       if (!any(dist[s, ] < 1E-10)) {
         sapply(1:K, function(k) 1/sum((dist[s, k]/dist[s, ])^(1/(m - 1))))
@@ -341,8 +321,8 @@ pdSpecClust1D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
 #' }
 #'
 #' @examples
-#' ## Generate periodogram date for 4 subjects
-#' pgram <- function(seed) rExamples2D(c(2^5, 2^5), 2, example = "smiley", seed = seed)$per
+#' ## Generate periodogram data for 4 subjects
+#' pgram <- function(rescale) rescale * rExamples2D(c(2^5, 2^5), 2, example = "smiley")$P
 #' P <- array(c(replicate(2, pgram(1)), replicate(2, pgram(2))), dim=c(2,2,2^5,2^5,4))
 #'
 #' cl <- pdSpecClust2D(P, K = 2, metric = "logEuclidean")

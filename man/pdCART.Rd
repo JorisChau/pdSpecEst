@@ -55,13 +55,13 @@ all wavelet scales.
 }
 \examples{
 ## 1D
-X <- rExamples(256, example = "bumps")
-Coeffs <- WavTransf1D(X$per)
+X <- rExamples1D(256, example = "bumps")
+Coeffs <- WavTransf1D(X$P)
 pdCART(Coeffs$D, Coeffs$D.white, order = 5)$w ## logical tree of non-zero coefficients
 
 \dontrun{
 ## 2D
-P <- rExamples2D(c(2^7, 2^7), 3, example = "tvar")$per
+P <- rExamples2D(c(2^7, 2^7), 3, example = "tvar")$P
 Coeffs <- WavTransf2D(P, jmax = 5)
 pdCART(Coeffs$D, Coeffs$D.white, order = c(3, 3))$w
 }
