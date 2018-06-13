@@ -94,155 +94,72 @@
 #'
 #' @export
 pdSpecClust1D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1,
-                          eps = c(1e-04, 1e-04), tau = 0.5, max.iter = 50, return.centers = F, ...) {
+                          eps = c(1e-04, 1e-04), tau = 0.5, max_iter = 50, return.centers = F, ...) {
 
   ## Set variables
-  P = (if(missing(P)) NULL else P)
-  dots = list(...)
-  order = (if(is.null(dots$order)) 5 else dots$order)
-  alpha = (if(is.null(dots$alpha)) 1 else dots$alpha)
-  metric = match.arg(metric, c("Riemannian", "logEuclidean", "Cholesky", "rootEuclidean", "Euclidean"))
-  return.D = (if(is.null(dots$return.D)) F else dots$return.D)
-  method = (if(is.null(dots$method)) "fast" else dots$method)
-
-  ## input P
   d = dim(P)[1]
   S = dim(P)[4]
+  metric = match.arg(metric, c("Riemannian", "logEuclidean", "Cholesky", "rootEuclidean", "Euclidean"))
   jmax = (if(missing(jmax)) log2(dim(P)[3]) - 2 else jmax)
-  periodic = (if(is.null(dots$periodic)) T else dots$periodic)
-  if(periodic){
-    L = (order - 1) / 2
-    L_b = ceiling(L / 2)
-  } else{
-    L_b = 0
-  }
 
+  ## Compute denoised wavelet coefficients
   D <- D.est <- list()
   M0 <- array(dim = c(d, d, S))
-  M0.est <- array(dim = c(d, d, order, S))
   D.nzero <- matrix(NA, S, jmax + 1)
-  for (s in 1:S) {
-    D.s <- pdSpecEst1D(P[, , , s], order, metric, alpha, return = "D", method = method,
-                       periodic = periodic, jmax = jmax, return.D = "D.white")
-    D[[s]] <- sapply(0:jmax, function(j) D.s$D.white[[j + 1]][, , L_b + 1:2^j, drop = F])
-    M0[, , s] <- D.s$M0[, , L + 1]
-    M0.est[, , , s] <- D.s$M0
+  for(s in 1:S) {
+    D.s <- pdSpecEst1D(P[, , , s], metric = metric, return = "D", periodic = F,
+                       jmax = jmax, return.D = "D.white", ...)
+    D[[s]] <- D.s$D.white
+    M0[, , s] <- D.s$M0
     D.nzero[s, ] <- sapply(0:jmax, function(j) ifelse(j == 0, T, sum(D.s$tree.weights[[j]])/2^j))
     D.est[[s]] <- D.s$D
   }
 
   ## Update maximum wavelet scale of interest
   jmax <- min(jmax, sum(colMeans(D.nzero) > d.jmax) - 1)
+  n_jmax <- 2^(jmax + 1) - 1
 
-  ## C-medoids algorithm for midpoints
-  cent <- M0[, , sample(1:S, K)]
-  stopit <- F
-  ii <- 0
-  while ((!stopit) & (ii < max.iter)) {
-    dist <- t(sapply(1:S, function(s) t(sapply(1:K, function(k) pdDist(M0[, , s], cent[, , k],
-                                  metric = ifelse(metric == "Riemannian", "Riemannian", "Euclidean"))^2))))
-    mu <- function(s) {
-      if (!any(dist[s, ] < 1E-10)) {
-        sapply(1:K, function(k) 1/sum((dist[s, k]/dist[s, ])^(1/(m - 1))))
-      } else {
-        as.numeric(dist[s, ] < 1E-10)/sum(dist[s, ] < 1E-10)
-      }
-    }
-    clust <- t(sapply(1:S, mu))
-    cent1 <- array(dim = c(d, d, K))
-    for (k in 1:K) {
-      w <- clust[, k]^m/sum(clust[, k]^m)
-      cent1[, , k] <- pdMean(M0, w, metric = ifelse(metric == "Riemannian", "Riemannian", "Euclidean"))
-    }
-    stopit <- ifelse(isTRUE(sum(sapply(1:K, function(k) pdDist(cent[, , k], cent1[, , k],
-                                                               metric = ifelse(metric == "Riemannian", "Riemannian", "Euclidean"))^2)) > eps[1]), F, T)
-    cent <- cent1
-    ii <- ii + 1
-    if(ii == max.iter){
-      message("Reached maximum number of iterations in midpoint c-medoids algorithm.")
-    }
-  }
+  ## C++ c-medoids algorithm coarsest midpoints
+  clust <- cMeans_C(M0, M0[, , 1:K], S, K, m, eps[1], max_iter,
+                    ifelse(metric == "Riemannian", "Riemannian", "Euclidean"), matrix(1, S, K))
 
-  ## Weighted c-means algorithm for wavelet coeff's
-  DD <- lapply(0:jmax, function(j) sapply(1:S, function(s) D[[s]][[j + 1]], simplify = "array"))
-  cent <- lapply(0:jmax, function(j) array(dim = c(d, d, 2^j, K)))
-
-  ## Update centers wavelet coeff's
+  ## Set up variables for weighted c-means in wavelet domain
+  DD <- array(aperm(array(sapply(D, function(D) unlist(D[1:(jmax + 1)])),
+                          dim = c(d, d, n_jmax, S)), c(1, 2, 4, 3)), dim = c(d, d, n_jmax * S))
+  cent <- array(dim = c(d, d, n_jmax * K))
   for(k in 1:K) {
-    w <- clust[, k]^m/sum(clust[, k]^m)
-    for(j in 0:jmax){
-      cent[[j + 1]][, , , k] <- sapply(1:2^j, function(i) apply(array(rep(w, each = d^2),
-                                                                      dim = c(d, d, S)) * DD[[j + 1]][, , i, ], c(1, 2), sum),
-                                       simplify = "array")
+    w <- clust[, k, 1]^m / sum(clust[, k, 1]^m)
+    for(i in 1:n_jmax) {
+      cent[, , (k - 1) * n_jmax + i] <- apply(sweep(DD[, , (i - 1) * S + 1:S], 3, w, "*"), c(1, 2), sum)
     }
   }
-  stopit <- F
-  jj <- 0
-  dist0 <- dist
-  clust0 <- clust
-  cent1 <- lapply(0:jmax, function(j) array(dim = c(d, d, 2^j, K)))
-  distj <- function(D1, D2) sum(sapply(1:dim(D1)[3], function(i) NormF(D1[, , i, 1] - D2[, , i, 1])^2))
+  dist_weights <- (1 - exp(-tau * clust[, , 2])) / (1 + exp(-tau * clust[, , 2]))
 
-  ## Run weighted c-means algorithm
-  while ((!stopit) & (jj < max.iter)) {
-
-    ## distance to cluster centers
-    dist <- t(sapply(1:S, function(s) t(sapply(1:K, function(k) sum(sapply(0:jmax,
-                      function(j) (1 - exp(-tau * dist0[s, k]))/(1 + exp(-tau * dist0[s, k])) *
-                      distj(DD[[j + 1]][, , , s, drop = F], cent[[j + 1]][, , , k, drop = F])))))))
-
-    ## update cluster weights
-    mu <- function(s) {
-      if (!any(dist[s, ] < 1E-10)) {
-        sapply(1:K, function(k) 1/sum((dist[s, k]/dist[s, ])^(1/(m - 1))))
-      } else if (all(dist[s, ] < 1E-10)) {
-        clust[s, ]
-      } else {
-        as.numeric(dist[s, ] < 1E-10)/sum(dist[s, ] < 1E-10)
-      }
-    }
-    clust <- t(sapply(1:S, mu))
-
-    ## update centers
-    for (k in 1:K) {
-      w <- clust[, k]^m/sum(clust[, k]^m)
-      for (j in 0:jmax) {
-        cent1[[j + 1]][, , , k] <- sapply(1:2^j, function(i) apply(array(rep(w,  each = d^2),
-                                        dim = c(d, d, S)) * DD[[j + 1]][, , i, ], c(1, 2), sum),
-                                          simplify = "array")
-      }
-    }
-    stopit <- ifelse(isTRUE(sum(sapply(1:K, function(k) sum(sapply(0:jmax, function(j)
-      distj(cent[[j + 1]][, , , k, drop = F],
-            cent1[[j + 1]][, , , k, drop = F]))))) > eps[2]), F, T)
-    cent <- cent1
-    jj <- jj + 1
-    if(jj == max.iter){
-      message("Reached maximum number of iterations in wavelet domain weighted c-means algorithm.")
-    }
-  }
+  ## C++ weighted c-means algorithm wavelet domain
+  clust <- cMeans_C(DD, cent, S, K, m, eps[2], max_iter, "Euclidean", dist_weights)[, , 1]
   rownames(clust) <- paste0("Subject", 1:S)
   colnames(clust) <- paste0("Cluster", 1:K)
 
-  ## Compute centers
-  weights <- unname(sapply(1:K, function(k) clust[, k]^m/sum(clust[, k]^m)))
-  cent.M0 <- lapply(1:K, function(k) sapply(1:dim(M0.est)[3], function(i) pdMean(M0.est[, , i,], weights[, k],
-                              metric = ifelse(metric == "Riemannian", "Riemannian", "Euclidean")), simplify = "array"))
-  DD.est <- lapply(1:length(D.est[[1]]), function(j) sapply(1:S, function(s) D.est[[s]][[j]],
-                                                            simplify = "array"))
-  cent.D <-  lapply(1:K, function(k) lapply(1:length(DD.est), function(j) sapply(1:dim(DD.est[[j]])[3],
-                                                                                 function(i) apply(array(rep(weights[, k], each = d^2), dim = c(d, d, S)) *
-                                                                                                     DD.est[[j]][, , i, ], c(1, 2), sum), simplify = "array")))
-  ## Return 'cl.centers.f' or not
-  if(return.centers){
-    cent.f <- lapply(1:K, function(k) InvWavTransf1D(cent.D[[k]], cent.M0[[k]], order = order,
-                                                     periodic = periodic, metric = metric, method = method))
+  ## Compute wavelet domain centroids
+  cent.M0 <- cent.D <- list()
+  for(k in 1:K) {
+    w <- clust[, k]^m / sum(clust[, k]^m)
+    cent.M0[[k]] <- array(pdMean(M0, w, ifelse(metric == "Riemannian", "Riemannian", "Euclidean"),
+                                 grad_desc = T), dim = c(d, d, 1))
+    cent.D[[k]] <- lapply(1:length(D.est[[1]]), function(j) {
+      apply(sweep(sapply(D.est, "[[", j, simplify = "array"), 4, w, "*"), c(1, 2, 3), sum)
+    })
   }
 
-  return(list(cl.prob = clust, cl.centers.D = cent.D, cl.centers.M0 = cent.M0, cl.centers.f =
-                (if(return.centers) cent.f else NULL), cl.jmax = jmax, iters = c(ii, jj)))
+  ## Compute inverse wavelet transforms and return output
+  if(isTRUE(return.centers)){
+    cent.f <- lapply(1:K, function(k) InvWavTransf1D(cent.D[[k]], cent.M0[[k]], periodic = F, metric = metric, ...))
+    res <- list(cl.prob = clust, cl.centers.D = cent.D, cl.centers.M0 = cent.M0, cl.centers.f = cent.f, cl.jmax = jmax)
+  } else {
+    res <- list(cl.prob = clust, cl.centers.D = cent.D, cl.centers.M0 = cent.M0, cl.jmax = jmax)
+  }
+  return(res)
 }
-
 
 #' Intrinsic 2D wavelet-based clustering of multivariate time-varying spectra.
 #'

@@ -314,7 +314,7 @@ arma::cx_cube impute_C(arma::cx_cube M0, arma::mat W, int L, bool inverse,
           //   }
         }
         else {
-          M_bar.slice(i) = mean(M.head_slices(i + 1), 2);
+          M_bar.slice(i) = arma::mean(M.head_slices(i + 1), 2);
         }
       }
       if((k - L) < 0) {
@@ -511,3 +511,131 @@ arma::cx_cube impute2D_C(arma::cx_cube M0, arma::field<arma::mat> W, int n1, int
   }
   return M1;
 }
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export()]]
+
+double pdDist_C(arma::cx_mat A, arma::cx_mat B, std::string method) {
+  try{
+    arma::cx_mat A2;
+    // compute distance
+    if(method == "Riemannian") {
+      arma::cx_mat A1 = arma::inv_sympd(arma::sqrtmat_sympd(A));
+      A2 = arma::logmat_sympd(A1 * B * A1);
+    }
+    else if (method == "logEuclidean") {
+      A2 = arma::logmat_sympd(A) - arma::logmat_sympd(B);
+    }
+    else if (method == "Cholesky") {
+      A2 = arma::chol(A) - arma::chol(B);
+    }
+    else if (method == "rootEuclidean") {
+      A2 = arma::sqrtmat_sympd(A) - arma::sqrtmat_sympd(B);
+    }
+    else {
+      A2 = A - B;
+    }
+    if(A2.has_nan()) {
+      Rcpp::stop("c++ function logmat_sympd() failed, matrix possibly not positive definite");
+    }
+    return arma::norm(A2, "fro");
+    // catch exceptions
+  } catch(std::exception &ex) {
+    forward_exception_to_r(ex);
+  } catch(...) {
+    Rcpp::exception("c++ exception (unknown reason)");
+  }
+  return NA_REAL; //not reached
+}
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export()]]
+
+arma::cube cMeans_C(arma::cx_cube M, arma::cx_cube centroids, int S, int K, double m,
+                   double eps, int max_iter, std::string metric, arma::mat dist_weights) {
+
+  // Initialize parameters
+  int d = M.n_rows;
+  int n = M.n_slices / S;
+  arma::mat dist_mat(S, K);
+  arma::mat clust_mat(S, K);
+  arma::cx_cube centroids_new(arma::size(centroids));
+  arma::vec w(S);
+  bool stopit = false;
+  int iter = 0;
+
+  while(!stopit && iter < max_iter) {
+
+    for(int s = 0; s < S; ++s) {
+      // Update distance matrix
+      for(int k = 0; k < K; ++k) {
+        // Integrated weighted distances over n locations
+        double dist_sk = 0;
+        for(int i = 0; i < n; ++i) {
+          dist_sk += std::pow(pdDist_C(M.slice(i * S + s), centroids.slice(k * n + i), metric), (double)2);
+        }
+        dist_mat(s, k) = dist_weights(s, k) * dist_sk;
+      }
+      // Update fuzzy cluster assignments
+      if(dist_mat.row(s).min() >= 1E-10) {
+        // Update for non-zero distances
+        for(int k = 0; k < K; ++k) {
+          clust_mat(s, k) = std::pow(dist_mat(s, k), -1 / (m - 1)) /
+            arma::accu(arma::pow(dist_mat.row(s), -1 / (m - 1)));
+        }
+      }
+      else {
+        // Update for (approximately) zero distances
+        clust_mat.row(s).zeros();
+        for(int k = 0; k < K; ++k) {
+          if(dist_mat(s, k) < 1E-10) {
+            clust_mat(s, k) = 1 / arma::accu(dist_mat.row(s) < 1E-10);
+          }
+        }
+      }
+    }
+    // Compute centroids based on new cluster weights
+    for(int k = 0; k < K; ++k) {
+      // Compute centroid weights
+      w = arma::pow(clust_mat.col(k), m) / arma::accu(arma::pow(clust_mat.col(k), m));
+
+      for(int i = 0; i < n; ++i) {
+        if(metric == "Riemannian") {
+          // Riemannian weighted average
+          centroids_new.slice(k * n + i) = pdMean_C_approx(M.slices(i * S, (i + 1) * S - 1), w);
+        }
+        else {
+          // Euclidean weighted average
+          arma::cx_mat cent_k = arma::zeros<arma::cx_mat>(d, d);
+          for(int s = 0; s < S; ++s){
+            cent_k += w[s] * M.slice(i * S + s);
+          }
+          centroids_new.slice(k * n + i) = cent_k;
+        }
+      }
+    }
+
+    // Revalidate stopping criterion
+    double dist_old_new = 0;
+    for(unsigned int i = 0; i < centroids.n_slices; ++i) {
+      dist_old_new += std::pow(pdDist_C(centroids.slice(i), centroids_new.slice(i), metric), (double)2);
+    }
+    stopit = (dist_old_new < eps);
+
+    // Update for next iteration
+    centroids = centroids_new;
+    if(iter >= max_iter) {
+      Rcpp::warning("Reached maximum number of iterations in c-medoids algorithm.");
+    }
+    ++iter;
+  }
+
+  // Return final cluster assignments and distance matrix
+  arma::cube res(S, K, 2);
+  res.slice(0) = clust_mat;
+  res.slice(1) = dist_mat;
+
+  return res;
+}
+
+

@@ -6,6 +6,224 @@
 
 using namespace Rcpp;
 
+// Mid
+arma::cx_mat Mid(arma::cx_mat A, arma::cx_mat B);
+RcppExport SEXP _pdSpecEst_Mid(SEXP ASEXP, SEXP BSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cx_mat >::type A(ASEXP);
+    Rcpp::traits::input_parameter< arma::cx_mat >::type B(BSEXP);
+    rcpp_result_gen = Rcpp::wrap(Mid(A, B));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Sqrt
+arma::cx_mat Sqrt(arma::cx_mat M);
+RcppExport SEXP _pdSpecEst_Sqrt(SEXP MSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cx_mat >::type M(MSEXP);
+    rcpp_result_gen = Rcpp::wrap(Sqrt(M));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Chol_C
+arma::cx_mat Chol_C(arma::cx_mat M, bool bias, bool inverse);
+RcppExport SEXP _pdSpecEst_Chol_C(SEXP MSEXP, SEXP biasSEXP, SEXP inverseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cx_mat >::type M(MSEXP);
+    Rcpp::traits::input_parameter< bool >::type bias(biasSEXP);
+    Rcpp::traits::input_parameter< bool >::type inverse(inverseSEXP);
+    rcpp_result_gen = Rcpp::wrap(Chol_C(M, bias, inverse));
+    return rcpp_result_gen;
+END_RCPP
+}
+// iSqrt
+arma::cx_mat iSqrt(arma::cx_mat M);
+RcppExport SEXP _pdSpecEst_iSqrt(SEXP MSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cx_mat >::type M(MSEXP);
+    rcpp_result_gen = Rcpp::wrap(iSqrt(M));
+    return rcpp_result_gen;
+END_RCPP
+}
+// NormF
+double NormF(arma::cx_mat M);
+RcppExport SEXP _pdSpecEst_NormF(SEXP MSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cx_mat >::type M(MSEXP);
+    rcpp_result_gen = Rcpp::wrap(NormF(M));
+    return rcpp_result_gen;
+END_RCPP
+}
+// wavPyr_C
+arma::cx_cube wavPyr_C(arma::cx_cube P, int L, int J, arma::ivec Nj, std::string metric);
+RcppExport SEXP _pdSpecEst_wavPyr_C(SEXP PSEXP, SEXP LSEXP, SEXP JSEXP, SEXP NjSEXP, SEXP metricSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cx_cube >::type P(PSEXP);
+    Rcpp::traits::input_parameter< int >::type L(LSEXP);
+    Rcpp::traits::input_parameter< int >::type J(JSEXP);
+    Rcpp::traits::input_parameter< arma::ivec >::type Nj(NjSEXP);
+    Rcpp::traits::input_parameter< std::string >::type metric(metricSEXP);
+    rcpp_result_gen = Rcpp::wrap(wavPyr_C(P, L, J, Nj, metric));
+    return rcpp_result_gen;
+END_RCPP
+}
+// wavCoeff_C
+arma::cx_cube wavCoeff_C(arma::cx_cube M1, arma::cx_cube M0, double j, std::string metric);
+RcppExport SEXP _pdSpecEst_wavCoeff_C(SEXP M1SEXP, SEXP M0SEXP, SEXP jSEXP, SEXP metricSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cx_cube >::type M1(M1SEXP);
+    Rcpp::traits::input_parameter< arma::cx_cube >::type M0(M0SEXP);
+    Rcpp::traits::input_parameter< double >::type j(jSEXP);
+    Rcpp::traits::input_parameter< std::string >::type metric(metricSEXP);
+    rcpp_result_gen = Rcpp::wrap(wavCoeff_C(M1, M0, j, metric));
+    return rcpp_result_gen;
+END_RCPP
+}
+// reconstr_C
+arma::cx_cube reconstr_C(arma::cx_cube M1, arma::cx_cube M0, arma::cx_cube Dj, double j, int nj, bool in_sample, int L1, std::string metric);
+RcppExport SEXP _pdSpecEst_reconstr_C(SEXP M1SEXP, SEXP M0SEXP, SEXP DjSEXP, SEXP jSEXP, SEXP njSEXP, SEXP in_sampleSEXP, SEXP L1SEXP, SEXP metricSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cx_cube >::type M1(M1SEXP);
+    Rcpp::traits::input_parameter< arma::cx_cube >::type M0(M0SEXP);
+    Rcpp::traits::input_parameter< arma::cx_cube >::type Dj(DjSEXP);
+    Rcpp::traits::input_parameter< double >::type j(jSEXP);
+    Rcpp::traits::input_parameter< int >::type nj(njSEXP);
+    Rcpp::traits::input_parameter< bool >::type in_sample(in_sampleSEXP);
+    Rcpp::traits::input_parameter< int >::type L1(L1SEXP);
+    Rcpp::traits::input_parameter< std::string >::type metric(metricSEXP);
+    rcpp_result_gen = Rcpp::wrap(reconstr_C(M1, M0, Dj, j, nj, in_sample, L1, metric));
+    return rcpp_result_gen;
+END_RCPP
+}
+// reconstr2D_C
+arma::cx_cube reconstr2D_C(arma::cx_cube M1, arma::cx_cube D, double j, arma::ivec n, bool in_sample, std::string metric);
+RcppExport SEXP _pdSpecEst_reconstr2D_C(SEXP M1SEXP, SEXP DSEXP, SEXP jSEXP, SEXP nSEXP, SEXP in_sampleSEXP, SEXP metricSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cx_cube >::type M1(M1SEXP);
+    Rcpp::traits::input_parameter< arma::cx_cube >::type D(DSEXP);
+    Rcpp::traits::input_parameter< double >::type j(jSEXP);
+    Rcpp::traits::input_parameter< arma::ivec >::type n(nSEXP);
+    Rcpp::traits::input_parameter< bool >::type in_sample(in_sampleSEXP);
+    Rcpp::traits::input_parameter< std::string >::type metric(metricSEXP);
+    rcpp_result_gen = Rcpp::wrap(reconstr2D_C(M1, D, j, n, in_sample, metric));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Ptransf2D_C
+arma::cx_cube Ptransf2D_C(arma::cx_cube P, bool inverse, bool chol_bias, std::string metric);
+RcppExport SEXP _pdSpecEst_Ptransf2D_C(SEXP PSEXP, SEXP inverseSEXP, SEXP chol_biasSEXP, SEXP metricSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cx_cube >::type P(PSEXP);
+    Rcpp::traits::input_parameter< bool >::type inverse(inverseSEXP);
+    Rcpp::traits::input_parameter< bool >::type chol_bias(chol_biasSEXP);
+    Rcpp::traits::input_parameter< std::string >::type metric(metricSEXP);
+    rcpp_result_gen = Rcpp::wrap(Ptransf2D_C(P, inverse, chol_bias, metric));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Expm
+arma::cx_mat Expm(arma::cx_mat P, arma::cx_mat H);
+RcppExport SEXP _pdSpecEst_Expm(SEXP PSEXP, SEXP HSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cx_mat >::type P(PSEXP);
+    Rcpp::traits::input_parameter< arma::cx_mat >::type H(HSEXP);
+    rcpp_result_gen = Rcpp::wrap(Expm(P, H));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Logm
+arma::cx_mat Logm(arma::cx_mat P, arma::cx_mat Q);
+RcppExport SEXP _pdSpecEst_Logm(SEXP PSEXP, SEXP QSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cx_mat >::type P(PSEXP);
+    Rcpp::traits::input_parameter< arma::cx_mat >::type Q(QSEXP);
+    rcpp_result_gen = Rcpp::wrap(Logm(P, Q));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ParTrans
+arma::cx_mat ParTrans(arma::cx_mat P, arma::cx_mat V, arma::cx_mat W);
+RcppExport SEXP _pdSpecEst_ParTrans(SEXP PSEXP, SEXP VSEXP, SEXP WSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cx_mat >::type P(PSEXP);
+    Rcpp::traits::input_parameter< arma::cx_mat >::type V(VSEXP);
+    Rcpp::traits::input_parameter< arma::cx_mat >::type W(WSEXP);
+    rcpp_result_gen = Rcpp::wrap(ParTrans(P, V, W));
+    return rcpp_result_gen;
+END_RCPP
+}
+// E_coeff
+arma::vec E_coeff(arma::cx_mat H);
+RcppExport SEXP _pdSpecEst_E_coeff(SEXP HSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cx_mat >::type H(HSEXP);
+    rcpp_result_gen = Rcpp::wrap(E_coeff(H));
+    return rcpp_result_gen;
+END_RCPP
+}
+// T_coeff
+arma::vec T_coeff(arma::cx_mat H, arma::cx_mat y);
+RcppExport SEXP _pdSpecEst_T_coeff(SEXP HSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cx_mat >::type H(HSEXP);
+    Rcpp::traits::input_parameter< arma::cx_mat >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(T_coeff(H, y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// E_coeff_inv
+arma::cx_mat E_coeff_inv(arma::vec coeff);
+RcppExport SEXP _pdSpecEst_E_coeff_inv(SEXP coeffSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type coeff(coeffSEXP);
+    rcpp_result_gen = Rcpp::wrap(E_coeff_inv(coeff));
+    return rcpp_result_gen;
+END_RCPP
+}
+// T_coeff_inv
+arma::cx_mat T_coeff_inv(arma::vec coeff, arma::cx_mat y);
+RcppExport SEXP _pdSpecEst_T_coeff_inv(SEXP coeffSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type coeff(coeffSEXP);
+    Rcpp::traits::input_parameter< arma::cx_mat >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(T_coeff_inv(coeff, y));
+    return rcpp_result_gen;
+END_RCPP
+}
 // ARMA
 arma::mat ARMA(arma::cube Phi, arma::cube Theta, arma::mat Z, int len);
 RcppExport SEXP _pdSpecEst_ARMA(SEXP PhiSEXP, SEXP ThetaSEXP, SEXP ZSEXP, SEXP lenSEXP) {
@@ -167,127 +385,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// Mid
-arma::cx_mat Mid(arma::cx_mat A, arma::cx_mat B);
-RcppExport SEXP _pdSpecEst_Mid(SEXP ASEXP, SEXP BSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cx_mat >::type A(ASEXP);
-    Rcpp::traits::input_parameter< arma::cx_mat >::type B(BSEXP);
-    rcpp_result_gen = Rcpp::wrap(Mid(A, B));
-    return rcpp_result_gen;
-END_RCPP
-}
-// Sqrt
-arma::cx_mat Sqrt(arma::cx_mat M);
-RcppExport SEXP _pdSpecEst_Sqrt(SEXP MSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cx_mat >::type M(MSEXP);
-    rcpp_result_gen = Rcpp::wrap(Sqrt(M));
-    return rcpp_result_gen;
-END_RCPP
-}
-// Chol_C
-arma::cx_mat Chol_C(arma::cx_mat M, bool bias, bool inverse);
-RcppExport SEXP _pdSpecEst_Chol_C(SEXP MSEXP, SEXP biasSEXP, SEXP inverseSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cx_mat >::type M(MSEXP);
-    Rcpp::traits::input_parameter< bool >::type bias(biasSEXP);
-    Rcpp::traits::input_parameter< bool >::type inverse(inverseSEXP);
-    rcpp_result_gen = Rcpp::wrap(Chol_C(M, bias, inverse));
-    return rcpp_result_gen;
-END_RCPP
-}
-// iSqrt
-arma::cx_mat iSqrt(arma::cx_mat M);
-RcppExport SEXP _pdSpecEst_iSqrt(SEXP MSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cx_mat >::type M(MSEXP);
-    rcpp_result_gen = Rcpp::wrap(iSqrt(M));
-    return rcpp_result_gen;
-END_RCPP
-}
-// NormF
-double NormF(arma::cx_mat M);
-RcppExport SEXP _pdSpecEst_NormF(SEXP MSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cx_mat >::type M(MSEXP);
-    rcpp_result_gen = Rcpp::wrap(NormF(M));
-    return rcpp_result_gen;
-END_RCPP
-}
-// wavPyr_C
-arma::cx_cube wavPyr_C(arma::cx_cube P, int L, int J, arma::ivec Nj, std::string metric);
-RcppExport SEXP _pdSpecEst_wavPyr_C(SEXP PSEXP, SEXP LSEXP, SEXP JSEXP, SEXP NjSEXP, SEXP metricSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cx_cube >::type P(PSEXP);
-    Rcpp::traits::input_parameter< int >::type L(LSEXP);
-    Rcpp::traits::input_parameter< int >::type J(JSEXP);
-    Rcpp::traits::input_parameter< arma::ivec >::type Nj(NjSEXP);
-    Rcpp::traits::input_parameter< std::string >::type metric(metricSEXP);
-    rcpp_result_gen = Rcpp::wrap(wavPyr_C(P, L, J, Nj, metric));
-    return rcpp_result_gen;
-END_RCPP
-}
-// wavCoeff_C
-arma::cx_cube wavCoeff_C(arma::cx_cube M1, arma::cx_cube M0, double j, std::string metric);
-RcppExport SEXP _pdSpecEst_wavCoeff_C(SEXP M1SEXP, SEXP M0SEXP, SEXP jSEXP, SEXP metricSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cx_cube >::type M1(M1SEXP);
-    Rcpp::traits::input_parameter< arma::cx_cube >::type M0(M0SEXP);
-    Rcpp::traits::input_parameter< double >::type j(jSEXP);
-    Rcpp::traits::input_parameter< std::string >::type metric(metricSEXP);
-    rcpp_result_gen = Rcpp::wrap(wavCoeff_C(M1, M0, j, metric));
-    return rcpp_result_gen;
-END_RCPP
-}
-// reconstr_C
-arma::cx_cube reconstr_C(arma::cx_cube M1, arma::cx_cube M0, arma::cx_cube Dj, double j, int nj, bool in_sample, int L1, std::string metric);
-RcppExport SEXP _pdSpecEst_reconstr_C(SEXP M1SEXP, SEXP M0SEXP, SEXP DjSEXP, SEXP jSEXP, SEXP njSEXP, SEXP in_sampleSEXP, SEXP L1SEXP, SEXP metricSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cx_cube >::type M1(M1SEXP);
-    Rcpp::traits::input_parameter< arma::cx_cube >::type M0(M0SEXP);
-    Rcpp::traits::input_parameter< arma::cx_cube >::type Dj(DjSEXP);
-    Rcpp::traits::input_parameter< double >::type j(jSEXP);
-    Rcpp::traits::input_parameter< int >::type nj(njSEXP);
-    Rcpp::traits::input_parameter< bool >::type in_sample(in_sampleSEXP);
-    Rcpp::traits::input_parameter< int >::type L1(L1SEXP);
-    Rcpp::traits::input_parameter< std::string >::type metric(metricSEXP);
-    rcpp_result_gen = Rcpp::wrap(reconstr_C(M1, M0, Dj, j, nj, in_sample, L1, metric));
-    return rcpp_result_gen;
-END_RCPP
-}
-// reconstr2D_C
-arma::cx_cube reconstr2D_C(arma::cx_cube M1, arma::cx_cube D, double j, arma::ivec n, bool in_sample, std::string metric);
-RcppExport SEXP _pdSpecEst_reconstr2D_C(SEXP M1SEXP, SEXP DSEXP, SEXP jSEXP, SEXP nSEXP, SEXP in_sampleSEXP, SEXP metricSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cx_cube >::type M1(M1SEXP);
-    Rcpp::traits::input_parameter< arma::cx_cube >::type D(DSEXP);
-    Rcpp::traits::input_parameter< double >::type j(jSEXP);
-    Rcpp::traits::input_parameter< arma::ivec >::type n(nSEXP);
-    Rcpp::traits::input_parameter< bool >::type in_sample(in_sampleSEXP);
-    Rcpp::traits::input_parameter< std::string >::type metric(metricSEXP);
-    rcpp_result_gen = Rcpp::wrap(reconstr2D_C(M1, D, j, n, in_sample, metric));
-    return rcpp_result_gen;
-END_RCPP
-}
 // pdDist_C
 double pdDist_C(arma::cx_mat A, arma::cx_mat B, std::string method);
 RcppExport SEXP _pdSpecEst_pdDist_C(SEXP ASEXP, SEXP BSEXP, SEXP methodSEXP) {
@@ -301,105 +398,44 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// Ptransf2D_C
-arma::cx_cube Ptransf2D_C(arma::cx_cube P, bool inverse, bool chol_bias, std::string metric);
-RcppExport SEXP _pdSpecEst_Ptransf2D_C(SEXP PSEXP, SEXP inverseSEXP, SEXP chol_biasSEXP, SEXP metricSEXP) {
+// cMeans_C
+arma::cube cMeans_C(arma::cx_cube M, arma::cx_cube centroids, int S, int K, double m, double eps, int max_iter, std::string metric, arma::mat dist_weights);
+RcppExport SEXP _pdSpecEst_cMeans_C(SEXP MSEXP, SEXP centroidsSEXP, SEXP SSEXP, SEXP KSEXP, SEXP mSEXP, SEXP epsSEXP, SEXP max_iterSEXP, SEXP metricSEXP, SEXP dist_weightsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cx_cube >::type P(PSEXP);
-    Rcpp::traits::input_parameter< bool >::type inverse(inverseSEXP);
-    Rcpp::traits::input_parameter< bool >::type chol_bias(chol_biasSEXP);
+    Rcpp::traits::input_parameter< arma::cx_cube >::type M(MSEXP);
+    Rcpp::traits::input_parameter< arma::cx_cube >::type centroids(centroidsSEXP);
+    Rcpp::traits::input_parameter< int >::type S(SSEXP);
+    Rcpp::traits::input_parameter< int >::type K(KSEXP);
+    Rcpp::traits::input_parameter< double >::type m(mSEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
     Rcpp::traits::input_parameter< std::string >::type metric(metricSEXP);
-    rcpp_result_gen = Rcpp::wrap(Ptransf2D_C(P, inverse, chol_bias, metric));
-    return rcpp_result_gen;
-END_RCPP
-}
-// Expm
-arma::cx_mat Expm(arma::cx_mat P, arma::cx_mat H);
-RcppExport SEXP _pdSpecEst_Expm(SEXP PSEXP, SEXP HSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cx_mat >::type P(PSEXP);
-    Rcpp::traits::input_parameter< arma::cx_mat >::type H(HSEXP);
-    rcpp_result_gen = Rcpp::wrap(Expm(P, H));
-    return rcpp_result_gen;
-END_RCPP
-}
-// Logm
-arma::cx_mat Logm(arma::cx_mat P, arma::cx_mat Q);
-RcppExport SEXP _pdSpecEst_Logm(SEXP PSEXP, SEXP QSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cx_mat >::type P(PSEXP);
-    Rcpp::traits::input_parameter< arma::cx_mat >::type Q(QSEXP);
-    rcpp_result_gen = Rcpp::wrap(Logm(P, Q));
-    return rcpp_result_gen;
-END_RCPP
-}
-// ParTrans
-arma::cx_mat ParTrans(arma::cx_mat P, arma::cx_mat V, arma::cx_mat W);
-RcppExport SEXP _pdSpecEst_ParTrans(SEXP PSEXP, SEXP VSEXP, SEXP WSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cx_mat >::type P(PSEXP);
-    Rcpp::traits::input_parameter< arma::cx_mat >::type V(VSEXP);
-    Rcpp::traits::input_parameter< arma::cx_mat >::type W(WSEXP);
-    rcpp_result_gen = Rcpp::wrap(ParTrans(P, V, W));
-    return rcpp_result_gen;
-END_RCPP
-}
-// E_coeff
-arma::vec E_coeff(arma::cx_mat H);
-RcppExport SEXP _pdSpecEst_E_coeff(SEXP HSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cx_mat >::type H(HSEXP);
-    rcpp_result_gen = Rcpp::wrap(E_coeff(H));
-    return rcpp_result_gen;
-END_RCPP
-}
-// T_coeff
-arma::vec T_coeff(arma::cx_mat H, arma::cx_mat y);
-RcppExport SEXP _pdSpecEst_T_coeff(SEXP HSEXP, SEXP ySEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::cx_mat >::type H(HSEXP);
-    Rcpp::traits::input_parameter< arma::cx_mat >::type y(ySEXP);
-    rcpp_result_gen = Rcpp::wrap(T_coeff(H, y));
-    return rcpp_result_gen;
-END_RCPP
-}
-// E_coeff_inv
-arma::cx_mat E_coeff_inv(arma::vec coeff);
-RcppExport SEXP _pdSpecEst_E_coeff_inv(SEXP coeffSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type coeff(coeffSEXP);
-    rcpp_result_gen = Rcpp::wrap(E_coeff_inv(coeff));
-    return rcpp_result_gen;
-END_RCPP
-}
-// T_coeff_inv
-arma::cx_mat T_coeff_inv(arma::vec coeff, arma::cx_mat y);
-RcppExport SEXP _pdSpecEst_T_coeff_inv(SEXP coeffSEXP, SEXP ySEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type coeff(coeffSEXP);
-    Rcpp::traits::input_parameter< arma::cx_mat >::type y(ySEXP);
-    rcpp_result_gen = Rcpp::wrap(T_coeff_inv(coeff, y));
+    Rcpp::traits::input_parameter< arma::mat >::type dist_weights(dist_weightsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cMeans_C(M, centroids, S, K, m, eps, max_iter, metric, dist_weights));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_pdSpecEst_Mid", (DL_FUNC) &_pdSpecEst_Mid, 2},
+    {"_pdSpecEst_Sqrt", (DL_FUNC) &_pdSpecEst_Sqrt, 1},
+    {"_pdSpecEst_Chol_C", (DL_FUNC) &_pdSpecEst_Chol_C, 3},
+    {"_pdSpecEst_iSqrt", (DL_FUNC) &_pdSpecEst_iSqrt, 1},
+    {"_pdSpecEst_NormF", (DL_FUNC) &_pdSpecEst_NormF, 1},
+    {"_pdSpecEst_wavPyr_C", (DL_FUNC) &_pdSpecEst_wavPyr_C, 5},
+    {"_pdSpecEst_wavCoeff_C", (DL_FUNC) &_pdSpecEst_wavCoeff_C, 4},
+    {"_pdSpecEst_reconstr_C", (DL_FUNC) &_pdSpecEst_reconstr_C, 8},
+    {"_pdSpecEst_reconstr2D_C", (DL_FUNC) &_pdSpecEst_reconstr2D_C, 6},
+    {"_pdSpecEst_Ptransf2D_C", (DL_FUNC) &_pdSpecEst_Ptransf2D_C, 4},
+    {"_pdSpecEst_Expm", (DL_FUNC) &_pdSpecEst_Expm, 2},
+    {"_pdSpecEst_Logm", (DL_FUNC) &_pdSpecEst_Logm, 2},
+    {"_pdSpecEst_ParTrans", (DL_FUNC) &_pdSpecEst_ParTrans, 3},
+    {"_pdSpecEst_E_coeff", (DL_FUNC) &_pdSpecEst_E_coeff, 1},
+    {"_pdSpecEst_T_coeff", (DL_FUNC) &_pdSpecEst_T_coeff, 2},
+    {"_pdSpecEst_E_coeff_inv", (DL_FUNC) &_pdSpecEst_E_coeff_inv, 1},
+    {"_pdSpecEst_T_coeff_inv", (DL_FUNC) &_pdSpecEst_T_coeff_inv, 2},
     {"_pdSpecEst_ARMA", (DL_FUNC) &_pdSpecEst_ARMA, 4},
     {"_pdSpecEst_pgram_C", (DL_FUNC) &_pdSpecEst_pgram_C, 5},
     {"_pdSpecEst_Mid_w", (DL_FUNC) &_pdSpecEst_Mid_w, 4},
@@ -411,24 +447,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pdSpecEst_impute_C", (DL_FUNC) &_pdSpecEst_impute_C, 6},
     {"_pdSpecEst_wavPyr2D_C", (DL_FUNC) &_pdSpecEst_wavPyr2D_C, 4},
     {"_pdSpecEst_impute2D_C", (DL_FUNC) &_pdSpecEst_impute2D_C, 7},
-    {"_pdSpecEst_Mid", (DL_FUNC) &_pdSpecEst_Mid, 2},
-    {"_pdSpecEst_Sqrt", (DL_FUNC) &_pdSpecEst_Sqrt, 1},
-    {"_pdSpecEst_Chol_C", (DL_FUNC) &_pdSpecEst_Chol_C, 3},
-    {"_pdSpecEst_iSqrt", (DL_FUNC) &_pdSpecEst_iSqrt, 1},
-    {"_pdSpecEst_NormF", (DL_FUNC) &_pdSpecEst_NormF, 1},
-    {"_pdSpecEst_wavPyr_C", (DL_FUNC) &_pdSpecEst_wavPyr_C, 5},
-    {"_pdSpecEst_wavCoeff_C", (DL_FUNC) &_pdSpecEst_wavCoeff_C, 4},
-    {"_pdSpecEst_reconstr_C", (DL_FUNC) &_pdSpecEst_reconstr_C, 8},
-    {"_pdSpecEst_reconstr2D_C", (DL_FUNC) &_pdSpecEst_reconstr2D_C, 6},
     {"_pdSpecEst_pdDist_C", (DL_FUNC) &_pdSpecEst_pdDist_C, 3},
-    {"_pdSpecEst_Ptransf2D_C", (DL_FUNC) &_pdSpecEst_Ptransf2D_C, 4},
-    {"_pdSpecEst_Expm", (DL_FUNC) &_pdSpecEst_Expm, 2},
-    {"_pdSpecEst_Logm", (DL_FUNC) &_pdSpecEst_Logm, 2},
-    {"_pdSpecEst_ParTrans", (DL_FUNC) &_pdSpecEst_ParTrans, 3},
-    {"_pdSpecEst_E_coeff", (DL_FUNC) &_pdSpecEst_E_coeff, 1},
-    {"_pdSpecEst_T_coeff", (DL_FUNC) &_pdSpecEst_T_coeff, 2},
-    {"_pdSpecEst_E_coeff_inv", (DL_FUNC) &_pdSpecEst_E_coeff_inv, 1},
-    {"_pdSpecEst_T_coeff_inv", (DL_FUNC) &_pdSpecEst_T_coeff_inv, 2},
+    {"_pdSpecEst_cMeans_C", (DL_FUNC) &_pdSpecEst_cMeans_C, 9},
     {NULL, NULL, 0}
 };
 

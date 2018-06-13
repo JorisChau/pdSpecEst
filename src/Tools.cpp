@@ -259,42 +259,6 @@ arma::cx_cube reconstr2D_C(arma::cx_cube M1, arma::cx_cube D, double j,
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export()]]
 
-double pdDist_C(arma::cx_mat A, arma::cx_mat B, std::string method) {
-  try{
-    arma::cx_mat A2;
-    // compute distance
-    if(method == "Riemannian") {
-      arma::cx_mat A1 = arma::inv_sympd(arma::sqrtmat_sympd(A));
-      A2 = arma::logmat_sympd(A1 * B * A1);
-    }
-    else if (method == "logEuclidean") {
-      A2 = arma::logmat_sympd(A) - arma::logmat_sympd(B);
-    }
-    else if (method == "Cholesky") {
-      A2 = arma::chol(A) - arma::chol(B);
-    }
-    else if (method == "rootEuclidean") {
-      A2 = arma::sqrtmat_sympd(A) - arma::sqrtmat_sympd(B);
-    }
-    else {
-      A2 = A - B;
-    }
-    if(A2.has_nan()) {
-      Rcpp::stop("c++ function logmat_sympd() failed, matrix possibly not positive definite");
-    }
-    return arma::norm(A2, "fro");
-    // catch exceptions
-  } catch(std::exception &ex) {
-    forward_exception_to_r(ex);
-  } catch(...) {
-    Rcpp::exception("c++ exception (unknown reason)");
-  }
-  return NA_REAL; //not reached
-}
-
-// [[Rcpp::depends(RcppArmadillo)]]
-// [[Rcpp::export()]]
-
 arma::cx_cube Ptransf2D_C(arma::cx_cube P, bool inverse, bool chol_bias, std::string metric) {
 
   // Set parameters

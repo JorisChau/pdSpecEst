@@ -5,7 +5,7 @@
 \title{Intrinsic 1D wavelet-based clustering of multivariate spectra.}
 \usage{
 pdSpecClust1D(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1,
-  eps = c(1e-04, 1e-04), tau = 0.5, max.iter = 50, return.centers = F,
+  eps = c(1e-04, 1e-04), tau = 0.5, max_iter = 50, return.centers = F,
   ...)
 }
 \arguments{
@@ -37,13 +37,13 @@ cluster centers is smaller than \code{eps[2]}. If \code{eps} is not specified, b
 \item{tau}{an optional argument tuning the weight given to the cluster assignments obtained in the first step of
 the clustering algorithm. If \code{tau} is not specified, by default \code{tau = 0.5}.}
 
-\item{max.iter}{an optional argument tuning the maximum number of iterations in both the first and second step of the
-clustering algorithm, defaults to \code{max.iter = 50}.}
-
 \item{return.centers}{should the cluster centers transformed back the space of HPD matrices also be returned?
 Defaults to \code{return.centers = F}.}
 
 \item{...}{additional arguments for internal use.}
+
+\item{max.iter}{an optional argument tuning the maximum number of iterations in both the first and second step of the
+clustering algorithm, defaults to \code{max.iter = 50}.}
 }
 \value{
 The function returns a list with 6 components:

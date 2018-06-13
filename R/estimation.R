@@ -69,7 +69,7 @@ pdSpecEst1D <- function(P, order = 5, metric = "Riemannian", alpha = 1, return =
   d = dim(P)[1]
   B = (if(is.null(dots$B)) d else dots$B)
   J.out = (if(is.null(dots$J.out)) J else dots$J.out)
-  jmax = min((if(is.null(dots$jmax)) J - 3 else dots$jmax), J.out - 1)
+  jmax = min((if(is.null(dots$jmax)) J - 2 else dots$jmax), J.out - 1)
   bias.corr = (if(is.null(dots$bias.corr)) T else dots$bias.corr)
   return.D = (if(is.null(dots$return.D)) NA else dots$return.D)
 

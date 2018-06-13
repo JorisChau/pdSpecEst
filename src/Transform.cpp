@@ -139,8 +139,8 @@ arma::vec E_coeff(arma::cx_mat H) {
 
   arma::vec coeff(d * d);
 
-  for(int i = 0; i < d; i++) {
-    for(int j = 0; j < d; j++) {
+  for(int i = 0; i < d; ++i) {
+    for(int j = 0; j < d; ++j) {
 
       if(i == j) {
         coeff[i * d + j] = real(H(i,i ));
@@ -166,8 +166,8 @@ arma::vec T_coeff(arma::cx_mat H, arma::cx_mat y){
   arma::cx_mat Ei = arma::zeros<arma::cx_mat>(d, d);
   arma::cx_mat y_sqrt = arma::sqrtmat_sympd(y);
 
-  for(int i = 0; i < d; i++) {
-    for(int j = 0; j < d; j++) {
+  for(int i = 0; i < d; ++i) {
+    for(int j = 0; j < d; ++j) {
 
       if(i == j) {
 
@@ -206,8 +206,8 @@ arma::cx_mat E_coeff_inv(arma::vec coeff) {
   arma::cx_mat M = arma::zeros<arma::cx_mat>(d, d);
   arma::cx_mat Ei = arma::zeros<arma::cx_mat>(d, d);
 
-  for(int i = 0; i < d; i++) {
-    for(int j = 0; j < d; j++) {
+  for(int i = 0; i < d; ++i) {
+    for(int j = 0; j < d; ++j) {
 
       if(i == j) {
 
@@ -246,8 +246,8 @@ arma::cx_mat T_coeff_inv(arma::vec coeff, arma::cx_mat y) {
   arma::cx_mat Ei = arma::zeros<arma::cx_mat>(d, d);
   arma::cx_mat y_isqrt = arma::inv_sympd(arma::sqrtmat_sympd(y));
 
-  for(int i = 0; i < d; i++) {
-    for(int j = 0; j < d; j++) {
+  for(int i = 0; i < d; ++i) {
+    for(int j = 0; j < d; ++j) {
 
       if(i == j) {
 
