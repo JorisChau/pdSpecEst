@@ -1,30 +1,6 @@
 ---
 output: github_document
-references:
-- id: CvS17
-  title: 'Positive Definite multivariate spectral estimation: a geometric wavelet approach'
-  author:
-  - family: Chau  
-    given: J.
-  - family: von Sachs
-    given: R.
-  URL: 'http://arxiv.org/abs/1701.03314'
-  type: article-journal
-  issued:
-    year: 2017
-- id: COvS17
-  title: 'Data depth and rank-based tests for covariance and spectral density matrices'
-  author:
-  - family: Chau  
-    given: J.
-  - family: Ombao
-    given: H.
-  - family: von Sachs
-    given: R.
-  URL: 'http://arxiv.org/abs/1706.08289'
-  type: article-journal
-  issued:
-    year: 2017
+bibliography: inst/REFERENCES.bib
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -42,17 +18,17 @@ knitr::opts_chunk$set(
 [![CRAN version](http://www.r-pkg.org/badges/version/pdSpecEst)](https://cran.r-project.org/package=pdSpecEst)
 [![Travis-CI Build Status](https://travis-ci.org/JorisChau/pdSpecEst.svg?branch=master)](https://travis-ci.org/JorisChau/pdSpecEst)
 
-The `pdSpecEst` (**p**ositive **d**efinite **Spec**tral **Est**imation) package provides data analysis tools for samples of symmetric or Hermitian positive definite matrices, such as collections of (non-degenerate) covariance matrices or spectral density matrices.
+The `pdSpecEst` (**p**ositive **d**efinite **Spec**tral **Est**imation) package provides data analysis tools for samples of symmetric or Hermitian positive definite matrices, such as collections of positive definite covariance matrices or spectral density matrices.
 
 The tools in this package can be used to perform:
 
-* *Intrinsic manifold wavelet regression* and *clustering* for curves (1D) or surfaces (2D) of Hermitian positive definite matrices. These implementations are based in part on the paper [@CvS17].
+* *Intrinsic wavelet transforms* for curves (1D) or surfaces (2D) of Hermitian positive definite matrices, with applications to for instance: dimension reduction, denoising and clustering for curves or surfaces of Hermitian positive definite matrices such as (time-varying) Fourier spectral density matrices. These implementations are based in part on the paper [@CvS17] and Chapters 3 and 5 of [@C18].
 
-* Exploratory data analysis and inference for samples of Hermitian positive definite matrices by means of *intrinsic manifold data depth* and *manifold rank-based hypothesis tests*. These implementations are based on the paper [@COvS17].
+* Exploratory data analysis and inference for samples of Hermitian positive definite matrices by means of *intrinsic data depth functions* and *depth rank-based hypothesis tests*. These implementations are based on the paper [@COvS17] and Chapter 4 of [@C18].
 
 For more details and examples on how to use the package see the accompanying vignettes in the vignettes folder. 
 
-A demo Shiny app to test out the implemented functions in the package is available [here](https://jchau.shinyapps.io/pdSpecEst/).
+An R-Shiny app to demonstrate and test the implemented functionality in the package is available [here](https://jchau.shinyapps.io/pdSpecEst/).
 
 *Author and maintainer:* Joris Chau (<j.chau@uclouvain.be>).
 

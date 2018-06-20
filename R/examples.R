@@ -1,37 +1,37 @@
-#' Simulate vARMA(2,2) time series observations
+#' Simulate vARMA(2,2) time series
 #'
-#' \code{rARMA} generates \code{d}-dimensional time series observations from a vector ARMA(2,2)
-#' (autoregressive moving average) process based on Gaussian white noise for testing and simulation
+#' \code{rARMA} generates \code{d}-dimensional time series observations from a vARMA(2,2)
+#' (vector-autoregressive-moving-average) process based on Gaussian white noise for testing and simulation
 #' purposes.
 #'
 #' @param n  number of time series observations to be generated.
 #' @param d  dimension of the multivariate time series.
 #' @param Phi a (\eqn{d, d, 2})-dimensional array, with \code{Phi[, , 1]} and \code{Phi[, , 2]}
-#'  the autoregressive parameter matrices.
+#'  the autoregressive (AR) coefficient matrices.
 #' @param Theta a (\eqn{d, d, 2})-dimensional array, with \code{Theta[, , 1]} and \code{Theta[, , 2]}
-#'  the moving-average parameter matrices.
+#'  the moving-average (MA) coefficient matrices.
 #' @param Sigma the covariance matrix of the Gaussian white noise component.
 #' @param burn  a burn-in period when generating the time series observations, by default \code{burn = 100}.
 #' @param freq  an optional vector of frequencies, if \code{!is.null(freq)} the function also returns the
-#' underlying spectral matrix of the stationary generating process at the frequencies corresponding to \code{freq}.
+#' underlying Fourier spectral matrix of the stationary generating process evaluated at the frequencies in \code{freq}.
 #'
 #' @return The function returns a list with two components:
 #'    \item{\code{X} }{ generated time series observations, the \code{d} columns correspond to the components of
 #'     the multivariate time series.}
-#'    \item{\code{f} }{ if \code{!is.null(freq)}, \code{f} is a \code{(d, d, length(freq))}-dimensional array containing
-#'     the underlying spectral matrix of the process at frequencies corresponding to \code{freq}. If
-#'     \code{is.null(freq)}, \code{f} is set to \code{NULL}.}
+#'    \item{\code{f} }{ if \code{!is.null(freq)}, \code{f} is a \code{(d, d, length(freq))}-dimensional array corresponding
+#'    to the underlying Fourier spectral matrix curve of \eqn{(d,d)}-dimensional HPD matrices evaluated at the frequencies
+#'    in \code{freq}. If \code{is.null(freq)}, \code{f} is set to \code{NULL}.}
 #'
-#' @references Brockwell, P.J. and Davis, R.A. (1991). \emph{Time series: Theory and Methods}. New York: Springer.
+#' @references
+#' \insertRef{BD06}{pdSpecEst}
 #'
 #' @examples
 #' ## ARMA(1,1) process: Example 11.4.1 in (Brockwell and Davis, 1991)
-#'
 #' freq <- seq(from = pi / 100, to = pi, length = 100)
 #' Phi <- array(c(0.7, 0, 0, 0.6, rep(0, 4)), dim = c(2, 2, 2))
 #' Theta <- array(c(0.5, -0.7, 0.6, 0.8, rep(0, 4)), dim = c(2, 2, 2))
 #' Sigma <- matrix(c(1, 0.71, 0.71, 2), nrow = 2)
-#' ts.sim <- rARMA(200, 2, Phi, Theta, Sigma, freq=freq)
+#' ts.sim <- rARMA(200, 2, Phi, Theta, Sigma, freq = freq)
 #' ts.plot(ts.sim$X) # plot generated time series traces.
 #'
 #' @export
@@ -83,51 +83,74 @@ rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
   return(list(X = X, f = f))
 }
 
-#' Several example spectral matrices
+#' Several example curves of HPD matrices
 #'
-#' \code{rExamples1D()} generates stationary time series observations from several example HPD spectral matrices
-#' for testing and simulation purposes. For more details, we refer to the simulation studies in (Chau and von Sachs, 2017).
+#' \code{rExamples1D()} generates several example (locally) smooth target \emph{curves} of HPD matrices corrupted by
+#' noise in a manifold of HPD matrices for testing and simulation purposes. For more details, see also Chapter 2 and 3 in
+#' \insertCite{C18}{pdSpecEst}.
 #'
-#' The examples include: (i) a \eqn{(3 \times 3)} heaviSine HPD spectral matrix consisting of smooth sinosoids with a break,
-#' (ii) a \eqn{(3 \times 3)} bumps HPD spectral matrix containing peaks and bumps of various smoothness degrees, (iii) a
-#' \eqn{(3 \times 3)} two-cats HPD spectral matrix visualizing the contour of two side-by-side cats, with inhomogeneous
-#' smoothness across frequency, and (iv) a \eqn{(2 \times 2)} Gaussian HPD spectral matrix consisting of smooth random Gaussian
-#' functions. The time series observations are generated via the Cram\'er representation based on the transfer function of
-#' the example spectral matrix and complex normal random variates.
+#' The examples include: (i) a \eqn{(3,3)}-dimensional \code{'bumps'} HPD matrix curve containing peaks and bumps of various smoothness degrees;
+#' (ii) a \eqn{(3,3)}-dimensional \code{'two-cats'} HPD matrix curve visualizing the contour of two side-by-side cats, with inhomogeneous
+#' smoothness across the domain; (iii) a \eqn{(3,3)}-dimensional \code{'heaviSine'} HPD matrix curve consisting of smooth sinosoids with a break;
+#' (iv) a \eqn{(2,2)}-dimensional \code{'gaussian'} HPD matrix curve consisting of smooth Gaussian functions; and (v) a \eqn{(d,d)}-dimensional
+#' \code{'mix-gaussian'} HPD matrix curve consisting of a weighted linear combination of smooth Gaussian functions.\cr
+#' In addition to the smooth target curve of HPD matrices, the function also returns a noisy version of the target curve of HPD matrices, corrupted
+#' by a user-specified noise distribution. By default, the noisy HPD matrix observations follow an intrinsic signal plus i.i.d. noise model with
+#' respect to the affine-invariant Riemannian metric, with a matrix log-Gaussian noise distribution (\code{noise = 'riem-gaussian'}), such that the
+#' Riemannian Karcher means of the observations coincide with the target curve of HPD matrices. Additional details can be found in Chapters 2, 3,
+#' and 5 of \insertCite{C18}{pdSpecEst}. Other available signal-noise models include: (ii) a Log-Euclidean signal plus i.i.d. noise model, with
+#' a matrix log-Gaussian noise distribution (\code{noise = 'log-gaussian'}); (iii) a Riemannian signal plus i.i.d. noise model, with a complex
+#' Wishart noise distribution (\code{noise = 'wishart'}); (iv) a Log-Euclidean signal plus i.i.d. noise model, with a complex Wishart noise
+#' distribution (\code{noise = 'log-wishart'}); and (v) noisy periodogram observations obtained with \code{pdPgram} from a stationary time series
+#' generated via the Cramer representation based on the transfer function of the target HPD spectral matrix curve and complex normal random variates
+#' (\code{noise = 'periodogram'}). If \code{return.ts = T}, the function also returns the generated time series observations, which are not generated
+#' by default if \code{noise != 'periodogram'}.
 #'
 #' @param n number of sampled matrices to be generated.
-#' @param d row- (resp. column-)dimension of the generated matrices.
-#' @param example the example HPD spectral matrix curve, one of \code{'heaviSine'}, \code{'bumps'}, \code{'two-cats'},
+#' @param d row- (resp. column-)dimension of the generated matrices. Defaults to \code{d = 3}.
+#' @param example the example target HPD matrix curve, one of \code{'bumps'}, \code{'two-cats'}, \code{'heaviSine'},
 #'     \code{'gaussian'} or \code{'mix-gaussian'}.
-#' @param return.ts if \code{isTRUE(return.ts)} the function returns time series observations generated via the Cram\'er representation
-#' based on the transfer function of the example spectral matrix and complex normal random variates.
-#' @param noise noise distribution for the generated noisy spectral matrices, one of \code{'riem-gaussian'},
-#' \code{'periodogram'}, \code{'log-gaussian'}, \code{'wishart'} or \code{'log-wishart'}. Additional details are given below.
-#' @param noise.level parameter to tune the signal-to-noise ratio for the generated noisy spectral matrices.
-#' @param df.wishart optional parameter to specify the degrees of freedom in the case of a Wishart noise distribution or the
-#' number of DPSS taper functions in the case of generated periodogram matrices. Only used if \code{noise} is equal to \code{'periodogram'},
-#' \code{'wishart'} or \code{'log-wishart'}. By default \code{df.wishart} is equal to the dimension \code{d} to
-#' guarantee positive definiteness of the generated matrices.
+#' @param return.ts a logical value, if \code{return.ts = T} the function also returns time series observations generated via the Cramer representation
+#' based on the transfer function of the example HPD spectral matrix and complex normal random variates. Defaults to \code{return.ts = F}.
+#' @param replicates a positive integer specifying the number of replications of noisy HPD matrix curves to be generated based on the
+#' target curve of HPD matrices. Defaults to \code{replicates = 1}
+#' @param noise noise distribution for the generated noisy curves of HPD matrices, one of \code{'riem-gaussian'},
+#' \code{'log-gaussian'}, \code{'wishart'}, \code{'log-wishart'} or \code{'periodogram'}, defaults to \code{'riem-gaussian'}.
+#' Additional details are given below.
+#' @param noise.level parameter to tune the signal-to-noise ratio for the generated noisy HPD matrix observations, only used if \code{noise != 'periodogram'}.
+#' If \code{noise.level = 0}, the noise distributions are degenerate and the noisy HPD matrix observations coincide with the target HPD matrices.
+#' Defaults to \code{noise.level = 1}.
+#' @param df.wishart optional parameter to specify the degrees of freedom in the case of a Wishart noise distribution (\code{noise = 'wishart'} or
+#' \code{noise = 'log-wishart'}); or the number of DPSS tapers in the case of generated periodogram matrices if \code{noise = 'periodogram'}.
+#' By default \code{df.wishart} is equal to the dimension \code{d} to guarantee positive definiteness of the generated noisy matrices.
 #'
 #' @return Depending on the input arguments returns a list with two or three components:
-#'    \item{\code{f} }{ example spectral matrix, \code{f} is a \code{(d, d, length(freq))}-dimensional array, corresponding
-#'    to a \eqn{(d \times d)}-dimensional spectral matrix at the Fourier frequencies \code{freq}.}
-#'    \item{\code{P} }{ multitaper HPD periodogram of the generated time series, by default pre-smoothed using \code{df.wishart = d}
-#'    DPSS tapering functions, see \code{\link{pdPgram}} for details.}
-#'    \item{\code{ts}}{ generated \eqn{d}-dimensional time series observations, only available if \code{isTRUE(return.ts)}.}
+#'   \item{\code{f} }{ a (\eqn{d,d,n})-dimensional array, corresponding to the length \eqn{n} example target curve of
+#'   \eqn{(d,d)}-dimensional HPD matrices.}
+#'   \item{\code{P} }{ a (\eqn{d,d,n})-dimensional array, corresponding to a length \eqn{n} curve of noisy \eqn{(d,d)}-dimensional
+#'   HPD matrices centered around the smooth target HPD matrix curve \code{f}. If \code{replicates > 1}, \code{P} is a \code{(d,d,n,length(replicates))}-dimensional
+#'   array, corresponding to a collection of replicated length \eqn{n} curves of noisy \eqn{(d,d)}-dimensional HPD matrices centered around
+#'   the smooth target HPD matrix curve \code{f}.}
+#'   \item{\code{ts} }{ generated \eqn{d}-dimensional time series observations, only available if \code{return.ts = T}.}
+#'
+#' @note
+#' If \code{noise = 'wishart'}, the generated noisy HPD matrix observations are independent complex Wishart matrices, which can be
+#' interpreted informally as pseudo-periodogram matrix observations, as the periodogram matrices based on strictly stationary time series
+#' observations obtained with \code{noise = 'periodogram'} are asymptotically independent and asymptotically complex Wishart distributed,
+#' see e.g., \insertCite{B81}{pdSpecEst}.
 #'
 #' @examples
 #' example <- rExamples1D(100, example = "bumps", return.ts = TRUE)
-#' ts.plot(Re(example$ts)) # plot generated time series
+#' plot.ts(Re(example$ts), main = "3-d time series") # plot generated time series
 #'
-#' @seealso \code{\link{pdPgram}}
+#' @seealso \code{\link{rExamples2D}}, \code{\link{pdPgram}}, \code{\link{rARMA}}
 #'
-#' @references Chau, J. and von Sachs, R. (2017). \emph{Positive definite multivariate spectral
-#' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
+#' @references
+#' \insertAllCited{}
 #'
 #' @export
-rExamples1D <- function(n, d = 3, example = c("heaviSine", "bumps", "two-cats", "gaussian", "mix-gaussian"),
-                        return.ts = FALSE, noise = "riem-gaussian", noise.level = 1, df.wishart = NULL){
+rExamples1D <- function(n, d = 3, example = c("bumps", "two-cats", "heaviSine", "gaussian", "mix-gaussian"),
+                        return.ts = FALSE, replicates = 1, noise = "riem-gaussian", noise.level = 1, df.wishart = NULL){
 
   ## Set variables
   example <- match.arg(example, c("heaviSine", "bumps", "two-cats", "gaussian", "mix-gaussian"))
@@ -153,7 +176,7 @@ rExamples1D <- function(n, d = 3, example = c("heaviSine", "bumps", "two-cats", 
     ## Discontinuous heavisine matrix curve (d = 3)
     f <- sapply(x, function(t){
       Expm(diag(2, 3), H.coeff(sin(HeaviSine[ifelse(t < 0.5, 2, 4),] * pi * t +
-                                   HeaviSine[ifelse(t < 0.5, 1, 3),]), inverse = T))
+                                     HeaviSine[ifelse(t < 0.5, 1, 3),]), inverse = T))
     }, simplify = "array")
   } else if(example == "two-cats"){
     ## Locally smooth two-cats matrix curve (d = 3)
@@ -166,7 +189,7 @@ rExamples1D <- function(n, d = 3, example = c("heaviSine", "bumps", "two-cats", 
     ## Locally smooth bumps matrix curve (d = 3)
     f <- sapply(x, function(t){
       Expm(diag(3), (1 - 0.4 * t) * H.coeff(sqrt(t * (1 - t) + 1) *
-                                        sin(pi / (0.4 * t + 0.1)) * (1 + Bumps), inverse = T))
+                                              sin(pi / (0.4 * t + 0.1)) * (1 + Bumps), inverse = T))
     }, simplify = "array")
   } else if(example == "gaussian"){
     ## Gaussian matrix curve (d = 2)
@@ -182,11 +205,11 @@ rExamples1D <- function(n, d = 3, example = c("heaviSine", "bumps", "two-cats", 
                  w.comp = replicate(4, rnorm(d^2, mean = 1)))
     pars$w <- pars$w / sum(pars$w)
     f0 <- apply(sapply(1:4, function(i){
-            pars$w[i] * sapply(2 * pi * x - pi, function(t) {
-            H.coeff(pars$w.comp[, i] * pars$sd[i] / sqrt(2 * pi) *
-                      exp(-(t - pars$mu[i])^2/(2 * pars$sd[i]^2)), inverse = T)
-            }, simplify = "array")
-      }, simplify = "array"), c(1,2,3), sum)
+      pars$w[i] * sapply(2 * pi * x - pi, function(t) {
+        H.coeff(pars$w.comp[, i] * pars$sd[i] / sqrt(2 * pi) *
+                  exp(-(t - pars$mu[i])^2/(2 * pars$sd[i]^2)), inverse = T)
+      }, simplify = "array")
+    }, simplify = "array"), c(1,2,3), sum)
     f <- sapply(1:n, function(i) Expm(diag(0.25, d), f0[, , i]), simplify = "array")
   }
 
@@ -195,97 +218,116 @@ rExamples1D <- function(n, d = 3, example = c("heaviSine", "bumps", "two-cats", 
   f1 <- Ptransf2D_C(f, F, F, ifelse(noise %in% c("riem-gaussian", "wishart", "periodogram"),
                                     "rootEuclidean", "logEuclidean"))
 
-  if(return.ts | noise == "periodogram") {
+  ## Construct (# replicates) noisy HPD curves
+  ts <- array(dim = c(2 * n, d, replicates))
+  P <- array(dim = c(d, d, n, replicates))
 
-    ## Generate time series via Cramer representation
-    chi <- matrix(nrow = d, ncol = 2 * n)
-    chi[, 1:(n - 1)] <- replicate(n - 1, complex(d, rnorm(d, sd = sqrt(1/2)), rnorm(d, sd = sqrt(1/2))))
-    chi[, c(n, 2 * n)] <- replicate(2, rnorm(d))
-    chi[, (n + 1):(2 * n - 1)] <- Conj(chi[, 1:(n - 1)])
-    f2 <- array(c(f1, Conj(f1[, , n:1])), dim = c(d, d, 2 * n))
-    ts <- sqrt(2 * pi) / sqrt(2 * n) * mvfft(t(sapply(1:(2 * n), function(i) f2[, , i] %*% chi[, i])), inverse = T)
+  for(s in 1:replicates) {
 
-    ## Generate multitaper periodogram from time series
-    if(noise == "periodogram") {
-      P <- pdPgram(ts, B = df.wishart, method = "multitaper")$P
-    }
-  }
+    if(return.ts | noise == "periodogram") {
 
-  if(noise %in% c("riem-gaussian", "log-gaussian")) {
-    ## Generate iid zero mean (intrinsic) gaussian noise
-    W0 <- replicate(n, H.coeff(rnorm(d^2, sd = sqrt(noise.level)), inverse = T))
-    if(noise == "riem-gaussian") {
-      W <- Ptransf2D_C(W0, T, F, "logEuclidean")
-      P <- sapply(1:n, function(i) (t(Conj(f1[, , i])) %*% W[, , i]) %*% f1[, , i], simplify = "array")
-    } else if(noise == "log-gaussian") {
-      P <- Ptransf2D_C(f1 + W0, T, F, "logEuclidean")
+      ## Generate time series via Cramer representation
+      chi <- matrix(nrow = d, ncol = 2 * n)
+      chi[, 1:(n - 1)] <- replicate(n - 1, complex(d, rnorm(d, sd = sqrt(1/2)), rnorm(d, sd = sqrt(1/2))))
+      chi[, c(n, 2 * n)] <- replicate(2, rnorm(d))
+      chi[, (n + 1):(2 * n - 1)] <- Conj(chi[, 1:(n - 1)])
+      f2 <- array(c(f1, Conj(f1[, , n:1])), dim = c(d, d, 2 * n))
+      ts[, , s] <- sqrt(2 * pi) / sqrt(2 * n) * mvfft(t(sapply(1:(2 * n), function(i) f2[, , i] %*% chi[, i])), inverse = T)
+
+      ## Generate multitaper periodogram from time series
+      if(noise == "periodogram") {
+        P[, , , s] <- pdPgram(ts[, , s], B = df.wishart, method = "multitaper")$P
+      }
     }
-  } else if(noise %in% c("wishart", "log-wishart")) {
-    ## Generate iid zero mean (intrinsic) wishart noise
-    X0 <- replicate(n * df.wishart, complex(d, rnorm(d, sd = sqrt(1/2)), rnorm(d, sd = sqrt(1/2))))
-    W0 <- array(apply(X0, 2, function(x) x %*% t(Conj(x))), dim = c(d, d, n * df.wishart))
-    W <- sapply(1:n, function(i) apply(W0[, , (i - 1) * df.wishart + 1:df.wishart], c(1, 2), mean), simplify = "array")
-    if(noise.level != 1 & df.wishart >= d) {
-      W <- Ptransf2D_C(sqrt(noise.level) * Ptransf2D_C(W, F, F, "logEuclidean"), T, F, "logEuclidean")
-    }
-    if(noise == "wishart") {
-      P <- sapply(1:n, function(i) (t(Conj(f1[, , i])) %*% W[, , i]) %*% f1[, , i], simplify = "array")
-    } else {
-      P <- Ptransf2D_C(f1 + Ptransf2D_C(W, F, F, "logEuclidean"), T, F, "logEuclidean")
+
+    if(noise %in% c("riem-gaussian", "log-gaussian")) {
+      ## Generate iid zero mean (intrinsic) gaussian noise
+      W0 <- replicate(n, H.coeff(rnorm(d^2, sd = sqrt(noise.level)), inverse = T))
+      if(noise == "riem-gaussian") {
+        W <- Ptransf2D_C(W0, T, F, "logEuclidean")
+        P[, , , s] <- sapply(1:n, function(i) (t(Conj(f1[, , i])) %*% W[, , i]) %*% f1[, , i], simplify = "array")
+      } else if(noise == "log-gaussian") {
+        P[, , , s] <- Ptransf2D_C(f1 + W0, T, F, "logEuclidean")
+      }
+    } else if(noise %in% c("wishart", "log-wishart")) {
+      ## Generate iid zero mean (intrinsic) wishart noise
+      X0 <- replicate(n * df.wishart, complex(d, rnorm(d, sd = sqrt(1/2)), rnorm(d, sd = sqrt(1/2))))
+      W0 <- array(apply(X0, 2, function(x) x %*% t(Conj(x))), dim = c(d, d, n * df.wishart))
+      W <- sapply(1:n, function(i) apply(W0[, , (i - 1) * df.wishart + 1:df.wishart], c(1, 2), mean), simplify = "array")
+      if(noise.level != 1 & df.wishart >= d) {
+        W <- Ptransf2D_C(sqrt(noise.level) * Ptransf2D_C(W, F, F, "logEuclidean"), T, F, "logEuclidean")
+      }
+      if(noise == "wishart") {
+        P[, , , s] <- sapply(1:n, function(i) (t(Conj(f1[, , i])) %*% W[, , i]) %*% f1[, , i], simplify = "array")
+      } else {
+        P[, , , s] <- Ptransf2D_C(f1 + Ptransf2D_C(W, F, F, "logEuclidean"), T, F, "logEuclidean")
+      }
     }
   }
 
   ## return list with objects
   if(return.ts) {
-    res <-  list(f = f, P = P, ts = ts)
+    res <-  list(f = f, P = P[, , , 1:replicates], ts = ts[, , 1:replicates])
   } else {
-    res <- list(f = f, P = P)
+    res <- list(f = f, P = P[, , , 1:replicates])
   }
 
   return(res)
 }
 
-#' Several example time-varying spectral matrices
+#' Several example surfaces of HPD matrices
 #'
-#' \code{rExamples2D()} generates several example HPD time-varying spectral matrices for testing and simulation purposes.
+#' \code{rExamples2D()} generates several example (locally) smooth target \emph{surfaces} of HPD matrices corrupted by
+#' noise in a manifold of HPD matrices for testing and simulation purposes. For more details, see also Chapter 2 and 5 in
+#' \insertCite{C18}{pdSpecEst}.
 #'
-#' The examples include: (i) a \eqn{(d \times d)} smiley HPD spectral matrix consisting of constant surfaces of random HPD matrices in
-#' the shape of a smiley face, (ii) a \eqn{(d \times d)} tvar HPD spectral matrix generated from a time-varying vector auto-
-#' regressive process of order 1 with a random time-varying coefficient matrix (\eqn{\Phi}), (iii) a \eqn{(d \times d)} generally smooth
-#' HPD spectral matrix containing a pronounced peak in the center of the discretized time-frequency grid and (iv) a \eqn{(d \times d)}
-#' facets HPD spectral matrix consisting of several facets generated from random geodesic surfaces. In addition to the HPD spectral matrices,
-#' the function also generates pseudo HPD periodogram observations as independent complex random HPD Wishart matrices centered around
-#' the generating HPD spectral matrix with \eqn{B} degrees of freedom. Informally, such random matrix behavior corresponds to the asymptotic
-#' distribution of actual HPD periodogram observations (as obtained via \code{\link{pdPgram2D}}) of a multivariate time series with the given
-#' generating HPD spectral matrix.
+#' The examples include: (i) a \eqn{(d,d)}-dimensional \code{'smiley'} HPD matrix surface consisting of constant surfaces of random HPD matrices in
+#' the shape of a smiley face; (ii) a \eqn{(d,d)}-dimensional \code{'tvar'} HPD matrix surface generated from a time-varying vector-auto-
+#' regressive process of order 1 with random time-varying coefficient matrix (\eqn{\Phi}); (iii) a \eqn{(d,d)}-dimensional \code{'facets'} HPD matrix
+#' surface consiting of several facets generated from random geodesic surfaces; and (iv) a \eqn{(d,d)}-dimensional \code{'peak'} HPD matrix surface
+#' containing a pronounced peak in the center of its 2-d (e.g., time-frequency) domain.\cr
+#' In addition to the (locally) smooth target surface of HPD matrices, the function also returns a noisy version of the target surface of HPD matrices, corrupted
+#' by a user-specified noise distribution. By default, the noisy HPD matrix observations follow an intrinsic signal plus i.i.d. noise model with
+#' respect to the affine-invariant Riemannian metric, with a matrix log-Gaussian noise distribution (\code{noise = 'riem-gaussian'}), such that the
+#' Riemannian Karcher means of the observations coincide with the target surface of HPD matrices. Additional details can be found in Chapters 2, 3,
+#' and 5 of \insertCite{C18}{pdSpecEst}. Other available signal-noise models include: (ii) a Log-Euclidean signal plus i.i.d. noise model, with
+#' a matrix log-Gaussian noise distribution (\code{noise = 'log-gaussian'}); (iii) a Riemannian signal plus i.i.d. noise model, with a complex
+#' Wishart noise distribution (\code{noise = 'wishart'}); (iv) a Log-Euclidean signal plus i.i.d. noise model, with a complex Wishart noise
+#' distribution (\code{noise = 'log-wishart'}).
 #'
-#' @param n numeric vector with two components corresponding to the size of the discretized time-frequency grid at which the spectral matrix
-#' is generated.
-#' @param d row- (resp. column-)dimension of the generated spectral matrix.
-#' @param example the example spectral matrix, one of \code{'smiley'}, \code{'tvar'}, \code{'peak'} or \code{'facets'}.
-#' @param noise noise distribution for the generated noisy time-varying spectral matrices, one of \code{'riem-gaussian'},
-#'    \code{'log-gaussian'}, \code{'wishart'} or \code{'log-wishart'}. Additional details are given below.
-#' @param noise.level parameter to tune the signal-to-noise ratio for the generated noisy spectral matrices.
-#' @param df.wishart complex Wishart distribution degrees of freedom, defaults to \code{df.wishart = d}, such that the generated pseudo periodogram matrix
-#' observations are positive definite. Note that \code{df.wishart} coincides with the number of tapering functions in the (time-varying) multitaper
-#' periodogram in \code{\link{pdPgram2D}}.
+#' @param n integer vector \code{c(n1, n2)} specifying the number of sampled matrices to be generated on a rectangular surface.
+#' @param d row- (resp. column-)dimension of the generated matrices. Defaults to \code{d = 2}.
+#' @param example the example target HPD matrix surface, one of \code{'smiley'}, \code{'tvar'}, \code{'facets'} or \code{'peak'}.
+#' @param replicates a positive integer specifying the number of replications of noisy HPD matrix surfaces to be generated based on the
+#' target surface of HPD matrices. Defaults to \code{replicates = 1}
+#' @param noise noise distribution for the generated noisy surfaces of HPD matrices, one of \code{'riem-gaussian'},
+#' \code{'log-gaussian'}, \code{'wishart'}, \code{'log-wishart'} or \code{'periodogram'}, defaults to \code{'riem-gaussian'}.
+#' Additional details are given below.
+#' @param noise.level parameter to tune the signal-to-noise ratio for the generated noisy HPD matrix observations.
+#' If \code{noise.level = 0}, the noise distributions are degenerate and the noisy HPD matrix observations coincide with the target HPD matrices.
+#' Defaults to \code{noise.level = 1}.
+#' @param df.wishart optional parameter to specify the degrees of freedom in the case of a Wishart noise distribution (\code{noise = 'wishart'} or
+#' \code{noise = 'log-wishart'}). By default \code{df.wishart} is equal to the dimension \code{d} to guarantee positive definiteness of the
+#' generated noisy matrices.
 #'
 #' @return Returns a list with two components:
-#'    \item{\code{f} }{ example spectral matrix, \code{f} is a \code{(d, d, n[1], n[2])}-dimensional array, corresponding
-#'    to a \eqn{(d \times d)}-dimensional spectral matrix at a \eqn{(n_1,n_2)}-dimensional grid of time-frequency points.}
-#'    \item{\code{P} }{ pseudo HPD periodogram observations generated as random complex Wishart matrices centered around \code{f}
-#'    with \code{df.wishart} degrees of freedom at \eqn{(n_1,n_2)}-dimensional grid of time-frequency points.}
+#'   \item{\code{f} }{ a (\code{d,d,n[1],n[2]})-dimensional array, corresponding to the \eqn{(n_1 \times n_2)}-sized example target surface of
+#'   \eqn{(d,d)}-dimensional HPD matrices.}
+#'   \item{\code{P} }{ a (\code{d,d,n[1],n[2]})-dimensional array, corresponding to the \eqn{(n_1 \times n_2)}-sized surface of noisy \eqn{(d,d)}-dimensional
+#'   HPD matrices centered around the smooth target HPD matrix surface \code{f}. If \code{replicates > 1}, \code{P} is a
+#'   \code{(d,d,n[1],n[2],length(replicates))}-dimensional array, corresponding to a collection of replicated \eqn{(n_1 \times n_2)}-sized surfaces
+#'   of noisy \eqn{(d,d)}-dimensional HPD matrices centered around the smooth target HPD matrix surface \code{f}.}
 #'
 #' @examples
 #' example <- rExamples2D(n = c(32, 32), example = "smiley")
 #'
-#' @seealso \code{\link{pdPgram2D}}
+#' @seealso \code{\link{rExamples1D}}, \code{\link{pdPgram2D}}
 #'
-#' @references Chau, J. and von Sachs, R. (2017). \emph{Positive definite multivariate spectral
-#' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
+#' @references
+#' \insertAllCited{}
 #'
 #' @export
-rExamples2D <- function(n, d = 2, example = c("smiley", "tvar", "peak", "facets"),
+rExamples2D <- function(n, d = 2, example = c("smiley", "tvar", "facets", "peak"), replicates = 1,
                         noise = "riem-gaussian", noise.level = 1, df.wishart = NULL){
   ## Set variables
   example <- match.arg(example, c("smiley", "tvar", "peak", "facets"))
@@ -303,8 +345,8 @@ rExamples2D <- function(n, d = 2, example = c("smiley", "tvar", "peak", "facets"
   ast <- function(A, B) (t(Conj(A)) %*% B) %*% A
   ## wrapper for Ptransf2D_C
   Ptransf2D <- function(X, inv, metric){
-      array(Ptransf2D_C(array(X, dim = c(dim(X)[1], dim(X)[2], dim(X)[3] * dim(X)[4])), inv, F, metric),
-            dim = dim(X))
+    array(Ptransf2D_C(array(X, dim = c(dim(X)[1], dim(X)[2], dim(X)[3] * dim(X)[4])), inv, F, metric),
+          dim = dim(X))
   }
 
   ## Create spectrum
@@ -357,15 +399,15 @@ rExamples2D <- function(n, d = 2, example = c("smiley", "tvar", "peak", "facets"
     grid.x <- expand.grid(seq(-1, 1, length.out = n[1]), seq(-1, 1, length.out = n[2]))
     mu <- Expm(diag(d), H.coeff(rnorm(d^2), inverse = T))
     f <- array(c(mapply(function(x, y) Expm(mu, H.coeff(exp(-(abs(x)^v1 + abs(y)^v1)),
-                            inverse = T)), grid.x$Var1, grid.x$Var2)), dim = c(d, d, n))
+                                                        inverse = T)), grid.x$Var1, grid.x$Var2)), dim = c(d, d, n))
 
   } else if(example == "facets"){
 
     ## Create 2D facets spectrum
     p <- replicate(2, Expm(diag(d), H.coeff(rnorm(d^2), inverse = T)))
     facets <- sapply(1:2, function(i) pdNeville(array(replicate(4, Expm(i * diag(d), H.coeff(rnorm(d^2), inverse = T))),
-                                      dim=c(d, d, 2, 2)), X = list(x = c(0, 1), y = c(0, 1)),
-                                      x = list(x = seq(0, 1, length.out = n[1]), y = seq(0, 1, length.out = n[2]))), simplify = "array")
+                                                      dim=c(d, d, 2, 2)), X = list(x = c(0, 1), y = c(0, 1)),
+                                                x = list(x = seq(0, 1, length.out = n[1]), y = seq(0, 1, length.out = n[2]))), simplify = "array")
     select <- function(i1, i2){
       if((n[2] / n[1] * i1) < i2 & i2 <= (n[2] - n[2] / n[1] * i1)){
         res <- facets[, , i1, i2, 1]
@@ -386,32 +428,38 @@ rExamples2D <- function(n, d = 2, example = c("smiley", "tvar", "peak", "facets"
   f <- f / mean(apply(f, c(3, 4), NormF))
   f1 <- Ptransf2D(f, F, ifelse(noise %in% c("riem-gaussian","wishart"), "rootEuclidean", "logEuclidean"))
 
-  if(noise %in% c("riem-gaussian", "log-gaussian")) {
-    ## Generate iid zero mean (intrinsic) gaussian noise
-    W0 <- replicate(n[2], replicate(n[1], H.coeff(rnorm(d^2, sd = sqrt(noise.level)), inverse = T)))
-    if(noise == "riem-gaussian") {
-      W <- Ptransf2D(W0, T, "logEuclidean")
-      P <- array(c(mapply(function(i, j) ast(f1[, , i, j], W[, , i, j]), grid.n$Var1, grid.n$Var2)), dim = dim(W))
-    } else if(noise == "log-gaussian") {
-      P <- Ptransf2D(f1 + W0, T, "logEuclidean")
-    }
-  } else if(noise %in% c("wishart", "log-wishart")) {
-    ## Generate iid zero mean (intrinsic) wishart noise
-    X0 <- array(c(replicate(n[1] * n[2] * df.wishart, complex(d, rnorm(d, sd = sqrt(1/2)),
-                  rnorm(d, sd = sqrt(1/2))))), dim = c(d, n[1] * df.wishart, n[2]))
-    W0 <- array(c(apply(X0, c(2,3), function(x) x %*% t(Conj(x)))), dim = c(d,d, n[1] * df.wishart, n[2]))
-    W <- array(c(mapply(function(i1, i2) apply(W0[, , (i1 - 1) * df.wishart + 1:df.wishart, i2], c(1, 2), mean),
-                        grid.n$Var1, grid.n$Var2)), dim = c(d, d, n))
-    if(noise.level != 1 & df.wishart >= d) {
-      W <- Ptransf2D(sqrt(noise.level) * Ptransf2D(W, F, "logEuclidean"), T, "logEuclidean")
-    }
-    if(noise == "wishart") {
-      P <- array(c(mapply(function(i1, i2) ast(f1[, , i1, i2], W[, , i1, i2]), grid.n$Var1,
-                          grid.n$Var2)), dim = dim(W))
-    } else {
-      P <- Ptransf2D(f1 + Ptransf2D(W, F, "logEuclidean"), T, "logEuclidean")
+  ## Construct (# replicates) noisy HPD surfaces
+  P <- array(dim = c(d, d, n, replicates))
+
+  for(s in 1:replicates) {
+
+    if(noise %in% c("riem-gaussian", "log-gaussian")) {
+      ## Generate iid zero mean (intrinsic) gaussian noise
+      W0 <- replicate(n[2], replicate(n[1], H.coeff(rnorm(d^2, sd = sqrt(noise.level)), inverse = T)))
+      if(noise == "riem-gaussian") {
+        W <- Ptransf2D(W0, T, "logEuclidean")
+        P[, , , , s] <- array(c(mapply(function(i, j) ast(f1[, , i, j], W[, , i, j]), grid.n$Var1, grid.n$Var2)), dim = dim(W))
+      } else if(noise == "log-gaussian") {
+        P[, , , , s] <- Ptransf2D(f1 + W0, T, "logEuclidean")
+      }
+    } else if(noise %in% c("wishart", "log-wishart")) {
+      ## Generate iid zero mean (intrinsic) wishart noise
+      X0 <- array(c(replicate(n[1] * n[2] * df.wishart, complex(d, rnorm(d, sd = sqrt(1/2)),
+                                                                rnorm(d, sd = sqrt(1/2))))), dim = c(d, n[1] * df.wishart, n[2]))
+      W0 <- array(c(apply(X0, c(2,3), function(x) x %*% t(Conj(x)))), dim = c(d,d, n[1] * df.wishart, n[2]))
+      W <- array(c(mapply(function(i1, i2) apply(W0[, , (i1 - 1) * df.wishart + 1:df.wishart, i2], c(1, 2), mean),
+                          grid.n$Var1, grid.n$Var2)), dim = c(d, d, n))
+      if(noise.level != 1 & df.wishart >= d) {
+        W <- Ptransf2D(sqrt(noise.level) * Ptransf2D(W, F, "logEuclidean"), T, "logEuclidean")
+      }
+      if(noise == "wishart") {
+        P[, , , , s] <- array(c(mapply(function(i1, i2) ast(f1[, , i1, i2], W[, , i1, i2]), grid.n$Var1,
+                                       grid.n$Var2)), dim = dim(W))
+      } else {
+        P[, , , , s] <- Ptransf2D(f1 + Ptransf2D(W, F, "logEuclidean"), T, "logEuclidean")
+      }
     }
   }
-  return(list(f = f, P = P))
+  return(list(f = f, P = P[, , , , 1:replicates]))
 }
 

@@ -1,42 +1,51 @@
 #' Polynomial interpolation of curves (1D) or surfaces (2D) of HPD matrices
 #'
-#' \code{pdNeville()} performs intrinsic polynomial interpolation of curves or surfaces on the manifold of
-#' HPD matrices equipped with the Riemannian metric via iterative geodesic interpolation, see e.g.
-#' (Chau and von Sachs, 2017a).
+#' \code{pdNeville} performs intrinsic polynomial interpolation of curves or surfaces of HPD matrices
+#' in the metric space of HPD matrices equipped with the affine-invariant Riemannian metric (see \insertCite{B09}{pdSpecEst}[Chapter 6]
+#' or \insertCite{PFA05}{pdSpecEst}) via Neville's algorithm based on iterative geodesic interpolation detailed
+#' in \insertCite{CvS17}{pdSpecEst} and in Chapter 3 and 5 of \insertCite{C18}{pdSpecEst}.
 #'
-#' For polynomial curve interpolation, given \eqn{N} control points (i.e. HPD
-#' matrices), the degree of the interpolated polynomial is \eqn{N - 1}. For polynomial surface interpolation,
-#' given \eqn{N_1 \times N_2} control points (i.e. HPD matrices) on a tensor product grid, the interpolated
-#' polynomial has bi-degree \eqn{(N_1 - 1, N_2 - 1)}. The function \code{pdNeville()} determines whether
-#' polynomial curve or polynomial surface interpolation has to be performed based on the function input.
+#' For polynomial curve interpolation, given \eqn{N} control points (i.e., HPD matrices), the degree of the
+#' interpolated polynomial is \eqn{N - 1}. For polynomial surface interpolation, given \eqn{N_1 \times N_2} control points
+#' (i.e., HPD matrices) on a tensor product grid, the interpolated polynomial surface is of bi-degree \eqn{(N_1 - 1, N_2 - 1)}.
+#' Depending on the input array \code{P}, the function decides whether polynomial curve or polynomial surface interpolation
+#' is performed.
 #'
-#' @param P for polynomial curve interpolation, a \eqn{(d, d, N)}-dimensional array corresponding to a sequence
-#' of \eqn{(d, d)}-dimensional HPD matrices, i.e. control points, through which the interpolated polynomial
+#' @param P for polynomial curve interpolation, a \eqn{(d, d, N)}-dimensional array corresponding to a length \eqn{N} sequence
+#' of \eqn{(d, d)}-dimensional HPD matrices (control points) through which the interpolating polynomial
 #' curve passes. For polynomial surface interpolation, a \eqn{(d, d, N_1, N_2)}-dimensional array corresponding
-#' to a tensor product grid of \eqn{(d, d)}-dimensional matrices, i.e. control points, through which the interpolated
+#' to a tensor product grid of \eqn{(d, d)}-dimensional HPD matrices (control points) through which the interpolating
 #' polynomial surface passes.
-#' @param X for polynomial curve interpolation, a numeric vector of length \eqn{N} specifying the time points
-#' the interpolated polynomial passes through the control points \code{P}. For polynomial surface interpolation, a list
+#' @param X for polynomial curve interpolation, a numeric vector of length \eqn{N} specifying the time points at which
+#' the interpolating polynomial passes through the control points \code{P}. For polynomial surface interpolation, a list
 #' with as elements two numeric vectors \code{x} and \code{y} of length \eqn{N_1} and \eqn{N_2} respectively. The numeric
-#' vectors specify the time points on the tensor product grid \code{expand.grid(X$x, X$y)} the interpolated polynomial passes
-#' trough the control points \code{P}.
-#' @param x for polynomial curve interpolation, a numeric vector specifying the time grid (resolution) at which the
-#' interpolated polynomial is estimated. For polynomial surface interpolation, a list with as elements two numeric vectors
-#' \code{x} and \code{y} specifying the time tensor product grid (resolution) \code{expand.grid(x$x, x$y)} at which the
-#' interpolated polynomial surface is estimated.
-#' @param metric the metric the space of HPD matrices gets equipped with, by default \code{metric = "Riemannian"}, but instead
+#' vectors specify the time points on the tensor product grid \code{expand.grid(X$x, X$y)} at which the interpolating
+#' polynomial passes trough the control points \code{P}.
+#' @param x for polynomial curve interpolation, a numeric vector specifying the time points (locations) at which the
+#' interpolating polynomial is evaluated. For polynomial surface interpolation, a list with as elements two numeric vectors
+#' \code{x} and \code{y} specifying the time points (locations) on the tensor product grid \code{expand.grid(x$x, x$y)} at which the
+#' interpolating polynomial surface is evaluated.
+#' @param metric the metric on the space of HPD matrices, by default \code{metric = "Riemannian"}, but instead of the Riemannian metric
 #' this can also be set to \code{metric = "Euclidean"} to perform (standard) Euclidean polynomial interpolation of curves or
 #' surfaces in the space of HPD matrices.
 #'
-#' @return For polynomial curve interpolation, a \code{(d, d, length(x))}-dimensional array containing the interpolated
-#' polynomial of degree \eqn{N-1} at the time grid \code{x} passing through the control points \code{P} at times \code{X}.
-#' For polynomial surface interpolation, a \code{(d, d, length(x$x), length(x$y))}-dimensional array containing the interpolated
-#' polynomial of bi-degree \eqn{N_1 - 1, N_2 - 1} at the time grid \code{expand.grid(x$x, x$y)} passing through the control points
-#' \code{P} at times \code{expand.grid(X$x, X$y)}.
+#' @return For polynomial curve interpolation, a \code{(d, d, length(x))}-dimensional array corresponding to the interpolating polynomial
+#' curve of \eqn{(d,d)}-dimensional matrices of degree \eqn{N-1} evaluated at times \code{x} and passing through the control points \code{P}
+#' at times \code{X}. For polynomial surface interpolation, a \code{(d, d, length(x$x), length(x$y))}-dimensional array corresponding to the
+#' interpolating polynomial surface of \eqn{(d,d)}-dimensional matrices of bi-degree \eqn{N_1 - 1, N_2 - 1} evaluated at times \code{expand.grid(x$x, x$y)}
+#' and passing through the control points \code{P} at times \code{expand.grid(X$x, X$y)}.
+#'
+#' @note
+#' If \code{metric = "Euclidean"}, the interpolating curve or surface may not be positive definite everywhere as the space of HPD
+#' matrices equipped with the Euclidean metric has its boundary at a finite distance.
+#'
+#' @note
+#' The function does not check for positive definiteness of the input matrices, and may fail if \code{metric = "Riemannian"} and
+#' the input matrices are close to being singular.
 #'
 #' @examples
 #' ### Polynomial curve interpolation
-#' P <- rExamples1D(100, example = 'gaussian')$f[, , 10*(1:5)]
+#' P <- rExamples1D(50, example = 'gaussian')$f[, , 10*(1:5)]
 #' P.poly <- pdNeville(P, (1:5)/5, (1:50)/50)
 #' ## Examine matrix-component (1,1)
 #' plot((1:50)/50, Re(P.poly[1, 1, ]), type = "l") ## interpolated polynomial
@@ -48,8 +57,8 @@
 #'
 #' @seealso \code{\link{pdPolynomial}}
 #'
-#' @references Chau, J. and von Sachs, R. (2017a). \emph{Intrinsic wavelet regression for curves of
-#' Hermitian positive definite matrices}. Available at \url{http://arxiv.org/abs/1701.03314}.
+#' @references
+#' \insertAllCited{}
 #'
 #' @export
 pdNeville <- function(P, X, x, metric = "Riemannian"){
@@ -74,6 +83,7 @@ pdNeville <- function(P, X, x, metric = "Riemannian"){
   metric = match.arg(metric, match.arg(metric, c("Riemannian", "Euclidean")))
 
   if(!is_2D) {
+    ## 1D Neville's algorithm C++
     PP <- pdNeville_C(P, X, x, metric)
   } else if(is_2D) {
     ## 2D Neville's algorithm via geodesic surface interpolation
@@ -97,16 +107,17 @@ pdNeville <- function(P, X, x, metric = "Riemannian"){
 
 #' Generate intrinsic HPD polynomial curves
 #'
-#' \code{pdPolynomial()} generates intrinsic polynomial curves on the manifold of HPD matrices
-#' equipped with the Riemannian metric according to the numerical integration procedure described in (Hinkle et al., 2014).
-#' Given an initial starting point \code{p0} (i.e. HPD matrix) on the Riemannian manifold and the covariant
-#' derivatives up to order \eqn{k - 1} at \code{p0}, \code{pdPolynomial()} approximates the uniquely existing
+#' \code{pdPolynomial} generates intrinsic polynomial curves in the manifold of HPD matrices
+#' equipped with the affine-invariant Riemannian metric (see \insertCite{B09}{pdSpecEst}[Chapter 6]
+#' or \insertCite{PFA05}{pdSpecEst}) according to the numerical integration procedure in \insertCite{HFJ14}{pdSpecEst}.
+#' Given an initial starting point \code{p0} (i.e., a HPD matrix) in the Riemannian manifold and covariant
+#' derivatives up to order \eqn{k - 1} at \code{p0}, \code{pdPolynomial} approximates the uniquely existing
 #' intrinsic polynomial curve of degree \eqn{k} passing through \code{p0} with the given covariant derivatives up
 #' to order \eqn{k - 1} and vanishing higher order covariant derivatives.
 #'
 #' @param p0 a \eqn{(d, d)}-dimensional HPD matrix specifying the starting point of the polynomial curve.
-#' @param v0 a \eqn{(d, d, k)}-dimensional array corresponding to a sequence of covariant derivatives of
-#' order zero up to order \eqn{k - 1} at the starting point \code{p0}.
+#' @param v0 a \eqn{(d, d, k)}-dimensional array corresponding to a sequence of \eqn{(d,d)}-dimensional Hermitian matrix-valued
+#' covariant derivatives from order zero up to order \eqn{k - 1} at the starting point \code{p0}.
 #' @param delta.t a numeric value determining the incrementing step size in the numerical integration procedure.
 #' A smaller step size results in a higher resolution and therefore a more accurate approximation of the polynomial curve,
 #' defaults to \code{delta.t = 0.01}.
@@ -119,26 +130,34 @@ pdNeville <- function(P, X, x, metric = "Riemannian"){
 #' P.poly <- pdPolynomial(p0, v0)
 #'
 #' ## First-order polynomials coincide with geodesic curves
-#' geo <- function(A, B, t) Expm(A, t * Logm(A, B))
-#' P.geo <- sapply(seq(0, 1, length = 100), function(t) geo(p0, P.poly[, , 100], t),
-#'                 simplify = "array")
+#' P.geo <- sapply(seq(0, 1, length = 100), function(t) Expm(p0, t * Logm(p0, P.poly[, , 100])),
+#'                simplify = "array")
 #' all.equal(P.poly, P.geo)
 #'
-#' @return A \code{(d, d, length(steps))}-dimensional array containing the approximated intrinsic polynomial
-#' curve of degree \eqn{k} passing through \code{p0} with the given covariant derivatives up to order
-#' \eqn{k - 1} and vanishing higher order covariant derivatives.
+#' @return A \code{(d, d, length(steps))}-dimensional array corresponding to a generated (approximate)
+#' intrinsic polynomial curve in the space of \eqn{(d,d)}-dimensional HPD matrices of degree \eqn{k}
+#' passing through \code{p0} with the given covariant derivatives \code{v0} up to order \eqn{k - 1}
+#' and vanishing higher order covariant derivatives.
 #'
 #' @references
-#' Hinkle, J., Fletcher, P. and Joshi, S. (2014). Intrinsic polynomials for regression on Riemannian manifolds.
-#' \emph{Journal of Mathematical Imaging and Vision} 50, 32-52.
+#' \insertAllCited{}
 #'
-#' @seealso \code{\link{pdNeville}}
+#' @seealso \code{\link{pdNeville}}, \code{\link{pdParTrans}}
 #'
 #' @export
 pdPolynomial <- function(p0, v0, delta.t = 0.01, steps = 100) {
 
-  if(!isTRUE(length(dim(v0)) == 3)){
-    stop("'v0' should be a 3-dimensional array of covariant derivatives.")
+  if(!isTRUE(length(dim(v0)) == 3 & identical(dim(v0)[1:2], dim(p0)))) {
+    stop("Incorrect input formats for arguments: 'p0' or 'v0', consult
+         the function documentation for the correct inputs.")
+  }
+  if(!isTRUE(all.equal(apply(v0, 3, function(x) t(Conj(x))), apply(v0, 3, c)))) {
+    stop("The matrix-valued covariant derivatives in 'v0' are not Hermitian, consult
+          the function documentation for the correct inputs.")
+  }
+  if(!isTRUE(all(eigen(p0, symmetric = T, only.values = T)$values > 0))){
+    stop("'p0' is not a positive definite matrix, consult the function documentation
+         for the correct input.")
   }
   d <- dim(p0)[1]
   k <- max(dim(v0)[3], 2)
@@ -149,9 +168,9 @@ pdPolynomial <- function(p0, v0, delta.t = 0.01, steps = 100) {
 
   for(ti in 1:(steps - 1)){
     w <- vi[, , 1]
-    vi[, , 1:(k - 1)] <- sapply(1:(k - 1), function(i) ParTrans(p[, , ti], delta.t * w, vi[, , i] +
+    vi[, , 1:(k - 1)] <- sapply(1:(k - 1), function(i) pdParTrans(p[, , ti], delta.t * w, vi[, , i] +
                                                                   delta.t * vi[, , i + 1]), simplify = "array")
-    vi[, , k] <- ParTrans(p[, , ti], delta.t * w, vi[, , k])
+    vi[, , k] <- pdParTrans(p[, , ti], delta.t * w, vi[, , k])
     p[, , ti + 1] <- Expm(p[, , ti], delta.t * w)
   }
 

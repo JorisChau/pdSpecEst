@@ -2,9 +2,9 @@
 impute2D_R <- function(M_j0, L, metric, method){
 
   ## Set variables
-  n = dim(M_j0)[c(3,4)]
-  d = dim(M_j0)[1]
-  L = ifelse((2 * L + 1) > n, floor((n - 1) / 2), L)
+  n <- dim(M_j0)[c(3,4)]
+  d <- dim(M_j0)[1]
+  L <- ifelse((2 * L + 1) > n, floor((n - 1) / 2), L)
 
   if(isTRUE(all.equal(L, c(0, 0)))){
     ## Trivial prediction

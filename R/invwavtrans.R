@@ -1,26 +1,29 @@
-#' Inverse average-interpolation 1D wavelet transform
+#' Inverse AI wavelet transform for curve of HPD matrices
 #'
-#' \code{InvWavTransf1D} computes the inverse intrinsic average-interpolation (AI) wavelet
-#' transform of an array of coarsest-scale HPD midpoints combined with a pyramid of Hermitian
-#' wavelet coefficients as explained in (Chau and von Sachs, 2017). This is the inverse operation
-#' of the function \code{\link{WavTransf1D}}.
+#' \code{InvWavTransf1D} computes an inverse intrinsic average-interpolation (AI) wavelet
+#' transform mapping an array of coarsest-scale HPD midpoints combined with a pyramid of Hermitian
+#' wavelet coefficients to a curve in the manifold of HPD matrices equipped with a metric specified by the user,
+#' as described in \insertCite{CvS17}{pdSpecEst} and Chapter 3 of \insertCite{C18}{pdSpecEst}. This is
+#' the inverse operation of the function \code{\link{WavTransf1D}}.
 #'
 #' The input list of arrays \code{D} and array \code{M0} correspond to a pyramid of wavelet coefficients and
 #' the coarsest-scale HPD midpoints respectively, both are structured in the same way as in the output of
 #' \code{WavTransf1D}. As in the forward AI wavelet transform, if the refinement order is an odd integer smaller or
 #' equal to 9, the function computes the inverse wavelet transform using a fast wavelet refinement scheme based on
-#' weighted geometric averages with pre-determined weights as explained in (Chau and von Sachs, 2017a). If the
-#' refinement order is an odd integer larger than 9, the wavelet refinement scheme is based on intrinsic
-#' polynomial prediction using Neville's algorithm on the Riemannian manifold. The function computes the inverse
-#' intrinsic AI wavelet transform equipping the space of HPD matrices with one of the following metrics: (i) Riemannian
-#' metric (default) as in (Bhatia, 2009, Chapter 6), (ii) log-Euclidean metric, the Euclidean inner product between
-#' matrix logarithms, (iii) Cholesky metric, the Euclidean inner product between Cholesky decompositions, (iv)
-#' Euclidean metric and (v) root-Euclidean metric. The default choice (Riemannian) has several appealing properties
-#' not shared by the other metrics, see (Chau and von Sachs, 2017a) for more details.
+#' weighted intrinsic averages with pre-determined weights as explained in \insertCite{CvS17}{pdSpecEst} and Chapter 3 of
+#' \insertCite{C18}{pdSpecEst}. If the refinement order is an odd integer larger than 9, the wavelet refinement
+#' scheme uses intrinsic polynomial prediction based on Neville's algorithm in the Riemannian manifold (via \code{\link{pdNeville}}).\cr
+#' The function computes the inverse intrinsic AI wavelet transform in the space of HPD matrices equipped with
+#' one of the following metrics: (i) the affine-invariant Riemannian metric (default) as detailed in e.g., \insertCite{B09}{pdSpecEst}[Chapter 6]
+#' or \insertCite{PFA05}{pdSpecEst}; (ii) the log-Euclidean metric, the Euclidean inner product between matrix logarithms;
+#' (iii) the Cholesky metric, the Euclidean inner product between Cholesky decompositions; (iv) the Euclidean metric; or
+#' (v) the root-Euclidean metric. The default choice of metric (affine-invariant Riemannian) satisfies several useful properties
+#' not shared by the other metrics, see \cite{CvS17}{pdSpecEst} or \cite{C18}{pdSpecEst} for more details. Note that this comes
+#' at the cost of increased computation time in comparison to one of the other metrics.
 #'
 #' @param D a list of arrays containing the pyramid of wavelet coefficients, where each array contains the
-#' (\eqn{d,d})-dimensional wavelet coefficients from the finest wavelet scale \code{j = jmax} up to the coarsest
-#' wavelet scale \code{j = 0}. This is the same format as the \code{$D} component given as output by
+#' (\eqn{d,d})-dimensional wavelet coefficients from the coarsest wavelet scale \code{j = 0} up to the finest
+#' wavelet scale \code{j = jmax}. This is the same format as the \code{$D} component given as output by
 #'  \code{\link{WavTransf1D}}.
 #' @param M0 a numeric array containing the midpoint(s) at the coarsest scale \code{j = 0} in the midpoint pyramid.
 #' This is the same format as the \code{$M0} component given as output by \code{\link{WavTransf1D}}.
@@ -35,7 +38,7 @@
 #' where the spectral matrix is a symmetric and periodic curve in the frequency domain. Defaults to \code{periodic = F}.
 #' @param metric the metric that the space of HPD matrices is equipped with. The default choice is \code{"Riemannian"},
 #' but this can also be one of: \code{"logEuclidean"}, \code{"Cholesky"}, \code{"rootEuclidean"} or
-#' \code{"Euclidean"}. The inverse intrinsic AI wavelet transform fundamentally relies on the chosen metric.
+#' \code{"Euclidean"}. See also the Details section below.
 #' @param ... additional arguments for internal use.
 #'
 #' @examples
@@ -44,31 +47,31 @@
 #' P.f <- InvWavTransf1D(P.wt$D, P.wt$M0) ## backward transform
 #' all.equal(P.f, P$f)
 #'
-#' @return Returns a (\eqn{d, d, m})-dimensional array corresponding to a curve of length \eqn{m} of
+#' @return Returns a (\eqn{d, d, m})-dimensional array corresponding to a length \eqn{m} curve of
 #' (\eqn{d,d})-dimensional HPD matrices.
 #'
 #' @seealso \code{\link{WavTransf1D}}, \code{\link{pdSpecEst1D}}, \code{\link{pdNeville}}
 #'
-#' @references Chau, J. and von Sachs, R. (2017) \emph{Positive definite multivariate spectral
-#' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
+#' @references
+#' \insertAllCited{}
 #'
 #' @export
 InvWavTransf1D <- function(D, M0, order = 5, jmax, periodic = F, metric = "Riemannian", ...) {
 
   ## Initialize variables
-  dots = list(...)
-  return_val = (if(is.null(dots$return_val)) "manifold" else dots$return_val)
-  method = (if(is.null(dots$method)) "fast" else dots$method)
-  chol_bias = (if(is.null(dots$chol_bias)) F else dots$chol_bias)
+  dots <- list(...)
+  return_val <- (if(is.null(dots$return_val)) "f" else dots$return_val)
+  method <- (if(is.null(dots$method)) "fast" else dots$method)
+  chol_bias <- (if(is.null(dots$chol_bias)) F else dots$chol_bias)
   if (!(order %% 2 == 1)) {
     warning("Refinement order should be an odd integer, by default set to 5")
-    order = 5
+    order <- 5
   }
-  metric = match.arg(metric, c("Riemannian", "logEuclidean", "Cholesky", "rootEuclidean", "Euclidean"))
-  L = (order - 1) / 2
-  L_round = 2 * ceiling(L / 2)
-  d = nrow(D[[1]][, , 1])
-  J = (if(missing(jmax)) length(D) else jmax)
+  metric <- match.arg(metric, c("Riemannian", "logEuclidean", "Cholesky", "rootEuclidean", "Euclidean"))
+  L <- (order - 1) / 2
+  L_round <- 2 * ceiling(L / 2)
+  d <- nrow(D[[1]][, , 1])
+  J <- (if(missing(jmax)) length(D) else jmax)
   if(!isTRUE((J > 0) & isTRUE(all.equal(as.integer(J), J)))) {
     stop("'jmax' should be an integer larger than zero")
   }
@@ -92,7 +95,7 @@ InvWavTransf1D <- function(D, M0, order = 5, jmax, periodic = F, metric = "Riema
   }
 
   ## Transform back to manifold
-  if(return_val == "manifold") {
+  if(return_val == "f") {
     if(metric == "logEuclidean" | metric == "Cholesky" | metric == "rootEuclidean") {
       m1 <- Ptransf2D_C(m1, T, chol_bias, metric)
     }
@@ -100,41 +103,41 @@ InvWavTransf1D <- function(D, M0, order = 5, jmax, periodic = F, metric = "Riema
   return((if(periodic) m1[, , L_round + 1:2^J] else m1))
 }
 
-#' Inverse average-interpolation 2D wavelet transform
+#' Inverse AI wavelet transform for surface of HPD matrices
 #'
 #' \code{InvWavTransf2D} computes the inverse intrinsic average-interpolation (AI) wavelet
-#' transform of an array of coarsest-scale HPD midpoints combined with a 2D pyramid of Hermitian
-#' wavelet coefficients. This is the inverse operation of the function \code{\link{WavTransf2D}}.
+#' transform mapping an array of coarsest-scale HPD midpoints combined with a 2D pyramid of Hermitian
+#' wavelet coefficients to a surface in the manifold of HPD matrices equipped with a metric specified by the
+#' user, as described in Chapter 5 of \insertCite{C18}{pdSpecEst}. This is the inverse operation of the
+#' function \code{\link{WavTransf2D}}.
 #'
 #' The input list of arrays \code{D} and array \code{M0} correspond to a 2D pyramid of wavelet coefficients and
 #' the coarsest-scale HPD midpoints respectively, both are structured in the same way as in the output of
-#' \code{WavTransf2D}. As in the forward AI wavelet transform, if both marginal refinement orders are
-#' smaller or equal to 9, the function computes the inverse wavelet transform using a fast wavelet refinement scheme based
-#' on weighted geometric averages with pre-determined weights. If one of the marginal refinement order is an odd integer
-#' larger than 9, the wavelet refinement scheme is based on intrinsic polynomial surface prediction using Neville's algorithm on the
-#' Riemannian manifold (\code{\link{pdNeville}}). By default \code{InvWavTransf2D} computes the inverse intrinsic 2D AI wavelet transform
-#' equipping the space of HPD matrices with (i) the Riemannian metric. Instead, the space of HPD matrices can also be
-#' equipped with one of the following metrics; (ii) log-Euclidean metric, the Euclidean inner product between matrix logarithms,
-#' (iii) Cholesky metric, the Euclidean inner product between Cholesky decompositions, (iv) Euclidean metric and
-#' (v) root-Euclidean metric. The default choice (Riemannian) has several appealing properties not shared by the
-#' other metrics, see (Chau and von Sachs, 2017a) for more details.
+#' \code{WavTransf2D}. As in the forward AI wavelet transform, the marginal refinement orders should be smaller
+#' or equal to 9, and the function computes the wavelet transform using a fast wavelet refinement scheme based on weighted
+#' intrinsic averages with pre-determined weights as explained in Chapter 5 of \cite{C18}{pdSpecEst}. By default
+#' \code{WavTransf2D} computes the inverse intrinsic 2D AI wavelet transform equipping the space of HPD matrices with (i)
+#' the affine-invariant Riemannian metric as detailed in e.g., \insertCite{B09}{pdSpecEst}[Chapter 6] or \insertCite{PFA05}{pdSpecEst}.
+#' Instead, the space of HPD matrices can also be equipped with one of the following metrics; (ii) the Log-Euclidean metric, the
+#' Euclidean inner product between matrix logarithms; (iii) the Cholesky metric, the Euclidean inner product between Cholesky
+#' decompositions; (iv) the Euclidean metric and (v) the root-Euclidean metric. The default choice of metric (affine-invariant Riemannian)
+#' satisfies several useful properties not shared by the other metrics, see \cite{C18}{pdSpecEst} for more details. Note that this
+#' comes at the cost of increased computation time in comparison to one of the other metrics.
 #'
 #' @param D a list of arrays containing the 2D pyramid of wavelet coefficients, where each array contains the
-#' (\eqn{d,d})-dimensional wavelet coefficients from the finest wavelet scale \code{j = jmax} up to the coarsest
-#' wavelet scale \code{j = 0}. This is the same format as the \code{$D} component given as output by
+#' (\eqn{d,d})-dimensional wavelet coefficients from the coarsest wavelet scale \code{j = 0} up to the finest
+#' wavelet scale \code{j = jmax}. This is the same format as the \code{$D} component given as output by
 #'  \code{\link{WavTransf2D}}.
 #' @param M0 a numeric array containing the midpoint(s) at the coarsest scale \code{j = 0} in the 2D midpoint pyramid.
 #' This is the same format as the \code{$M0} component given as output by \code{\link{WavTransf2D}}.
-#' @param order a 2-dimensional numeric vector of odd integers larger or equal to 1 corresponding to the marginal
-#' orders of the intrinsic 2D AI refinement scheme, defaults to \code{order = c(5, 5)}. Note that if \code{max(order) > 9},
-#' the computational cost significantly increases as the wavelet transform no longer uses a fast wavelet refinement scheme based
-#' on pre-determined weights.
+#' @param order a 2-dimensional numeric vector \eqn{(1,1) \le} \code{order} \eqn{\le (9,9)} corresponding to the marginal
+#' orders of the intrinsic 2D AI refinement scheme, defaults to \code{order = c(3, 3)}.
 #' @param jmax the maximum scale (resolution) up to which the 2D surface of HPD midpoints (i.e. scaling coefficients) are
 #' reconstructed. If \code{jmax} is not specified it is set equal to the resolution in the finest wavelet scale
 #' \code{jmax = length(D)}.
 #' @param metric the metric that the space of HPD matrices is equipped with. The default choice is \code{"Riemannian"},
 #' but this can also be one of: \code{"logEuclidean"}, \code{"Cholesky"}, \code{"rootEuclidean"} or
-#' \code{"Euclidean"}. The inverse intrinsic 2D AI wavelet transform fundamentally relies on the chosen metric.
+#' \code{"Euclidean"}. See also the Details section below.
 #' @param ... additional arguments for internal use.
 #'
 #' @examples
@@ -148,15 +151,15 @@ InvWavTransf1D <- function(D, M0, order = 5, jmax, periodic = F, metric = "Riema
 #'
 #' @seealso \code{\link{WavTransf2D}}, \code{\link{pdSpecEst2D}}, \code{\link{pdNeville}}
 #'
-#' @references Chau, J. and von Sachs, R. (2017) \emph{Positive definite multivariate spectral
-#' estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
+#' @references
+#' \insertAllCited{}
 #'
 #' @export
 InvWavTransf2D <- function(D, M0, order = c(3, 3), jmax, metric = "Riemannian", ...) {
 
   ## Set variables
   dots <- list(...)
-  return_val <- (if(is.null(dots$return_val)) "manifold" else dots$return_val)
+  return_val <- (if(is.null(dots$return_val)) "f" else dots$return_val)
   method <- (if(is.null(dots$method)) "fast" else dots$method)
   chol_bias <- (if(is.null(dots$chol_bias)) F else dots$chol_bias)
   if (!isTRUE((order[1] %% 2 == 1) & (order[2] %% 2 == 1))) {
@@ -215,7 +218,7 @@ InvWavTransf2D <- function(D, M0, order = c(3, 3), jmax, metric = "Riemannian", 
   }
 
   ## Transform back to manifold
-  if(return_val == "manifold"){
+  if(return_val == "f"){
     if(metric == "logEuclidean" | metric == "Cholesky" | metric == "rootEuclidean") {
       m1 <- array(Ptransf2D_C(array(m1, dim = c(d, d, dim(m1)[3] * dim(m1)[4])), T, chol_bias, metric), dim = dim(m1))
     }

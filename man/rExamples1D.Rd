@@ -2,62 +2,85 @@
 % Please edit documentation in R/examples.R
 \name{rExamples1D}
 \alias{rExamples1D}
-\title{Several example spectral matrices}
+\title{Several example curves of HPD matrices}
 \usage{
-rExamples1D(n, d = 3, example = c("heaviSine", "bumps", "two-cats",
-  "gaussian", "mix-gaussian"), return.ts = FALSE, noise = "riem-gaussian",
-  noise.level = 1, df.wishart = NULL)
+rExamples1D(n, d = 3, example = c("bumps", "two-cats", "heaviSine",
+  "gaussian", "mix-gaussian"), return.ts = FALSE, replicates = 1,
+  noise = "riem-gaussian", noise.level = 1, df.wishart = NULL)
 }
 \arguments{
 \item{n}{number of sampled matrices to be generated.}
 
-\item{d}{row- (resp. column-)dimension of the generated matrices.}
+\item{d}{row- (resp. column-)dimension of the generated matrices. Defaults to \code{d = 3}.}
 
-\item{example}{the example HPD spectral matrix curve, one of \code{'heaviSine'}, \code{'bumps'}, \code{'two-cats'},
+\item{example}{the example target HPD matrix curve, one of \code{'bumps'}, \code{'two-cats'}, \code{'heaviSine'},
 \code{'gaussian'} or \code{'mix-gaussian'}.}
 
-\item{return.ts}{if \code{isTRUE(return.ts)} the function returns time series observations generated via the Cram\'er representation
-based on the transfer function of the example spectral matrix and complex normal random variates.}
+\item{return.ts}{a logical value, if \code{return.ts = T} the function also returns time series observations generated via the Cramer representation
+based on the transfer function of the example HPD spectral matrix and complex normal random variates. Defaults to \code{return.ts = F}.}
 
-\item{noise}{noise distribution for the generated noisy spectral matrices, one of \code{'riem-gaussian'},
-\code{'periodogram'}, \code{'log-gaussian'}, \code{'wishart'} or \code{'log-wishart'}. Additional details are given below.}
+\item{replicates}{a positive integer specifying the number of replications of noisy HPD matrix curves to be generated based on the
+target curve of HPD matrices. Defaults to \code{replicates = 1}}
 
-\item{noise.level}{parameter to tune the signal-to-noise ratio for the generated noisy spectral matrices.}
+\item{noise}{noise distribution for the generated noisy curves of HPD matrices, one of \code{'riem-gaussian'},
+\code{'log-gaussian'}, \code{'wishart'}, \code{'log-wishart'} or \code{'periodogram'}, defaults to \code{'riem-gaussian'}.
+Additional details are given below.}
 
-\item{df.wishart}{optional parameter to specify the degrees of freedom in the case of a Wishart noise distribution or the
-number of DPSS taper functions in the case of generated periodogram matrices. Only used if \code{noise} is equal to \code{'periodogram'},
-\code{'wishart'} or \code{'log-wishart'}. By default \code{df.wishart} is equal to the dimension \code{d} to
-guarantee positive definiteness of the generated matrices.}
+\item{noise.level}{parameter to tune the signal-to-noise ratio for the generated noisy HPD matrix observations, only used if \code{noise != 'periodogram'}.
+If \code{noise.level = 0}, the noise distributions are degenerate and the noisy HPD matrix observations coincide with the target HPD matrices.
+Defaults to \code{noise.level = 1}.}
+
+\item{df.wishart}{optional parameter to specify the degrees of freedom in the case of a Wishart noise distribution (\code{noise = 'wishart'} or
+\code{noise = 'log-wishart'}); or the number of DPSS tapers in the case of generated periodogram matrices if \code{noise = 'periodogram'}.
+By default \code{df.wishart} is equal to the dimension \code{d} to guarantee positive definiteness of the generated noisy matrices.}
 }
 \value{
 Depending on the input arguments returns a list with two or three components:
-   \item{\code{f} }{ example spectral matrix, \code{f} is a \code{(d, d, length(freq))}-dimensional array, corresponding
-   to a \eqn{(d \times d)}-dimensional spectral matrix at the Fourier frequencies \code{freq}.}
-   \item{\code{P} }{ multitaper HPD periodogram of the generated time series, by default pre-smoothed using \code{df.wishart = d}
-   DPSS tapering functions, see \code{\link{pdPgram}} for details.}
-   \item{\code{ts}}{ generated \eqn{d}-dimensional time series observations, only available if \code{isTRUE(return.ts)}.}
+  \item{\code{f} }{ a (\eqn{d,d,n})-dimensional array, corresponding to the length \eqn{n} example target curve of
+  \eqn{(d,d)}-dimensional HPD matrices.}
+  \item{\code{P} }{ a (\eqn{d,d,n})-dimensional array, corresponding to a length \eqn{n} curve of noisy \eqn{(d,d)}-dimensional
+  HPD matrices centered around the smooth target HPD matrix curve \code{f}. If \code{replicates > 1}, \code{P} is a \code{(d,d,n,length(replicates))}-dimensional
+  array, corresponding to a collection of replicated length \eqn{n} curves of noisy \eqn{(d,d)}-dimensional HPD matrices centered around
+  the smooth target HPD matrix curve \code{f}.}
+  \item{\code{ts} }{ generated \eqn{d}-dimensional time series observations, only available if \code{return.ts = T}.}
 }
 \description{
-\code{rExamples1D()} generates stationary time series observations from several example HPD spectral matrices
-for testing and simulation purposes. For more details, we refer to the simulation studies in (Chau and von Sachs, 2017).
+\code{rExamples1D()} generates several example (locally) smooth target \emph{curves} of HPD matrices corrupted by
+noise in a manifold of HPD matrices for testing and simulation purposes. For more details, see also Chapter 2 and 3 in
+\insertCite{C18}{pdSpecEst}.
 }
 \details{
-The examples include: (i) a \eqn{(3 \times 3)} heaviSine HPD spectral matrix consisting of smooth sinosoids with a break,
-(ii) a \eqn{(3 \times 3)} bumps HPD spectral matrix containing peaks and bumps of various smoothness degrees, (iii) a
-\eqn{(3 \times 3)} two-cats HPD spectral matrix visualizing the contour of two side-by-side cats, with inhomogeneous
-smoothness across frequency, and (iv) a \eqn{(2 \times 2)} Gaussian HPD spectral matrix consisting of smooth random Gaussian
-functions. The time series observations are generated via the Cram\'er representation based on the transfer function of
-the example spectral matrix and complex normal random variates.
+The examples include: (i) a \eqn{(3,3)}-dimensional \code{'bumps'} HPD matrix curve containing peaks and bumps of various smoothness degrees;
+(ii) a \eqn{(3,3)}-dimensional \code{'two-cats'} HPD matrix curve visualizing the contour of two side-by-side cats, with inhomogeneous
+smoothness across the domain; (iii) a \eqn{(3,3)}-dimensional \code{'heaviSine'} HPD matrix curve consisting of smooth sinosoids with a break;
+(iv) a \eqn{(2,2)}-dimensional \code{'gaussian'} HPD matrix curve consisting of smooth Gaussian functions; and (v) a \eqn{(d,d)}-dimensional
+\code{'mix-gaussian'} HPD matrix curve consisting of a weighted linear combination of smooth Gaussian functions.\cr
+In addition to the smooth target curve of HPD matrices, the function also returns a noisy version of the target curve of HPD matrices, corrupted
+by a user-specified noise distribution. By default, the noisy HPD matrix observations follow an intrinsic signal plus i.i.d. noise model with
+respect to the affine-invariant Riemannian metric, with a matrix log-Gaussian noise distribution (\code{noise = 'riem-gaussian'}), such that the
+Riemannian Karcher means of the observations coincide with the target curve of HPD matrices. Additional details can be found in Chapters 2, 3,
+and 5 of \insertCite{C18}{pdSpecEst}. Other available signal-noise models include: (ii) a Log-Euclidean signal plus i.i.d. noise model, with
+a matrix log-Gaussian noise distribution (\code{noise = 'log-gaussian'}); (iii) a Riemannian signal plus i.i.d. noise model, with a complex
+Wishart noise distribution (\code{noise = 'wishart'}); (iv) a Log-Euclidean signal plus i.i.d. noise model, with a complex Wishart noise
+distribution (\code{noise = 'log-wishart'}); and (v) noisy periodogram observations obtained with \code{pdPgram} from a stationary time series
+generated via the Cramer representation based on the transfer function of the target HPD spectral matrix curve and complex normal random variates
+(\code{noise = 'periodogram'}). If \code{return.ts = T}, the function also returns the generated time series observations, which are not generated
+by default if \code{noise != 'periodogram'}.
+}
+\note{
+If \code{noise = 'wishart'}, the generated noisy HPD matrix observations are independent complex Wishart matrices, which can be
+interpreted informally as pseudo-periodogram matrix observations, as the periodogram matrices based on strictly stationary time series
+observations obtained with \code{noise = 'periodogram'} are asymptotically independent and asymptotically complex Wishart distributed,
+see e.g., \insertCite{B81}{pdSpecEst}.
 }
 \examples{
 example <- rExamples1D(100, example = "bumps", return.ts = TRUE)
-ts.plot(Re(example$ts)) # plot generated time series
+plot.ts(Re(example$ts), main = "3-d time series") # plot generated time series
 
 }
 \references{
-Chau, J. and von Sachs, R. (2017). \emph{Positive definite multivariate spectral
-estimation: a geometric wavelet approach}. Available at \url{http://arxiv.org/abs/1701.03314}.
+\insertAllCited{}
 }
 \seealso{
-\code{\link{pdPgram}}
+\code{\link{rExamples2D}}, \code{\link{pdPgram}}, \code{\link{rARMA}}
 }

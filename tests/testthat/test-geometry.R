@@ -31,7 +31,7 @@ test_that("Correctly working data depth and rank-based tests", {
 
   ## Pointwise depth
   X1 <- replicate(10, Expm(mu, E_coeff_inv(rnorm(d^2))))
-  dd1 <- pdDepth(mu, X1, "zonoid")
+  dd1 <- pdDepth(y = mu, X = X1, method = "zonoid")
   dd2 <- pdDepth(mu, X1, "gdd")
   dd3 <- pdDepth(mu, X1, "spatial")
   dd4 <- pdDepth(X = X1, method = "zonoid")

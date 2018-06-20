@@ -1,24 +1,27 @@
 Package: pdSpecEst
 Type: Package
 Title: An Analysis Toolbox for Hermitian Positive Definite Matrices
-Version: 1.2.1
+Version: 1.2.2
 Authors@R: person("Joris", "Chau", email = "j.chau@uclouvain.be", role = c("aut", "cre"))
 Description: An implementation of data analysis tools for samples of symmetric or 
   Hermitian positive definite matrices, such as collections of covariance matrices 
-  or spectral density matrices. The tools in this package can be used to perform (i) 
-  intrinsic manifold wavelet regression and clustering for curves (1D) or surfaces (2D) 
-  of Hermitian positive definite matrices, and (ii) exploratory data analysis and inference 
-  for samples of (curves of) Hermitian positive definite matrices by means of intrinsic manifold 
-  data depth and manifold rank-based hypothesis tests.
+  or spectral density matrices. The tools in this package can be used to perform: (i) 
+  intrinsic wavelet transforms for curves (1D) or surfaces (2D) of Hermitian positive 
+  definite matrices with applications to dimension reduction, denoising and clustering in the 
+  space of Hermitian positive definite matrices; and (ii) exploratory data analysis and inference 
+  for samples of positive definite matrices by means of intrinsic data depth functions and 
+  rank-based hypothesis tests in the space of Hermitian positive definite matrices.
 URL: https://github.com/JorisChau/pdSpecEst, https://jchau.shinyapps.io/pdSpecEst/
 Depends:
-    R (>= 3.3.1)
+    R (>= 3.4.2)
 License: GPL-2
 LazyData: TRUE
 Imports:
     multitaper,
     Rcpp,
-    ddalpha
+    ddalpha,
+    Rdpack
+RdMacros: Rdpack
 RoxygenNote: 6.0.1
 LinkingTo: Rcpp, RcppArmadillo (>= 0.7.500.0.0)
 SystemRequirements: GNU make, C++11
