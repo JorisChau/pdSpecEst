@@ -382,12 +382,13 @@ pdSpecClust1D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
 #' }
 #'
 #' @examples
+#' \dontrun{
 #' ## Generate noisy HPD surfaces for 6 subjects in 2 groups
 #' n <- c(2^5, 2^5)
 #' P <- array(c(rExamples2D(n, example = "tvar", replicates = 3)$P,
 #'              rExamples2D(n, example = "tvar", replicates = 3)$P), dim = c(2, 2, n, 6))
 #' cl <- pdSpecClust2D(P, K = 2, metric = "logEuclidean")
-#'
+#' }
 #'
 #' @seealso \code{\link{pdSpecEst2D}}, \code{\link{WavTransf2D}}, \code{\link{pdDist}}, \code{\link{pdPgram2D}}
 #'

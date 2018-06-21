@@ -111,12 +111,13 @@ the cluster centers based on the given metric by applying the intrinsic inverse 
 \code{\link{InvWavTransf2D}}) to the cluster centers in the wavelet domain.
 }
 \examples{
+\dontrun{
 ## Generate noisy HPD surfaces for 6 subjects in 2 groups
 n <- c(2^5, 2^5)
 P <- array(c(rExamples2D(n, example = "tvar", replicates = 3)$P,
              rExamples2D(n, example = "tvar", replicates = 3)$P), dim = c(2, 2, n, 6))
 cl <- pdSpecClust2D(P, K = 2, metric = "logEuclidean")
-
+}
 
 }
 \references{

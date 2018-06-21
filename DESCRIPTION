@@ -13,7 +13,7 @@ Description: An implementation of data analysis tools for samples of symmetric o
   rank-based hypothesis tests in the space of Hermitian positive definite matrices.
 URL: https://github.com/JorisChau/pdSpecEst, https://jchau.shinyapps.io/pdSpecEst/
 Depends:
-    R (>= 3.4.2)
+    R (>= 3.4.0)
 License: GPL-2
 LazyData: TRUE
 Imports:

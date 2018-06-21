@@ -168,8 +168,7 @@ arma::cx_mat pdMedian_C(arma::cx_mat M0, arma::cx_cube M, arma::vec mu,
 arma::cx_mat Euclid_Median_C(arma::cx_mat M0, arma::cx_cube M, arma::vec mu,
                              int maxit, double reltol) {
   try{
-    // initialize params
-    int d = M0.n_cols;
+    // initialize parameters
     int n = mu.size();
     arma::cx_mat M1 = M0;
     double dist;
@@ -585,7 +584,6 @@ double pdDist_C(arma::cx_mat A, arma::cx_mat B, std::string metric) {
 arma::vec gdd_C(arma::cx_cube X, arma::cx_cube y, std::string metric, int S, std::string method) {
   try{
     // Initialize parameters
-    int d = X.n_rows;
     int n = X.n_slices / S;
     int res_size;
     if(method == "depth.y") {

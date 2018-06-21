@@ -74,6 +74,7 @@
 #' pdRankTests(data1, sample_sizes = rep(50, 3), test = "krusk.wall")
 #' pdRankTests(data1, test = "bartels")
 #'
+#' \dontrun{
 #' ## signed-rank test for equivalence of spectra of multivariate time series
 #' ## ARMA(1,1) process: Example 11.4.1 in (Brockwell and Davis, 1991)
 #' Phi <- array(c(0.7, 0, 0, 0.6, rep(0, 4)), dim = c(2, 2, 2))
@@ -85,7 +86,7 @@
 #' pdRankTests(array(c(pgram(Sigma), pgram(Sigma)), dim = c(2,2,2^8)), test = "signed.rank")
 #' ## null is false
 #' pdRankTests(array(c(pgram(Sigma), pgram(0.5 * Sigma)), dim = c(2,2,2^8)), test = "signed.rank")
-#'
+#' }
 #' @seealso \code{\link{pdDepth}}, \code{\link{pdPgram}}
 #'
 #' @references
