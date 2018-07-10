@@ -33,7 +33,7 @@
 #' @param max_iter an optional parameter tuning the maximum number of iterations in the
 #' k-means algorithm, defaults to \code{max_iter = 100}.
 #' @param centroids an optional (\eqn{d,d,K})- or (\eqn{d,d,n,K})-dimensional array depending on the input array \code{X}
-#' specifying the intial cluster centroids. If not specified, \code{K} initial cluster centroids are randomly sampled without
+#' specifying the initial cluster centroids. If not specified, \code{K} initial cluster centroids are randomly sampled without
 #' replacement from the input array \code{X}.
 #'
 #' @return Returns a list with two components:
@@ -185,7 +185,7 @@ pdkMeans <- function(X, K, metric = "Riemannian", m = 1, eps = 1e-05, max_iter =
 #'   coefficients is associated to a cluster center.}
 #'   \item{cl.centers.M0 }{ a list of \code{K} arrays of coarse-scale midpoints at scale \code{j = 0}, where each
 #'   array is associated to a cluster center.}
-#'   \item{cl.centers.f }{ only availble if \code{return.centers = T}, returning a list of \code{K} \eqn{(d,d,n)}-dimensional arrays,
+#'   \item{cl.centers.f }{ only available if \code{return.centers = T}, returning a list of \code{K} \eqn{(d,d,n)}-dimensional arrays,
 #'   where each array corresponds to a length \eqn{n} curve of \eqn{(d,d)}-dimensional HPD matrices associated to a cluster center.}
 #'   \item{cl.jmax }{ the maximum wavelet scale taken into account in the clustering procedure determined by
 #'   the input arguments \code{jmax} and \code{d.jmax}.}
@@ -374,7 +374,7 @@ pdSpecClust1D <- function(P, K, jmax, metric = "Riemannian", m = 2, d.jmax = 0.1
 #'   coefficients is associated to a cluster center.}
 #'   \item{cl.centers.M0 }{ a list of \code{K} arrays of coarse-scale midpoints at scale \code{j = 0}, where each
 #'   array is associated to a cluster center.}
-#'   \item{cl.centers.f }{ only availble if \code{return.centers = T}, returning a list of \code{K} \code{(d,d,n[1],n[2])}-dimensional
+#'   \item{cl.centers.f }{ only available if \code{return.centers = T}, returning a list of \code{K} \code{(d,d,n[1],n[2])}-dimensional
 #'   arrays, where each array corresponds to an\eqn{n_1 \times n_2}-sized surface of \eqn{(d,d)}-dimensional HPD matrices associated
 #'   to a cluster center.}
 #'   \item{cl.jmax }{ the maximum wavelet scale taken into account in the clustering procedure determined by
