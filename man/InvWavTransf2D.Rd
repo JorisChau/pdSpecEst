@@ -44,13 +44,13 @@ The input list of arrays \code{D} and array \code{M0} correspond to a 2D pyramid
 the coarsest-scale HPD midpoints respectively, both are structured in the same way as in the output of
 \code{WavTransf2D}. As in the forward AI wavelet transform, the marginal refinement orders should be smaller
 or equal to 9, and the function computes the wavelet transform using a fast wavelet refinement scheme based on weighted
-intrinsic averages with pre-determined weights as explained in Chapter 5 of \cite{C18}{pdSpecEst}. By default
+intrinsic averages with pre-determined weights as explained in Chapter 5 of \insertCite{C18}{pdSpecEst}. By default
 \code{WavTransf2D} computes the inverse intrinsic 2D AI wavelet transform equipping the space of HPD matrices with (i)
 the affine-invariant Riemannian metric as detailed in e.g., \insertCite{B09}{pdSpecEst}[Chapter 6] or \insertCite{PFA05}{pdSpecEst}.
 Instead, the space of HPD matrices can also be equipped with one of the following metrics; (ii) the Log-Euclidean metric, the
 Euclidean inner product between matrix logarithms; (iii) the Cholesky metric, the Euclidean inner product between Cholesky
 decompositions; (iv) the Euclidean metric and (v) the root-Euclidean metric. The default choice of metric (affine-invariant Riemannian)
-satisfies several useful properties not shared by the other metrics, see \cite{C18}{pdSpecEst} for more details. Note that this
+satisfies several useful properties not shared by the other metrics, see \insertCite{C18}{pdSpecEst} for more details. Note that this
 comes at the cost of increased computation time in comparison to one of the other metrics.
 }
 \examples{

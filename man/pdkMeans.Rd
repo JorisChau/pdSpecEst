@@ -28,7 +28,7 @@ terminates if the intrinsic distance between cluster centers is smaller than \co
 k-means algorithm, defaults to \code{max_iter = 100}.}
 
 \item{centroids}{an optional (\eqn{d,d,K})- or (\eqn{d,d,n,K})-dimensional array depending on the input array \code{X}
-specifying the intial cluster centroids. If not specified, \code{K} initial cluster centroids are randomly sampled without
+specifying the initial cluster centroids. If not specified, \code{K} initial cluster centroids are randomly sampled without
 replacement from the input array \code{X}.}
 }
 \value{

@@ -19,7 +19,7 @@ the direction of \code{V} along a geodesic curve for a unit time step.
 }
 \description{
 \code{pdParTrans} computes the parallel transport on the manifold of HPD matrices
-equipped with the affine-invariant Riemannian metric as described in e.g., Chapter 2 of \cite{C18}{pdSpecEst}. That is,
+equipped with the affine-invariant Riemannian metric as described in e.g., Chapter 2 of \insertCite{C18}{pdSpecEst}. That is,
 the function computes the parallel transport of a Hermitian matrix \code{W} in the tangent space
 at the HPD matrix \code{P} along a geodesic curve in the direction of the Hermitian matrix \code{V}
 in the tangent space at \code{P} for a unit time step.

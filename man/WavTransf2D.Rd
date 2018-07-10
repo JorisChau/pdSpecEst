@@ -43,13 +43,13 @@ HPD matrices. The rectangular surface is of size \eqn{n_1} by \eqn{n_2}, where b
 \eqn{n_2} are supposed to be dyadic numbers. \code{WavTransf2D} then computes the intrinsic AI wavelet transform
 of \code{P} based on the given refinement orders and the chosen metric. The marginal refinement orders should be
 smaller or equal to 9, and the function computes the wavelet transform using a fast wavelet refinement scheme based on weighted
-intrinsic averages with pre-determined weights as explained in Chapter 5 of \cite{C18}{pdSpecEst}. By default \code{WavTransf2D}
+intrinsic averages with pre-determined weights as explained in Chapter 5 of \insertCite{C18}{pdSpecEst}. By default \code{WavTransf2D}
 computes the intrinsic 2D AI wavelet transform equipping the space of HPD matrices with (i) the affine-invariant Riemannian metric as
 detailed in e.g., \insertCite{B09}{pdSpecEst}[Chapter 6] or \insertCite{PFA05}{pdSpecEst}. Instead, the space of HPD matrices
 can also be equipped with one of the following metrics; (ii) the Log-Euclidean metric, the Euclidean inner product between matrix
 logarithms; (iii) the Cholesky metric, the Euclidean inner product between Cholesky decompositions; (iv) the Euclidean metric and
 (v) the root-Euclidean metric. The default choice of metric (affine-invariant Riemannian) satisfies several useful properties
-not shared by the other metrics, see \cite{C18}{pdSpecEst} for more details. Note that this comes at the cost of increased computation
+not shared by the other metrics, see \insertCite{C18}{pdSpecEst} for more details. Note that this comes at the cost of increased computation
 time in comparison to one of the other metrics.
 }
 \note{

@@ -57,7 +57,7 @@ one of the following metrics: (i) the affine-invariant Riemannian metric (defaul
 or \insertCite{PFA05}{pdSpecEst}; (ii) the log-Euclidean metric, the Euclidean inner product between matrix logarithms;
 (iii) the Cholesky metric, the Euclidean inner product between Cholesky decompositions; (iv) the Euclidean metric; or
 (v) the root-Euclidean metric. The default choice of metric (affine-invariant Riemannian) satisfies several useful properties
-not shared by the other metrics, see \cite{CvS17}{pdSpecEst} or \cite{C18}{pdSpecEst} for more details. Note that this comes
+not shared by the other metrics, see \insertCite{CvS17}{pdSpecEst} or \insertCite{C18}{pdSpecEst} for more details. Note that this comes
 at the cost of increased computation time in comparison to one of the other metrics.
 }
 \note{

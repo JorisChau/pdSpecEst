@@ -34,7 +34,7 @@ defaults to \code{eps = 1E-3}.}
 }
 \value{
 A list with three components:
-\item{f }{a \eqn{(d, d, N_d)}-dimensional array corresponding to a length \code{Nd} eatimed cubic smoothing spline
+\item{f }{a \eqn{(d, d, N_d)}-dimensional array corresponding to a length \code{Nd} estimated cubic smoothing spline
 curve of (\eqn{d, d})-dimensional HPD matrices.}
 \item{cost }{a numeric vector containing the costs of the objective function at each gradient descent iteration.}
 \item{total_iter }{total number of gradient descent iterations.}

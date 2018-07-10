@@ -48,7 +48,7 @@ noise in a manifold of HPD matrices for testing and simulation purposes. For mor
 The examples include: (i) a \eqn{(d,d)}-dimensional \code{'smiley'} HPD matrix surface consisting of constant surfaces of random HPD matrices in
 the shape of a smiley face; (ii) a \eqn{(d,d)}-dimensional \code{'tvar'} HPD matrix surface generated from a time-varying vector-auto-
 regressive process of order 1 with random time-varying coefficient matrix (\eqn{\Phi}); (iii) a \eqn{(d,d)}-dimensional \code{'facets'} HPD matrix
-surface consiting of several facets generated from random geodesic surfaces; and (iv) a \eqn{(d,d)}-dimensional \code{'peak'} HPD matrix surface
+surface consisting of several facets generated from random geodesic surfaces; and (iv) a \eqn{(d,d)}-dimensional \code{'peak'} HPD matrix surface
 containing a pronounced peak in the center of its 2-d (e.g., time-frequency) domain.\cr
 In addition to the (locally) smooth target surface of HPD matrices, the function also returns a noisy version of the target surface of HPD matrices, corrupted
 by a user-specified noise distribution. By default, the noisy HPD matrix observations follow an intrinsic signal plus i.i.d. noise model with

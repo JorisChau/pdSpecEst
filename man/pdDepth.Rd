@@ -35,7 +35,7 @@ sequences (curves) of HPD matrices as detailed in \insertCite{COvS17}{pdSpecEst}
 }
 \details{
 Available pointwise or integrated intrinsic data depth functions for samples of HPD matrices are: (i)
-geodesic distance depth, (ii) instrinsic zonoid depth and (iii) intrinsic spatial depth.
+geodesic distance depth, (ii) intrinsic zonoid depth and (iii) intrinsic spatial depth.
 The various data depth measures and their theoretical properties are described in
 \insertCite{COvS17}{pdSpecEst}. If \code{y} is a \eqn{(d,d)}-dimensional HPD matrix, \code{X} should be a \eqn{(d,d,S)}-dimensional array
 corresponding to a length \code{S} sequence of \eqn{(d,d)}-dimensional HPD matrices and the pointwise

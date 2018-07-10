@@ -23,7 +23,7 @@ size \eqn{S}.}
 \code{pdMedian} calculates a weighted intrinsic median of a sample of \eqn{(d,d)}-dimensional
 HPD matrices based on a Weiszfeld algorithm intrinsic to the chosen metric.In the case of the
 affine-invariant Riemannian metric as detailed in e.g., \insertCite{B09}{pdSpecEst}[Chapter 6] or
-\insertCite{PFA05}{pdSpecEst}, the intrinsic Weisfeld algorithm in \insertCite{F09}{pdSpecEst} is used.
+\insertCite{PFA05}{pdSpecEst}, the intrinsic Weiszfeld algorithm in \insertCite{F09}{pdSpecEst} is used.
 By default, the unweighted intrinsic median is computed.
 }
 \note{
