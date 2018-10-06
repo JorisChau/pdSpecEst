@@ -1,22 +1,37 @@
-## CRAN package version 1.2.2
+## CRAN package version 1.2.3
+
+### Comments
+
+- Fixed WARNING:
+     checkRd: (-1) ...: Non-ASCII contents without declared encoding
+  by removing non-ASCII characters from REFERENCES.bib and setting 
+  UTF-8 encoding in DESCRIPTION file 
+- Fixed NOTE:
+     src/Makevars.win: SHLIB_OPENMP_CXXFLAGS is included in PKG_CXXFLAGS but not in PKG_LIBS
+     src/Makevars.win: SHLIB_OPENMP_CFLAGS is included in PKG_LIBS but not in PKG_CFLAGS
+
 
 ### Test environments
 
-* Ubuntu Linux 17.10 (local install) R 3.4.2, and 14.04 (travis-ci) R-release, 1 note (see below)
-* Debian Linux, R-release, gcc (rhub), 1 note (see below)
-* CentOS 6 with Redhat Developer Toolset, R from EPEL (rhub), 1 note (see below)
+* Ubuntu Linux 18.04 (local install) R-release, and 16.04 (rhub) R-release + R-devel, 2 notes (see below)
+* Debian Linux, R-release + R-devel, gcc + gcc ASAN/UBSAN (rhub), 2 notes (see below)
+* CentOS 6 with Redhat Developer Toolset, R from EPEL (rhub), pass
 * Oracle Solaris 10, x86, 32 bit, R-patched (rhub), pass
-* macOS 10.11 El Capitan, R-release (rhub and travis-ci), pass
-
+* macOS 10.11 El Capitan + 10.9 Mavericks, R-release + R-oldrel (travis-ci, rhub), pass
 * Win-builder R-release, R-devel and R-oldrel, 1 note
 
-checking CRAN incoming feasibility ... NOTE
-Maintainer: 'Joris Chau <j.chau@uclouvain.be>'
+### Notes
 
-Possibly mis-spelled words in DESCRIPTION:
+* checking CRAN incoming feasibility ... NOTE
+New maintainer:
+  Joris Chau <joris.chau@openanalytics.eu>
+Old maintainer(s):
+  Joris Chau <j.chau@uclouvain.be>
+
+* Possibly mis-spelled words in DESCRIPTION:
   Hermitian (3:32, 7:3, 9:68, 11:12, 13:47)
   denoising (10:63)
-
+  
 * Ubuntu, Debian, Fedora and CentOS Linux note:
 
 checking installed package size ... NOTE
