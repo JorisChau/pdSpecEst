@@ -74,7 +74,7 @@ Curves of Hermitian Positive Definite Matrices.” *ArXiv Preprint
 
 <div id="ref-CvS18">
 
-———. 2018. “Intrinsic Wavelet Regression for Surfaces of Hermitian
+Chau, J., and R. von Sachs. 2018. “Intrinsic Wavelet Regression for Surfaces of Hermitian
 Positive Definite Matrices.” *ArXiv Preprint 1808.08764*.
 <https://arxiv.org/abs/1808.08764>.
 
