@@ -15,9 +15,6 @@ knitr::opts_chunk$set(
 
 # The `pdSpecEst` package
 
-[![CRAN version](http://www.r-pkg.org/badges/version/pdSpecEst)](https://cran.r-project.org/package=pdSpecEst)
-[![Travis-CI Build Status](https://travis-ci.org/JorisChau/pdSpecEst.svg?branch=master)](https://travis-ci.org/JorisChau/pdSpecEst)
-
 The `pdSpecEst` (**p**ositive **d**efinite **Spec**tral **Est**imation) package provides data analysis tools for samples of symmetric or Hermitian positive definite matrices, such as collections of positive definite covariance matrices or spectral density matrices.
 
 The tools in this package can be used to perform:
