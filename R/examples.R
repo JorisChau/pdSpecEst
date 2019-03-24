@@ -159,7 +159,7 @@ rExamples1D <- function(n, d = 3, example = c("bumps", "two-cats", "heaviSine", 
   if(!is.null(user.f)) {
     example <- "user.f"
   }
-  example <- match.arg(example, c("heaviSine", "bumps", "two-cats", "gaussian", "mix-gaussian", "user.f"))
+  example <- match.arg(example, c("heaviSine", "bumps", "two-cats", "gaussian", "mix-gaussian", "arma", "user.f"))
   noise <- match.arg(noise, c("riem-gaussian", "periodogram", "log-gaussian", "wishart", "log-wishart"))
   d <- switch(example,
               "heaviSine" = 3,
@@ -168,7 +168,7 @@ rExamples1D <- function(n, d = 3, example = c("bumps", "two-cats", "heaviSine", 
               "gaussian" = 2,
               "arma" = 2,
               d)
-  
+
   df.wishart <- (if(is.null(df.wishart)) d else df.wishart)
   if(df.wishart < d & noise %in% c("wishart", "log-wishart")) {
     warning("'df.wishart' is smaller than the dimension 'd';
@@ -231,7 +231,7 @@ rExamples1D <- function(n, d = 3, example = c("bumps", "two-cats", "heaviSine", 
     Phi <- array(c(0.7, 0, 0, 0.6, rep(0, 4)), dim = c(2, 2, 2))
     Theta <- array(c(0.5, -0.7, 0.6, 0.8, rep(0, 4)), dim = c(2, 2, 2))
     Sigma <- matrix(c(1, 0.71, 0.71, 2), nrow = 2)
-    
+
     f.nu <- function(nu) {
       PhiB <- diag(d) - Phi[, , 1] * exp(complex(imaginary = -nu)) - Phi[, , 2] *
         exp(complex(imaginary = -2 * nu))
