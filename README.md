@@ -62,8 +62,7 @@ Hermitian Positive Definite Matrices.” *ArXiv Preprint 1706.08289*.
 <div id="ref-CvS17">
 
 Chau, J., and R. von Sachs. 2017. “Intrinsic Wavelet Regression for
-Curves of Hermitian Positive Definite Matrices.” *ArXiv Preprint
-1701.03314*. <https://arxiv.org/abs/1701.03314>.
+Curves of Hermitian Positive Definite Matrices.” *Journal of Computational and Graphical Statistics*. <https://doi.org/10.1080/10618600.2018.1537926>.
 
 </div>
 
