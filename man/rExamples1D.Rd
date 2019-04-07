@@ -5,9 +5,9 @@
 \title{Several example curves of HPD matrices}
 \usage{
 rExamples1D(n, d = 3, example = c("bumps", "two-cats", "heaviSine",
-  "gaussian", "mix-gaussian", "arma"), user.f = NULL,
+  "gaussian", "mix-gaussian", "arma", "peaks"), user.f = NULL,
   return.ts = FALSE, replicates = 1, noise = "riem-gaussian",
-  noise.level = 1, df.wishart = NULL)
+  noise.level = 1, df.wishart = NULL, nblocks = 10)
 }
 \arguments{
 \item{n}{number of sampled matrices to be generated.}
@@ -15,7 +15,7 @@ rExamples1D(n, d = 3, example = c("bumps", "two-cats", "heaviSine",
 \item{d}{row- (resp. column-)dimension of the generated matrices. Defaults to \code{d = 3}.}
 
 \item{example}{the example target HPD matrix curve, one of \code{'bumps'}, \code{'two-cats'}, \code{'heaviSine'},
-\code{'gaussian'}, \code{'mix-gaussian'} or \code{'arma'}.}
+\code{'gaussian'}, \code{'mix-gaussian'}, \code{'arma'}, \code{'peaks'} or \code{'blocks'}.}
 
 \item{user.f}{user-specified target HPD matrix curve, should be a (\eqn{d,d,n})-dimensional array, corresponding to a length \eqn{n} curve of
 \eqn{(d,d)}-dimensional HPD matrices.}
@@ -37,6 +37,8 @@ Defaults to \code{noise.level = 1}.}
 \item{df.wishart}{optional parameter to specify the degrees of freedom in the case of a Wishart noise distribution (\code{noise = 'wishart'} or
 \code{noise = 'log-wishart'}); or the number of DPSS tapers in the case of generated periodogram matrices if \code{noise = 'periodogram'}.
 By default \code{df.wishart} is equal to the dimension \code{d} to guarantee positive definiteness of the generated noisy matrices.}
+
+\item{nblocks}{optional parameter to specify the number of constant segments in the \code{'blocks'} HPD matrix curve. Only used if \code{example = 'blocks'}.}
 }
 \value{
 Depending on the input arguments returns a list with two or three components:
@@ -58,8 +60,10 @@ The examples include: (i) a \eqn{(3,3)}-dimensional \code{'bumps'} HPD matrix cu
 (ii) a \eqn{(3,3)}-dimensional \code{'two-cats'} HPD matrix curve visualizing the contour of two side-by-side cats, with inhomogeneous
 smoothness across the domain; (iii) a \eqn{(3,3)}-dimensional \code{'heaviSine'} HPD matrix curve consisting of smooth sinosoids with a break;
 (iv) a \eqn{(2,2)}-dimensional \code{'gaussian'} HPD matrix curve consisting of smooth Gaussian functions; (v) a \eqn{(d,d)}-dimensional
-\code{'mix-gaussian'} HPD matrix curve consisting of a weighted linear combination of smooth Gaussian functions; and (vi) a \eqn{(2,2)}-dimensional
-\code{'arma'} HPD matrix curve generated from the smooth spectral matrix of a 2-dimensional stationary ARMA(1,1)-process.\cr
+\code{'mix-gaussian'} HPD matrix curve consisting of a weighted linear combination of smooth Gaussian functions; (vi) a \eqn{(2,2)}-dimensional
+\code{'arma'} HPD matrix curve generated from the smooth spectral matrix of a 2-dimensional stationary ARMA(1,1)-process; (vii) a \eqn{(d, d)}-
+dimensional \code{'peaks'} HPD matrix curve containing several sharp peaks across the domain; and (viii) a \eqn{(d, d)}-\code{'blocks'} HPD matrix
+curve generated from locally constant segments of HPD matrices.\cr
 In addition to the smooth target curve of HPD matrices, the function also returns a noisy version of the target curve of HPD matrices, corrupted
 by a user-specified noise distribution. By default, the noisy HPD matrix observations follow an intrinsic signal plus i.i.d. noise model with
 respect to the affine-invariant Riemannian metric, with a matrix log-Gaussian noise distribution (\code{noise = 'riem-gaussian'}), such that the

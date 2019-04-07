@@ -73,9 +73,9 @@ rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
   if (!is.null(freq)) {
     f.nu <- function(nu) {
       PhiB <- diag(d) - Phi[, , 1] * exp(complex(imaginary = -nu)) - Phi[, , 2] *
-        exp(complex(imaginary = -2 * nu))
+          exp(complex(imaginary = -2 * nu))
       ThetaB <- diag(d) + Theta[, , 1] * exp(complex(imaginary = -nu)) + Theta[, , 2] *
-        exp(complex(imaginary = -2 * nu))
+          exp(complex(imaginary = -2 * nu))
       return((((solve(PhiB) %*% ThetaB) %*% Sigma) %*% t(Conj(ThetaB))) %*% t(solve(Conj(PhiB))))
     }
     f <- sapply(freq, function(freq) 1/(2 * pi) * f.nu(freq), simplify = "array")
@@ -93,8 +93,10 @@ rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
 #' (ii) a \eqn{(3,3)}-dimensional \code{'two-cats'} HPD matrix curve visualizing the contour of two side-by-side cats, with inhomogeneous
 #' smoothness across the domain; (iii) a \eqn{(3,3)}-dimensional \code{'heaviSine'} HPD matrix curve consisting of smooth sinosoids with a break;
 #' (iv) a \eqn{(2,2)}-dimensional \code{'gaussian'} HPD matrix curve consisting of smooth Gaussian functions; (v) a \eqn{(d,d)}-dimensional
-#' \code{'mix-gaussian'} HPD matrix curve consisting of a weighted linear combination of smooth Gaussian functions; and (vi) a \eqn{(2,2)}-dimensional
-#' \code{'arma'} HPD matrix curve generated from the smooth spectral matrix of a 2-dimensional stationary ARMA(1,1)-process.\cr
+#' \code{'mix-gaussian'} HPD matrix curve consisting of a weighted linear combination of smooth Gaussian functions; (vi) a \eqn{(2,2)}-dimensional
+#' \code{'arma'} HPD matrix curve generated from the smooth spectral matrix of a 2-dimensional stationary ARMA(1,1)-process; (vii) a \eqn{(d, d)}-
+#' dimensional \code{'peaks'} HPD matrix curve containing several sharp peaks across the domain; and (viii) a \eqn{(d, d)}-\code{'blocks'} HPD matrix
+#' curve generated from locally constant segments of HPD matrices.\cr
 #' In addition to the smooth target curve of HPD matrices, the function also returns a noisy version of the target curve of HPD matrices, corrupted
 #' by a user-specified noise distribution. By default, the noisy HPD matrix observations follow an intrinsic signal plus i.i.d. noise model with
 #' respect to the affine-invariant Riemannian metric, with a matrix log-Gaussian noise distribution (\code{noise = 'riem-gaussian'}), such that the
@@ -110,7 +112,7 @@ rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
 #' @param n number of sampled matrices to be generated.
 #' @param d row- (resp. column-)dimension of the generated matrices. Defaults to \code{d = 3}.
 #' @param example the example target HPD matrix curve, one of \code{'bumps'}, \code{'two-cats'}, \code{'heaviSine'},
-#'     \code{'gaussian'}, \code{'mix-gaussian'} or \code{'arma'}.
+#'     \code{'gaussian'}, \code{'mix-gaussian'}, \code{'arma'}, \code{'peaks'} or \code{'blocks'}.
 #' @param user.f user-specified target HPD matrix curve, should be a (\eqn{d,d,n})-dimensional array, corresponding to a length \eqn{n} curve of
 #'   \eqn{(d,d)}-dimensional HPD matrices.
 #' @param return.ts a logical value, if \code{return.ts = TRUE} the function also returns time series observations generated via the Cramer representation
@@ -126,6 +128,7 @@ rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
 #' @param df.wishart optional parameter to specify the degrees of freedom in the case of a Wishart noise distribution (\code{noise = 'wishart'} or
 #' \code{noise = 'log-wishart'}); or the number of DPSS tapers in the case of generated periodogram matrices if \code{noise = 'periodogram'}.
 #' By default \code{df.wishart} is equal to the dimension \code{d} to guarantee positive definiteness of the generated noisy matrices.
+#' @param nblocks optional parameter to specify the number of constant segments in the \code{'blocks'} HPD matrix curve. Only used if \code{example = 'blocks'}.
 #'
 #' @return Depending on the input arguments returns a list with two or three components:
 #'   \item{\code{f} }{ a (\eqn{d,d,n})-dimensional array, corresponding to the length \eqn{n} example target curve of
@@ -152,30 +155,31 @@ rARMA <- function(n, d, Phi, Theta, Sigma, burn = 100, freq = NULL) {
 #' \insertAllCited{}
 #'
 #' @export
-rExamples1D <- function(n, d = 3, example = c("bumps", "two-cats", "heaviSine", "gaussian", "mix-gaussian", "arma"), user.f = NULL,
-                        return.ts = FALSE, replicates = 1, noise = "riem-gaussian", noise.level = 1, df.wishart = NULL) {
+rExamples1D <- function(n, d = 3, example = c("bumps", "two-cats", "heaviSine", "gaussian", "mix-gaussian", "arma", "peaks", "blocks"), user.f = NULL,
+    return.ts = FALSE, replicates = 1, noise = "riem-gaussian", noise.level = 1, df.wishart = NULL, nblocks = 10) {
 
   ## Set variables
   if(!is.null(user.f)) {
     example <- "user.f"
   }
-  example <- match.arg(example, c("heaviSine", "bumps", "two-cats", "gaussian", "mix-gaussian", "arma", "user.f"))
+  example <- match.arg(example, c("heaviSine", "bumps", "two-cats", "gaussian",
+          "mix-gaussian", "arma", "peaks", "blocks", "user.f"))
   noise <- match.arg(noise, c("riem-gaussian", "periodogram", "log-gaussian", "wishart", "log-wishart"))
   d <- switch(example,
-              "heaviSine" = 3,
-              "bumps" = 3,
-              "two-cats" = 3,
-              "gaussian" = 2,
-              "arma" = 2,
-              d)
+      "heaviSine" = 3,
+      "bumps" = 3,
+      "two-cats" = 3,
+      "gaussian" = 2,
+      "arma" = 2,
+      d)
 
   df.wishart <- (if(is.null(df.wishart)) d else df.wishart)
   if(df.wishart < d & noise %in% c("wishart", "log-wishart")) {
     warning("'df.wishart' is smaller than the dimension 'd';
-             the generated wishart matrices are not positive definite!")
+            the generated wishart matrices are not positive definite!")
     if(noise == "log-wishart") {
       stop("Matrix logarithm of generated wishart matrices fails due to zero eigenvalues;
-            increase value of 'df.wishart' to resolve problem.")
+              increase value of 'df.wishart' to resolve problem.")
     }
   }
   x <- seq(0, 1, length.out = n)
@@ -189,44 +193,44 @@ rExamples1D <- function(n, d = 3, example = c("bumps", "two-cats", "heaviSine", 
   } else if(identical(example, "heaviSine")){
     ## Discontinuous heavisine matrix curve (d = 3)
     f <- sapply(x, function(t){
-      Expm(diag(2, 3), H.coeff(sin(HeaviSine[ifelse(t < 0.5, 2, 4),] * pi * t +
-                                     HeaviSine[ifelse(t < 0.5, 1, 3),]), inverse = TRUE))
-    }, simplify = "array")
+          Expm(diag(2, 3), H.coeff(sin(HeaviSine[ifelse(t < 0.5, 2, 4),] * pi * t +
+                          HeaviSine[ifelse(t < 0.5, 1, 3),]), inverse = TRUE))
+        }, simplify = "array")
   } else if(example == "two-cats"){
     ## Locally smooth two-cats matrix curve (d = 3)
-    v1 <- c(2.0000000, 0.4961828, -0.8595843, -0.8290600, 2.5000000, -1.3037704, -1.4214866, 1.7449149, 3.0000000)
+    v1 <- c(2, 0.4961828, -0.8595843, -0.82906, 2.5, -1.3037704, -1.4214866, 1.7449149, 3)
     f0 <- sapply(1:n, function(i){
-      H.coeff(v1 * cat_fun[ceiling(1024 / n * i)] + c(0.05, 0, 0, 0, 0.05, 0, 0, 0, 0.05), inverse = TRUE)
-    }, simplify = "array")
+          H.coeff(v1 * cat_fun[ceiling(1024 / n * i)] + c(0.05, 0, 0, 0, 0.05, 0, 0, 0, 0.05), inverse = TRUE)
+        }, simplify = "array")
     f <- Ptransf2D_C(f0, TRUE, FALSE, "rootEuclidean")
   } else if(example == "bumps"){
     ## Locally smooth bumps matrix curve (d = 3)
     f <- sapply(x, function(t){
-      Expm(diag(3), (1 - 0.4 * t) * H.coeff(sqrt(t * (1 - t) + 1) *
-                                              sin(pi / (0.4 * t + 0.1)) * (1 + Bumps), inverse = TRUE))
-    }, simplify = "array")
+          Expm(diag(3), (1 - 0.4 * t) * H.coeff(sqrt(t * (1 - t) + 1) *
+                      sin(pi / (0.4 * t + 0.1)) * (1 + Bumps), inverse = TRUE))
+        }, simplify = "array")
   } else if(example == "gaussian"){
     ## Gaussian matrix curve (d = 2)
     v0 <- c(7.21935, 13.05307, 12.70734, 14.73554)
     f <- sapply(x, function(t){
-      Expm(diag(2, 2), H.coeff(v0 / sqrt(2 * pi) * exp(-((t - 0.5) / 0.3)^2 / 2), inverse = TRUE))
-    }, simplify = "array")
+          Expm(diag(2, 2), H.coeff(v0 / sqrt(2 * pi) * exp(-((t - 0.5) / 0.3)^2 / 2), inverse = TRUE))
+        }, simplify = "array")
   } else if(example == "mix-gaussian"){
     ## Random mixture of gaussian matrix curves
     pars <- list(mu = runif(4, min = -3, max = 3),
-                 sd = abs(rnorm(4)),
-                 w = abs(rnorm(4)),
-                 w.comp = replicate(4, rnorm(d^2, mean = 1)))
+        sd = abs(rnorm(4)),
+        w = abs(rnorm(4)),
+        w.comp = replicate(4, rnorm(d^2, mean = 1)))
     pars$w <- pars$w / sum(pars$w)
     f0 <- apply(sapply(1:4, function(i){
-      pars$w[i] * sapply(2 * pi * x - pi, function(t) {
-        H.coeff(pars$w.comp[, i] * pars$sd[i] / sqrt(2 * pi) *
-                  exp(-(t - pars$mu[i])^2/(2 * pars$sd[i]^2)), inverse = TRUE)
-      }, simplify = "array")
-    }, simplify = "array"), c(1,2,3), sum)
+              pars$w[i] * sapply(2 * pi * x - pi, function(t) {
+                    H.coeff(pars$w.comp[, i] * pars$sd[i] / sqrt(2 * pi) *
+                            exp(-(t - pars$mu[i])^2/(2 * pars$sd[i]^2)), inverse = TRUE)
+                  }, simplify = "array")
+            }, simplify = "array"), c(1,2,3), sum)
     f <- sapply(1:n, function(i) Expm(diag(0.25, d), f0[, , i]), simplify = "array")
   } else if(example == "arma") {
-    # smooth ARMA(1,1) spectral matrix
+    ## smooth ARMA(1,1) spectral matrix
     freq <- seq(from = pi / n, to = pi, length = n)
     Phi <- array(c(0.7, 0, 0, 0.6, rep(0, 4)), dim = c(2, 2, 2))
     Theta <- array(c(0.5, -0.7, 0.6, 0.8, rep(0, 4)), dim = c(2, 2, 2))
@@ -234,18 +238,42 @@ rExamples1D <- function(n, d = 3, example = c("bumps", "two-cats", "heaviSine", 
 
     f.nu <- function(nu) {
       PhiB <- diag(d) - Phi[, , 1] * exp(complex(imaginary = -nu)) - Phi[, , 2] *
-        exp(complex(imaginary = -2 * nu))
+          exp(complex(imaginary = -2 * nu))
       ThetaB <- diag(d) + Theta[, , 1] * exp(complex(imaginary = -nu)) + Theta[, , 2] *
-        exp(complex(imaginary = -2 * nu))
+          exp(complex(imaginary = -2 * nu))
       return((((solve(PhiB) %*% ThetaB) %*% Sigma) %*% t(Conj(ThetaB))) %*% t(solve(Conj(PhiB))))
     }
     f <- sapply(freq, function(freq) 1/(2 * pi) * f.nu(freq), simplify = "array")
+  } else if(example == "peaks") {
+    ## Spectrum containing sharp peaks
+    tloc <- c(-0.75, -0.25, 0, 0.75)
+    f0 <- apply(sapply(1:4, function(ii) {
+              1 / 4 * sapply(seq(from = -1, to = 1, length = n), function(t) {
+                    H.coeff(exp(-(abs(t - tloc[ii])^(c(0.1 * diag(d))))), inverse = TRUE)
+                  }, simplify = "array")
+            }, simplify = "array"), c(1, 2, 3), sum)
+    f <- sapply(1:n, function(i) Expm(diag(0.01, d), f0[, , i]), simplify = "array")
+    f <- f / mean(sapply(1:n, function(i) NormF(f[,,i]))) # normalize spectrum
+    f <- sapply(1:n, function(i) f[, , i] + 0.01 * diag(d), simplify = 'array')
+  } else if(example == "blocks") {
+    ## locally constant matrix curve
+    segments <- sapply(1:nblocks, function(i) {
+          if(i %% 2 == 1) {
+            Expm(diag(d), H.coeff(rep(1, d^2), inverse = TRUE))
+          } else {
+            Expm(diag(d), H.coeff(rep(0.1, d^2), inverse = TRUE))
+          }
+        }, simplify = "array")
+    seglen <- abs(rt(nblocks, df = 5))
+    seglen <- pmax(floor(seglen / sum(seglen) * n), 1)
+    seglen[which.min(seglen)] <- seglen[which.min(seglen)] + (n - sum(seglen))
+    f <- sapply(rep(1:nblocks, times = seglen), function(i) segments[, , i], simplify = "array")
   }
 
   ## Standardize int. Frob. norm of f
-  f <- f / mean(sapply(1:n, function(i) NormF(f[,,i])))
+  f <- f / mean(sapply(1:n, function(i) NormF(f[,,i]))) * 100
   f1 <- Ptransf2D_C(f, FALSE, FALSE, ifelse(noise %in% c("riem-gaussian", "wishart", "periodogram"),
-                                    "rootEuclidean", "logEuclidean"))
+          "rootEuclidean", "logEuclidean"))
 
   ## Construct (# replicates) noisy HPD curves
   ts <- array(dim = c(2 * n, d, replicates))
@@ -357,17 +385,17 @@ rExamples1D <- function(n, d = 3, example = c("bumps", "two-cats", "heaviSine", 
 #'
 #' @export
 rExamples2D <- function(n, d = 2, example = c("smiley", "tvar", "facets", "peak"), replicates = 1,
-                        noise = "riem-gaussian", noise.level = 1, df.wishart = NULL){
+    noise = "riem-gaussian", noise.level = 1, df.wishart = NULL){
   ## Set variables
   example <- match.arg(example, c("smiley", "tvar", "peak", "facets"))
   noise <- match.arg(noise, c("riem-gaussian", "log-gaussian", "wishart", "log-wishart"))
   df.wishart <- (if(is.null(df.wishart)) d else df.wishart)
   if(df.wishart < d & noise %in% c("wishart", "log-wishart")) {
     warning("'df.wishart' is smaller than the dimension 'd';
-             the generated wishart matrices are not positive definite!")
+            the generated wishart matrices are not positive definite!")
     if(noise == "log-wishart") {
       stop("Matrix logarithm of generated wishart matrices fails due to zero eigenvalues;
-            increase value of 'df.wishart' to resolve problem.")
+              increase value of 'df.wishart' to resolve problem.")
     }
   }
   grid.n <- expand.grid(1:n[1], 1:n[2])
@@ -375,7 +403,7 @@ rExamples2D <- function(n, d = 2, example = c("smiley", "tvar", "facets", "peak"
   ## wrapper for Ptransf2D_C
   Ptransf2D <- function(X, inv, metric){
     array(Ptransf2D_C(array(X, dim = c(dim(X)[1], dim(X)[2], dim(X)[3] * dim(X)[4])), inv, FALSE, metric),
-          dim = dim(X))
+        dim = dim(X))
   }
 
   ## Create spectrum
@@ -395,12 +423,12 @@ rExamples2D <- function(n, d = 2, example = c("smiley", "tvar", "facets", "peak"
           f[, , i1, i2] <- p_i[, , 3]
         }
         if(((i1 - center[1])^2 / (n[1] / sqrt(10))^2 + (i2 - center[2])^2 / (n[2] / sqrt(10))^2) <= 1 &
-           ((i1 - center[1])^2/(n[1] / sqrt(25))^2 + (i2 - center[2])^2 / (n[2] / sqrt(25))^2) >= 1 &
-           (i2 - center[2]) < -0.25 * abs(i1 - center[1])) {
+            ((i1 - center[1])^2/(n[1] / sqrt(25))^2 + (i2 - center[2])^2 / (n[2] / sqrt(25))^2) >= 1 &
+            (i2 - center[2]) < -0.25 * abs(i1 - center[1])) {
           f[, , i1, i2] <- p_i[, , 2]
         }
         if(((i1 - eye1[1])^2/(n[1] / 10)^2 + (i2 - eye1[2])^2 / (n[2] / 10)^2) <= 1 |
-           ((i1 - eye2[1])^2/(n[1] / 10)^2 + (i2 - eye2[2])^2 / (n[2] / 10)^2) <= 1) {
+            ((i1 - eye2[1])^2/(n[1] / 10)^2 + (i2 - eye2[2])^2 / (n[2] / 10)^2) <= 1) {
           f[, , i1, i2] <- p_i[, , 4]
         }
       }
@@ -428,15 +456,15 @@ rExamples2D <- function(n, d = 2, example = c("smiley", "tvar", "facets", "peak"
     grid.x <- expand.grid(seq(-1, 1, length.out = n[1]), seq(-1, 1, length.out = n[2]))
     mu <- Expm(diag(d), H.coeff(rnorm(d^2), inverse = TRUE))
     f <- array(c(mapply(function(x, y) Expm(mu, H.coeff(exp(-(abs(x)^v1 + abs(y)^v1)),
-                                                        inverse = TRUE)), grid.x$Var1, grid.x$Var2)), dim = c(d, d, n))
+                          inverse = TRUE)), grid.x$Var1, grid.x$Var2)), dim = c(d, d, n))
 
   } else if(example == "facets"){
 
     ## Create 2D facets spectrum
     p <- replicate(2, Expm(diag(d), H.coeff(rnorm(d^2), inverse = TRUE)))
     facets <- sapply(1:2, function(i) pdNeville(array(replicate(4, Expm(i * diag(d), H.coeff(rnorm(d^2), inverse = TRUE))),
-                                                      dim=c(d, d, 2, 2)), X = list(x = c(0, 1), y = c(0, 1)),
-                                                x = list(x = seq(0, 1, length.out = n[1]), y = seq(0, 1, length.out = n[2]))), simplify = "array")
+                  dim=c(d, d, 2, 2)), X = list(x = c(0, 1), y = c(0, 1)),
+              x = list(x = seq(0, 1, length.out = n[1]), y = seq(0, 1, length.out = n[2]))), simplify = "array")
     select <- function(i1, i2){
       if((n[2] / n[1] * i1) < i2 & i2 <= (n[2] - n[2] / n[1] * i1)){
         res <- facets[, , i1, i2, 1]
@@ -474,16 +502,16 @@ rExamples2D <- function(n, d = 2, example = c("smiley", "tvar", "facets", "peak"
     } else if(noise %in% c("wishart", "log-wishart")) {
       ## Generate iid zero mean (intrinsic) wishart noise
       X0 <- array(c(replicate(n[1] * n[2] * df.wishart, complex(d, rnorm(d, sd = sqrt(1/2)),
-                                                                rnorm(d, sd = sqrt(1/2))))), dim = c(d, n[1] * df.wishart, n[2]))
+                      rnorm(d, sd = sqrt(1/2))))), dim = c(d, n[1] * df.wishart, n[2]))
       W0 <- array(c(apply(X0, c(2,3), function(x) x %*% t(Conj(x)))), dim = c(d,d, n[1] * df.wishart, n[2]))
       W <- array(c(mapply(function(i1, i2) apply(W0[, , (i1 - 1) * df.wishart + 1:df.wishart, i2], c(1, 2), mean),
-                          grid.n$Var1, grid.n$Var2)), dim = c(d, d, n))
+                  grid.n$Var1, grid.n$Var2)), dim = c(d, d, n))
       if(noise.level != 1 & df.wishart >= d) {
         W <- Ptransf2D(sqrt(noise.level) * Ptransf2D(W, FALSE, "logEuclidean"), TRUE, "logEuclidean")
       }
       if(noise == "wishart") {
         P[, , , , s] <- array(c(mapply(function(i1, i2) ast(f1[, , i1, i2], W[, , i1, i2]), grid.n$Var1,
-                                       grid.n$Var2)), dim = dim(W))
+                    grid.n$Var2)), dim = dim(W))
       } else {
         P[, , , , s] <- Ptransf2D(f1 + Ptransf2D(W, FALSE, "logEuclidean"), TRUE, "logEuclidean")
       }
