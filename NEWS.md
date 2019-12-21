@@ -1,3 +1,8 @@
+# pdSpecEst 1.2.4
+
+* Fixed testthat error CRAN testing against R's messages
+* Updated article references
+
 # pdSpecEst 1.2.3
 
 * Updated functions:

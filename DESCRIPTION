@@ -11,7 +11,7 @@ Description: An implementation of data analysis tools for samples of symmetric o
   space of Hermitian positive definite matrices; and (ii) exploratory data analysis and inference 
   for samples of positive definite matrices by means of intrinsic data depth functions and 
   rank-based hypothesis tests in the space of Hermitian positive definite matrices.
-URL: https://github.com/JorisChau/pdSpecEst, https://jchau.shinyapps.io/pdSpecEst/
+URL: https://github.com/JorisChau/pdSpecEst
 Depends:
     R (>= 3.4.0)
 License: GPL-2

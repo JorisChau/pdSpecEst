@@ -30,15 +30,11 @@ The tools in this package can be used to perform:
 
 For more details and examples on how to use the package see the accompanying vignettes in the vignettes folder. 
 
-An R-Shiny app to demonstrate and test the implemented functionality in the package is available [here](https://jchau.shinyapps.io/pdSpecEst/).
-
 *Author and maintainer:* Joris Chau (<joris.chau@openanalytics.eu>).
 
 ## Installation
 
 * **Stable CRAN version:** install from within R
-
-* **Current development version:** install via `devtools::install_github("JorisChau/pdSpecEst")`
 
 ## References
 

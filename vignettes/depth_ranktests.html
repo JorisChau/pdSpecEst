@@ -7,12 +7,13 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <meta name="author" content="Joris Chau" />
 
-<meta name="date" content="2019-03-24" />
+<meta name="date" content="2019-12-20" />
 
 <title>Data depth and rank-based tests for HPD matrices</title>
 
@@ -96,7 +97,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -291,6 +292,9 @@ code > span.al { color: #ff0000; font-weight: bold; }
 code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
+
+
+
 </head>
 
 <body>
@@ -299,8 +303,8 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 
 <h1 class="title toc-ignore">Data depth and rank-based tests for HPD matrices</h1>
-<h4 class="author"><em>Joris Chau</em></h4>
-<h4 class="date"><em>2019-03-24</em></h4>
+<h4 class="author">Joris Chau</h4>
+<h4 class="date">2019-12-20</h4>
 
 
 <div id="TOC">
@@ -308,7 +312,6 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <li><a href="#introduction">Introduction</a></li>
 <li><a href="#data-depth-of-hpd-matrices-with-pddepth">Data depth of HPD matrices with <code>pdDepth()</code></a></li>
 <li><a href="#rank-based-tests-for-hpd-matrices-with-pdranktests">Rank-based tests for HPD matrices with <code>pdRankTests()</code></a></li>
-<li><a href="#demo-r-shiny-app">Demo R-Shiny app</a></li>
 <li><a href="#references">References</a></li>
 </ul>
 </div>
@@ -556,10 +559,6 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <a class="sourceLine" id="cb9-32" title="32"><span class="co">#&gt; $p.value</span></a>
 <a class="sourceLine" id="cb9-33" title="33"><span class="co">#&gt; [1] 0.000732231</span></a></code></pre></div>
 </div>
-<div id="demo-r-shiny-app" class="section level2">
-<h2>Demo R-Shiny app</h2>
-<p>A demo R-Shiny app to calculate the intrinsic data depth and perform rank-based hypothesis tests for samples in the space of HPD matrices is available <a href="https://jchau.shinyapps.io/pdSpecEst_app/">here</a>. The app allows the user to examine the performance of the different depth rank-based tests based on simulated samples of HPD matrices.</p>
-</div>
 <div id="references" class="section level2 unnumbered">
 <h2>References</h2>
 <div id="refs" class="references">
@@ -567,11 +566,14 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <p>Chau, J. 2018. “Advances in Spectral Analysis for Multivariate, Nonstationary and Replicated Time Series.” PhD thesis, Universite catholique de Louvain.</p>
 </div>
 <div id="ref-COvS17">
-<p>Chau, J., H. Ombao, and R. von Sachs. 2019. “Intrinsic Data Depth for Hermitian Positive Definite Matrices.” <em>Journal of Computational and Graphical Statistics</em>. <a href="https://doi.org/10.1080/10618600.2018.1537926">https://doi.org/10.1080/10618600.2018.1537926</a>.</p>
+<p>Chau, J., H. Ombao, and R. von Sachs. 2019. “Intrinsic Data Depth for Hermitian Positive Definite Matrices.” <em>Journal of Computational and Graphical Statistics</em> 28 (2): 427–39. <a href="https://doi.org/https://doi.org/10.1080/10618600.2018.1537926">https://doi.org/https://doi.org/10.1080/10618600.2018.1537926</a>.</p>
 </div>
 </div>
 </div>
 
+
+
+<!-- code folding -->
 
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
