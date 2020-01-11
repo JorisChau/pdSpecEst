@@ -1,20 +1,22 @@
-## CRAN package version 1.2.4
+## CRAN package version 1.2.5
 
 ### Comments
 
-* Fixed ERROR:
-    Running 'testthat.R' [5s/6s]
-    Running the tests in 'tests/testthat.R' failed.
-  by editing test that checked against R's messages  
-    
-* Updated references    
-    
+CRAN checks produce an error on all Windows flavors:
+  
+  Error in library.dynam(lib, package, package.lib) : 
+     DLL 'stringi' not found: maybe not installed for this architecture?   
+     
+Cannot reproduce error in Windows (local install) R-release or Win-builder R-release, R-devel, R-old-release
+R-pkg-devel mailing list suggests this might be due to a race condition and it is advised to resubmit the package.
+
+
 ### Test environments
 
 * Ubuntu Linux 18.10 (local install) R-release, and 16.04 (rhub) R-release + R-devel, 1 note (see below)
 * Fedora Linux R-devel (rhub), 2 notes (see below)
 * Debian Linux R-release + R-devel (rhub), 1 note (see below)
-* Win-builder R-release, R-devel, pass
+* Windows (local install) + Win-builder R-release, R-devel, R-old-release pass
 
 ### Notes
 

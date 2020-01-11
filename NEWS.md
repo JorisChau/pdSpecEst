@@ -1,3 +1,7 @@
+# pdSpecEst 1.2.5
+
+* Fix CRAN check error
+
 # pdSpecEst 1.2.4
 
 * Fixed testthat error CRAN testing against R's messages
