@@ -6,3 +6,4 @@
 ^\.travis\.yml$
 ^\.RDataTmp$
 ^inst/docs/$
+^CRAN-RELEASE$

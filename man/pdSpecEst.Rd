@@ -23,12 +23,8 @@ The tools in this package can be used to perform:
    on the paper \insertCite{COvS17}{pdSpecEst} and Chapter 4 of \insertCite{C18}{pdSpecEst}.
  }
 For more details and examples on how to use the package see the accompanying vignettes in the vignettes folder.
-An R-Shiny app to demonstrate and test the implemented functionality in the package is available
-\href{https://jchau.shinyapps.io/pdSpecEst/}{here}.
 
-Author and maintainer: \strong{Joris Chau} (\email{j.chau@uclouvain.be}).
-
-Install the current development version via \code{devtools::install_github("JorisChau/pdSpecEst")}.
+Author and maintainer: \strong{Joris Chau} (\email{joris.chau@openanalytics.eu}).
 }
 \references{
 \insertAllCited{}
