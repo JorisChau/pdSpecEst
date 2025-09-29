@@ -22,11 +22,11 @@
 #' @references
 #' \insertAllCited{}
 #'
-#' @docType package
 #' @useDynLib pdSpecEst, .registration = TRUE
 #' @importFrom Rcpp evalCpp
 #' @importFrom Rdpack reprompt
 #' @import utils
 #' @import stats
-#' @name pdSpecEst
-NULL
+#' @name pdSpecEst-package
+#' @aliases pdSpecEst
+"_PACKAGE"

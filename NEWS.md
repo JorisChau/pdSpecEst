@@ -1,6 +1,10 @@
+# pdSpecEst 1.2.6
+
+* Fixed CRAN check warnings/notes
+
 # pdSpecEst 1.2.5
 
-* Fix CRAN check error
+* Fixed CRAN check error
 
 # pdSpecEst 1.2.4
 
